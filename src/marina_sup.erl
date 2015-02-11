@@ -17,4 +17,4 @@ start_link() ->
 
 %% supervisor callbacks
 init([]) ->
-    {ok, {{one_for_one, 5, 10}, []}}.
+    {ok, {{one_for_one, 5, 10}, [?CHILD(marina_server)]}}.

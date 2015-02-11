@@ -1,4 +1,5 @@
 -module(marina_app).
+-include("marina.hrl").
 
 -export([
     start/0
@@ -18,7 +19,7 @@ start() ->
 
 %% application callbacks
 start(_StartType, _StartArgs) ->
-    anchor_sup:start_link().
+    marina_sup:start_link().
 
 stop(_State) ->
     ok.

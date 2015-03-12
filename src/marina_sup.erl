@@ -20,6 +20,20 @@ init([]) ->
     marina_backlog:init(),
     marina_queue:init(),
 
-    {ok, {{one_for_one, 5, 10}, [
-        ?CHILD(marina_server_1, marina_server)
-    ]}}.
+    {ok, {{one_for_one, 5, 10},
+        childs_specs()
+    }}.
+
+%% pivate
+child_name(N) ->
+    list_to_atom("marina_server_" ++ integer_to_list(N)).
+
+child_spec(N) ->
+    Name = child_name(N),
+    Module = marina_server,
+    StartFunc = {Module, start_link, [Name]},
+    {Name, StartFunc, permanent, 5000, worker, [Module]}.
+
+childs_specs() ->
+    PoolSize = application:get_env(?APP, pool_size, ?DEFAULT_POOL_SIZE),
+    [child_spec(N) || N <- lists:seq(1, PoolSize)].

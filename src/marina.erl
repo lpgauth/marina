@@ -36,10 +36,16 @@ call(Msg, Timeout) ->
 -spec async_call(term(), pid()) -> {ok, erlang:ref()} | {error, backlog_full}.
 async_call(Msg, Pid) ->
     Ref = make_ref(),
-    case marina_backlog:check(marina_server_1) of
+    Server = random_server(),
+    case marina_backlog:check(Server) of
         true ->
-            marina_server_1 ! {call, Ref, Pid, Msg},
+            Server ! {call, Ref, Pid, Msg},
             {ok, Ref};
         _ ->
             {error, backlog_full}
     end.
+
+random_server() ->
+    PoolSize = application:get_env(?APP, pool_size, ?DEFAULT_POOL_SIZE),
+    Random = erlang:phash2({os:timestamp(), self()}, PoolSize) + 1,
+    list_to_atom("marina_server_" ++ integer_to_list(Random)).

@@ -1,9 +1,9 @@
 % application
 -define(APP, marina).
--define(CHILD(Name, Mod), {Name, {Mod, start_link, [Name]}, permanent, 5000, worker, [Mod]}).
 
 % defaults
 -define(DEFAULT_IP, "127.0.0.1").
+-define(DEFAULT_POOL_SIZE, 16).
 -define(DEFAULT_PORT, 9042).
 -define(DEFAULT_RECONNECT, 5000).
 -define(DEFAULT_RECV_TIMEOUT, 1000).

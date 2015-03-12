@@ -10,9 +10,11 @@
 -define(QUEUE_TABLE_ID, marina_queue).
 
 %% public
--spec empty(atom()) -> true.
+-spec empty(atom()) -> [term()].
 empty(ServerName) ->
-    ets:match_delete(?QUEUE_TABLE_ID, {ServerName, '_'}).
+    Items = ets:match_object(?QUEUE_TABLE_ID, {{ServerName, '_'}, '_'}),
+    ets:match_delete(?QUEUE_TABLE_ID, {{ServerName, '_'}, '_'}),
+    Items.
 
 -spec init() -> ?QUEUE_TABLE_ID.
 init() ->

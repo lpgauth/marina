@@ -1,5 +1,6 @@
 % application
 -define(APP, marina).
+-define(SERVER_BASE_NAME, "marina_server_").
 
 % defaults
 -define(DEFAULT_IP, "127.0.0.1").
@@ -11,8 +12,7 @@
 -define(DEFAULT_TIMEOUT, 1000).
 
 % protocol
--define(CQL_VERSION, <<"3.2.0">>).
--define(CQL_VERSION_KEY, <<"CQL_VERSION">>).
+-define(CQL_VERSION, {<<"CQL_VERSION">>, <<"3.2.0">>}).
 -define(MAX_STREAM_ID, 32768).
 -define(PROTO_VERSION, 3).
 

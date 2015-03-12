@@ -26,7 +26,7 @@ init([]) ->
 
 %% pivate
 child_name(N) ->
-    list_to_atom("marina_server_" ++ integer_to_list(N)).
+    list_to_atom(?SERVER_BASE_NAME ++ integer_to_list(N)).
 
 child_spec(N) ->
     Name = child_name(N),

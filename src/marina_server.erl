@@ -39,19 +39,18 @@ handle_msg({call, Ref, From, _Msg}, #state {
         name = Name
     } = State) ->
 
-    marina_backlog:decrement(Name),
-    reply(Ref, From, {error, no_socket}),
+    reply(Name, Ref, From, {error, no_socket}),
     {ok, State};
-handle_msg({call, Ref, From, Msg}, #state {
+handle_msg({call, Ref, From, {query, Query, ConsistencyLevel}}, #state {
         socket = Socket,
         requests = Requests,
         name = Name
     } = State) ->
 
     Stream = Requests rem ?MAX_STREAM_ID,
-    Query = marina_request:query(Stream, Msg),
+    Msg = marina_request:query(Stream, Query, ConsistencyLevel),
 
-    case gen_tcp:send(Socket, Query) of
+    case gen_tcp:send(Socket, Msg) of
         ok ->
             marina_queue:in(Name, Stream, {Ref, From}),
             {ok, State#state {
@@ -60,12 +59,7 @@ handle_msg({call, Ref, From, Msg}, #state {
         {error, Reason} ->
             marina_utils:warning_msg("tcp send error: ~p", [Reason]),
             gen_tcp:close(Socket),
-            marina_backlog:decrement(Name),
-            reply(Ref, From, {error, Reason}),
-
-            {ok, State#state {
-                socket = undefined
-            }}
+            tcp_close(State)
     end;
 handle_msg(newsocket, #state {
         ip = Ip,
@@ -75,7 +69,6 @@ handle_msg(newsocket, #state {
     Opts = [
         binary,
         {active, false},
-        {nodelay, true},
         {packet, raw},
         {send_timeout, ?DEFAULT_SEND_TIMEOUT},
         {send_timeout_close, true}
@@ -83,19 +76,26 @@ handle_msg(newsocket, #state {
 
     case gen_tcp:connect(Ip, Port, Opts) of
         {ok, Socket} ->
-            case sync_msg(Socket, marina_request:startup()) of
+            Msg = marina_request:startup(),
+            case sync_msg(Socket, Msg) of
                 {ok, undefined} ->
-                    % TODO: set default keyspace
-                    inet:setopts(Socket, [{active, true}]),
+                    Msg2 = marina_request:query(0, <<"USE \"RTB\"">>, ?CONSISTENCY_ONE),
+                    case sync_msg(Socket, Msg2) of
+                        {ok, _} ->
+                            % TODO: check result
+                            inet:setopts(Socket, [{active, true}]),
 
-                    {ok, State#state {
-                        socket = Socket
-                    }};
+                            {ok, State#state {
+                                socket = Socket
+                            }};
+                        {error, Reason} ->
+                            marina_utils:warning_msg("query error: ~p", [Reason]),
+                            gen_tcp:close(Socket),
+                            tcp_close(State)
+                    end;
                 {error, Reason} ->
                     marina_utils:warning_msg("startup error: ~p", [Reason]),
-                    gen_tcp:close(Socket),
-                    erlang:send_after(?DEFAULT_RECONNECT, self(), newsocket),
-                    {ok, State}
+                    tcp_close(State)
             end;
         {error, Reason} ->
             marina_utils:warning_msg("tcp connect error: ~p", [Reason]),
@@ -110,8 +110,17 @@ handle_msg({tcp, _Port, Msg}, #state {
     reply_frames(Frames, State#state {
         buffer = Buffer2
     });
+
+handle_msg({tcp_closed, Socket}, #state {socket = Socket} = State) ->
+    marina_utils:warning_msg("tcp closed", []),
+    tcp_close(State);
+handle_msg({tcp_error, Socket, Reason}, #state {socket = Socket} = State) ->
+
+    marina_utils:warning_msg("tcp error: ~p", [Reason]),
+    gen_tcp:close(Socket),
+    tcp_close(State);
 handle_msg(Msg, State) ->
-    marina_utils:warning_msg("unexpected msg: ~p~n", [Msg]),
+    marina_utils:warning_msg("unexpected msg: ~p", [Msg]),
     {ok, State}.
 
 loop(State) ->
@@ -120,7 +129,8 @@ loop(State) ->
         loop(State2)
     end.
 
-reply(Ref, From, Msg) ->
+reply(Name, Ref, From, Msg) ->
+    marina_backlog:decrement(Name),
     From ! {?APP, Ref, Msg}.
 
 reply_frames([], State) ->
@@ -129,8 +139,7 @@ reply_frames([#frame {stream = -1} | T], State) ->
     reply_frames(T, State);
 reply_frames([#frame {stream = Stream} = Frame | T], #state {name = Name} = State) ->
     {Ref, From} = marina_queue:out(Name, Stream),
-    marina_backlog:decrement(Name),
-    reply(Ref, From, {ok, Frame}),
+    reply(Name, Ref, From, {ok, Frame}),
     reply_frames(T, State).
 
 sync_msg(Socket, Msg) ->
@@ -142,3 +151,13 @@ sync_msg(Socket, Msg) ->
         {error, Reason} ->
             {error, Reason}
     end.
+
+tcp_close(#state {name = Name} = State) ->
+    Msg = {error, tcp_close},
+    Items = marina_queue:empty(Name),
+    [reply(Name, Ref, From, Msg) || {_, {Ref, From}} <- Items],
+    erlang:send_after(?DEFAULT_RECONNECT, self(), newsocket),
+
+    {ok, State#state {
+        socket = undefined
+    }}.

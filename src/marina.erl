@@ -3,15 +3,23 @@
 
 -export([
     query/0,
-    query/1
+    query/1,
+    query/2,
+    query/3
 ]).
 
 %% public
 query() ->
-    query(<<"SELECT * FROM \"RTB\".users LIMIT 1;">>).
+    query(<<"SELECT * FROM users LIMIT 1;">>).
 
 query(Query) ->
-    case call(Query, ?DEFAULT_TIMEOUT) of
+    query(Query, ?CONSISTENCY_ONE).
+
+query(Query, ConsistencyLevel) ->
+    query(Query, ConsistencyLevel, ?DEFAULT_TIMEOUT).
+
+query(Query, ConsistencyLevel, Timeout) ->
+    case call({query, Query, ConsistencyLevel}, Timeout) of
         {ok, Frame} ->
             marina_body:decode(Frame);
         {error, Reason} ->
@@ -48,4 +56,4 @@ async_call(Msg, Pid) ->
 random_server() ->
     PoolSize = application:get_env(?APP, pool_size, ?DEFAULT_POOL_SIZE),
     Random = erlang:phash2({os:timestamp(), self()}, PoolSize) + 1,
-    list_to_atom("marina_server_" ++ integer_to_list(Random)).
+    list_to_existing_atom(?SERVER_BASE_NAME ++ integer_to_list(Random)).

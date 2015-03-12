@@ -21,5 +21,11 @@ decode(#frame {
     }) ->
 
     {ok, Rest};
+decode(#frame {
+        opcode = ?OP_RESULT,
+        body = <<3:32/integer, Rest/binary>>
+    }) ->
+
+    {ok, Rest};
 decode(#frame {}) ->
     {error, unknown_response}.

@@ -3,7 +3,6 @@
 
 -export([
     decode_bytes/1,
-    decode_inet/1,
     decode_int/1,
     decode_long/1,
     decode_long_string/1,
@@ -31,34 +30,17 @@ decode_bytes(Bin) ->
     {Pos, Rest} = decode_int(Bin),
     split_binary(Rest, Pos).
 
-decode_inet(Bin) ->
-    <<Pos:8, Rest/binary>> = Bin,
-    {IpBytes, Rest2} = split_binary(Rest, Pos),
-    {Port, Rest3} = decode_int(Rest2),
-    Ip = case Pos of
-        4 ->
-            <<A1:8, A2:8, A3:8, A4:8>> = IpBytes,
-            {A1, A2, A3, A4};
-        16 ->
-            <<A1:16, A2:16, A3:16, A4:16, A5:16, A6:16, A7:16, A8:16>> = IpBytes,
-            {A1, A2, A3, A4, A5, A6, A7, A8}
-    end,
-    {{Ip, Port}, Rest3}.
-
-decode_int(Bin) ->
-    <<Value:32, Rest/binary>> = Bin,
+decode_int(<<Value:32, Rest/binary>>) ->
     {Value, Rest}.
 
-decode_long(Bin) ->
-    <<Value:64, Rest/binary>> = Bin,
+decode_long(<<Value:64, Rest/binary>>) ->
     {Value, Rest}.
 
 decode_long_string(Bin) ->
     {Pos, Rest} = decode_int(Bin),
     split_binary(Rest, Pos).
 
-decode_short(Bin) ->
-    <<Value:16, Rest/binary>> = Bin,
+decode_short(<<Value:16, Rest/binary>>) ->
     {Value, Rest}.
 
 decode_short_bytes(Bin) ->

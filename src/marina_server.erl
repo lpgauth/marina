@@ -17,47 +17,50 @@
 
 %% public
 -spec init(pid(), atom()) -> no_return().
-init(Parent, ServerName) ->
-    register(ServerName, self()),
+init(Parent, Name) ->
+    register(Name, self()),
     proc_lib:init_ack(Parent, {ok, self()}),
-    marina_backlog:new(ServerName),
+    marina_backlog:new(Name),
     self() ! newsocket,
 
     loop(#state {
-        name = ServerName,
+        name = Name,
         ip = application:get_env(?APP, ip, ?DEFAULT_IP),
         port = application:get_env(?APP, port, ?DEFAULT_PORT)
     }).
 
 -spec start_link(atom()) -> {ok, pid()}.
-start_link(ServerName) ->
-    proc_lib:start_link(?MODULE, init, [self(), ServerName]).
+start_link(Name) ->
+    proc_lib:start_link(?MODULE, init, [self(), Name]).
 
 %% private
 handle_msg({call, Ref, From, _Msg}, #state {
         socket = undefined,
-        name = ServerName
+        name = Name
     } = State) ->
 
-    marina_backlog:decrement(ServerName),
+    marina_backlog:decrement(Name),
     reply(Ref, From, {error, no_socket}),
     {ok, State};
 handle_msg({call, Ref, From, Msg}, #state {
         socket = Socket,
         requests = Requests,
-        name = ServerName
+        name = Name
     } = State) ->
 
-    StreamId = Requests rem ?MAX_STREAM_ID,
-    Query = marina_request:query(StreamId, Msg),
+    Stream = Requests rem ?MAX_STREAM_ID,
+    Query = marina_request:query(Stream, Msg),
 
     case gen_tcp:send(Socket, Query) of
         ok ->
-            queue_in(StreamId, {Ref, From}, State);
+            marina_queue:in(Name, Stream, {Ref, From}),
+            {ok, State#state {
+                requests = Requests + 1
+            }};
         {error, Reason} ->
             marina_utils:warning_msg("tcp send error: ~p", [Reason]),
             gen_tcp:close(Socket),
-            marina_backlog:decrement(ServerName),
+            marina_backlog:decrement(Name),
             reply(Ref, From, {error, Reason}),
 
             {ok, State#state {
@@ -117,17 +120,6 @@ loop(State) ->
         loop(State2)
     end.
 
-queue_in(StreamId, Item, #state {
-        requests = Requests,
-        name = ServerName
-    } = State) ->
-
-    marina_queue:in(ServerName, StreamId, Item),
-
-    {ok, State#state {
-        requests = Requests + 1
-    }}.
-
 reply(Ref, From, Msg) ->
     From ! {?APP, Ref, Msg}.
 
@@ -135,9 +127,9 @@ reply_frames([], State) ->
     {ok, State};
 reply_frames([#frame {stream = -1} | T], State) ->
     reply_frames(T, State);
-reply_frames([#frame {stream = StreamId} = Frame | T], #state {name = ServerName} = State) ->
-    {Ref, From} = marina_queue:out(ServerName, StreamId),
-    marina_backlog:decrement(ServerName),
+reply_frames([#frame {stream = Stream} = Frame | T], #state {name = Name} = State) ->
+    {Ref, From} = marina_queue:out(Name, Stream),
+    marina_backlog:decrement(Name),
     reply(Ref, From, {ok, Frame}),
     reply_frames(T, State).
 

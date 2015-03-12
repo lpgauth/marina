@@ -7,10 +7,10 @@
 ]).
 
 %% public
-query(StreamId, Query) ->
+query(Stream, Query) ->
     marina_frame:encode(#frame {
         flags = 0,
-        stream = StreamId,
+        stream = Stream,
         opcode = ?OP_QUERY,
         body = <<(marina_types:encode_long_string(Query))/binary,
             (marina_types:encode_short(?CONSISTENCY_ONE))/binary, 0>>

@@ -26,74 +26,95 @@
 ]).
 
 %% public
+-spec decode_bytes(binary()) -> {binary(), binary()}.
 decode_bytes(Bin) ->
     {Pos, Rest} = decode_int(Bin),
     split_binary(Rest, Pos).
 
+-spec decode_int(binary()) -> {integer(), binary()}.
 decode_int(<<Value:32, Rest/binary>>) ->
     {Value, Rest}.
 
+-spec decode_long(binary()) -> {integer(), binary()}.
 decode_long(<<Value:64, Rest/binary>>) ->
     {Value, Rest}.
 
+-spec decode_long_string(binary()) -> {binary(), binary()}.
 decode_long_string(Bin) ->
     {Pos, Rest} = decode_int(Bin),
     split_binary(Rest, Pos).
 
+-spec decode_short(binary()) -> {integer(), binary()}.
 decode_short(<<Value:16, Rest/binary>>) ->
     {Value, Rest}.
 
+-spec decode_short_bytes(binary()) -> {binary(), binary()}.
 decode_short_bytes(Bin) ->
     {Pos, Rest} = decode_short(Bin),
     split_binary(Rest, Pos).
 
+-spec decode_string(binary()) -> {binary(), binary()}.
 decode_string(Bin) ->
     {Pos, Rest} = decode_short(Bin),
     split_binary(Rest, Pos).
 
+-spec decode_string_list(binary()) -> {[binary()], binary()}.
 decode_string_list(Bin) ->
     {Length, Rest} = decode_short(Bin),
     decode_string_list(Rest, Length, []).
 
+-spec decode_string_map(binary()) -> {[{binary(), binary()}], binary()}.
 decode_string_map(Bin) ->
     {Length, Rest} = decode_short(Bin),
     decode_string_map(Rest, Length, []).
 
+-spec decode_string_multimap(binary()) -> {[{binary(), [binary()]}], binary()}.
 decode_string_multimap(Bin) ->
     {Length, Rest} = decode_short(Bin),
     decode_string_multimap(Rest, Length, []).
 
+-spec decode_uuid(binary()) -> {binary(), binary()}.
 decode_uuid(Bin) ->
     split_binary(Bin, 16).
 
+-spec encode_bytes(binary()) -> binary().
 encode_bytes(Value) ->
     <<(encode_int(size(Value)))/binary, Value/binary>>.
 
+-spec encode_int(integer()) -> binary().
 encode_int(Value) ->
     <<Value:32>>.
 
+-spec encode_long(integer()) -> binary().
 encode_long(Value) ->
     <<Value:64>>.
 
+-spec encode_long_string(binary()) -> binary().
 encode_long_string(Value) ->
     <<(encode_int(size(Value)))/binary, Value/binary>>.
 
+-spec encode_short(integer()) -> binary().
 encode_short(Value) ->
     <<Value:16>>.
 
+-spec encode_short_bytes(binary()) -> binary().
 encode_short_bytes(Value) ->
     <<(encode_short(size(Value)))/binary, Value/binary>>.
 
+-spec encode_string(binary()) -> binary().
 encode_string(Value) ->
     <<(encode_short(size(Value)))/binary, Value/binary>>.
 
+-spec encode_string_list([binary()]) -> binary().
 encode_string_list(Values) ->
     EncodedValues = [encode_string(Value) || Value <- Values],
     iolist_to_binary([encode_short(length(Values)), EncodedValues]).
 
+-spec encode_string_map([{binary(), binary()}]) -> binary().
 encode_string_map(KeyValues) ->
     encode_string_map(KeyValues, []).
 
+-spec encode_string_multimap([{binary(), [binary()]}]) -> binary().
 encode_string_multimap(KeyValues) ->
     encode_string_multimap(KeyValues, []).
 

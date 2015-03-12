@@ -1,16 +1,19 @@
 % application
 -define(APP, marina).
--define(CHILD(Mod), {Mod, {Mod, start_link, []}, permanent, 5000, worker, [Mod]}).
+-define(CHILD(Name, Mod), {Name, {Mod, start_link, [Name]}, permanent, 5000, worker, [Mod]}).
 
 % defaults
 -define(DEFAULT_IP, "127.0.0.1").
 -define(DEFAULT_PORT, 9042).
 -define(DEFAULT_RECONNECT, 5000).
+-define(DEFAULT_RECV_TIMEOUT, 1000).
 -define(DEFAULT_SEND_TIMEOUT, 20).
+-define(DEFAULT_TIMEOUT, 1000).
 
 % protocol
--define(CQL_VERSION, <<"3.0.0">>).
+-define(CQL_VERSION, <<"3.2.0">>).
 -define(CQL_VERSION_KEY, <<"CQL_VERSION">>).
+-define(MAX_STREAM_ID, 32768).
 -define(PROTO_VERSION, 3).
 
 -define(OP_ERROR, 16#00).
@@ -43,9 +46,24 @@
 -define(CONSISTENCY_LOCAL_ONE, 16#10).
 
 % records
+-record(buffer, {
+    buffered :: iolist(),
+    current  :: non_neg_integer(),
+    pending  :: non_neg_integer() | undefined
+}).
+
 -record(frame, {
     flags,
-    stream,
-    opcode,
-    body
+    stream :: non_neg_integer(),
+    opcode :: non_neg_integer(),
+    body   :: binary()
 }).
+
+% types
+-type buffer() :: #buffer {}.
+-type frame()  :: #frame {}.
+
+-export_type([
+   buffer/0,
+   frame/0
+]).

@@ -54,7 +54,7 @@ decode_long(Bin) ->
     {Value, Rest}.
 
 decode_long_string(Bin) ->
-    {Pos, Rest} = decode_long(Bin),
+    {Pos, Rest} = decode_int(Bin),
     split_binary(Rest, Pos).
 
 decode_short(Bin) ->
@@ -94,7 +94,7 @@ encode_long(Value) ->
     <<Value:64>>.
 
 encode_long_string(Value) ->
-    <<(encode_long(size(Value)))/binary, Value/binary>>.
+    <<(encode_int(size(Value)))/binary, Value/binary>>.
 
 encode_short(Value) ->
     <<Value:16>>.

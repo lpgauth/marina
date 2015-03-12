@@ -17,4 +17,9 @@ start_link() ->
 
 %% supervisor callbacks
 init([]) ->
-    {ok, {{one_for_one, 5, 10}, [?CHILD(marina_server)]}}.
+    marina_backlog:init(),
+    marina_queue:init(),
+
+    {ok, {{one_for_one, 5, 10}, [
+        ?CHILD(marina_server_1, marina_server)
+    ]}}.

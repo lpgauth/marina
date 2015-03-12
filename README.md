@@ -1,7 +1,7 @@
 # marina
 Non-blocking cassandra CQL3 client (erlang)
 
-## TODO
+#### TODO
 - specs
 - unit tests
 - connection pool

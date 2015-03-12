@@ -27,7 +27,7 @@ init() ->
 in(ServerName, Stream, Item) ->
     ets:insert(?QUEUE_TABLE_ID, {{ServerName, Stream}, Item}).
 
--spec out(atom(), non_neg_integer()) -> true.
+-spec out(atom(), non_neg_integer()) -> term().
 out(ServerName, Stream) ->
     Item = ets:lookup_element(?QUEUE_TABLE_ID, {ServerName, Stream}, 2),
     ets:delete(?QUEUE_TABLE_ID, {ServerName, Stream}),

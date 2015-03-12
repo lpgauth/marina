@@ -54,7 +54,7 @@
 
 -record(frame, {
     flags,
-    stream :: non_neg_integer(),
+    stream :: integer(),
     opcode :: non_neg_integer(),
     body   :: binary()
 }).

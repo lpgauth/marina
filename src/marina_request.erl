@@ -9,7 +9,7 @@
 %% public
 query(Stream, Query, ConsistencyLevel) ->
     marina_frame:encode(#frame {
-        flags = 0,
+        flags = ?DEFAULT_FLAGS,
         stream = Stream,
         opcode = ?OP_QUERY,
         body = <<(marina_types:encode_long_string(Query))/binary,
@@ -18,8 +18,8 @@ query(Stream, Query, ConsistencyLevel) ->
 
 startup() ->
     marina_frame:encode(#frame {
-        flags = 0,
-        stream = 0,
+        flags = ?DEFAULT_FLAGS,
+        stream = ?DEFAULT_STREAM,
         opcode = ?OP_STARTUP,
         body = marina_types:encode_string_map([?CQL_VERSION])
     }).

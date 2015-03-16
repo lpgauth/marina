@@ -3,12 +3,14 @@
 -define(SERVER_BASE_NAME, "marina_server_").
 
 % defaults
+-define(DEFAULT_FLAGS, 0).
 -define(DEFAULT_IP, "127.0.0.1").
 -define(DEFAULT_POOL_SIZE, 16).
 -define(DEFAULT_PORT, 9042).
 -define(DEFAULT_RECONNECT, 5000).
 -define(DEFAULT_RECV_TIMEOUT, 1000).
 -define(DEFAULT_SEND_TIMEOUT, 20).
+-define(DEFAULT_STREAM, 0).
 -define(DEFAULT_TIMEOUT, 1000).
 
 % protocol
@@ -59,9 +61,30 @@
     body   :: binary()
 }).
 
+-record(column_spec, {
+    keyspace  = <<>>      :: binary(),
+    table     = <<>>      :: binary(),
+    name      = <<>>      :: binary(),
+    type      = undefined :: atom() | binary()
+}).
+
+-record(result_metadata, {
+    columns_count = 0  :: integer(),
+    rows_count    = 0  :: integer(),
+    columns       = [] :: list(column_spec())
+}).
+
+-record(result, {
+    metadata  :: result_metadata(),
+    rows = [] :: [[binary()]]
+}).
+
 % types
 -type buffer() :: #buffer {}.
+-type column_spec() :: #column_spec {}.
 -type frame()  :: #frame {}.
+-type result() :: #result {}.
+-type result_metadata() :: #result_metadata {}.
 
 -export_type([
    buffer/0,

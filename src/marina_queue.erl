@@ -12,8 +12,9 @@
 %% public
 -spec empty(atom()) -> [term()].
 empty(ServerName) ->
-    Items = ets:match_object(?QUEUE_TABLE_ID, {{ServerName, '_'}, '_'}),
-    ets:match_delete(?QUEUE_TABLE_ID, {{ServerName, '_'}, '_'}),
+    Match = {{ServerName, '_'}, '_'},
+    Items = ets:match_object(?QUEUE_TABLE_ID, Match),
+    ets:match_delete(?QUEUE_TABLE_ID, Match),
     Items.
 
 -spec init() -> ?QUEUE_TABLE_ID.
@@ -31,7 +32,8 @@ in(ServerName, Stream, Item) ->
 
 -spec out(atom(), non_neg_integer()) -> term().
 out(ServerName, Stream) ->
-    Item = ets:lookup_element(?QUEUE_TABLE_ID, {ServerName, Stream}, 2),
-    ets:delete(?QUEUE_TABLE_ID, {ServerName, Stream}),
+    Key = {ServerName, Stream},
+    Item = ets:lookup_element(?QUEUE_TABLE_ID, Key, 2),
+    ets:delete(?QUEUE_TABLE_ID, Key),
     Item.
 

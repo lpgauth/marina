@@ -9,6 +9,7 @@
 -record(state, {
     buffer   = marina_buffer:new(),
     ip       = undefined,
+    keyspace = undefined,
     name     = undefined,
     port     = undefined,
     requests = 0,
@@ -26,7 +27,8 @@ init(Parent, Name) ->
     loop(#state {
         name = Name,
         ip = application:get_env(?APP, ip, ?DEFAULT_IP),
-        port = application:get_env(?APP, port, ?DEFAULT_PORT)
+        port = application:get_env(?APP, port, ?DEFAULT_PORT),
+        keyspace = application:get_env(?APP, keyspace, undefined)
     }).
 
 -spec start_link(atom()) -> {ok, pid()}.
@@ -79,27 +81,18 @@ handle_msg(newsocket, #state {
             Msg = marina_request:startup(),
             case sync_msg(Socket, Msg) of
                 {ok, undefined} ->
-                    Msg2 = marina_request:query(0, <<"USE \"RTB\"">>, ?CONSISTENCY_ONE),
-                    case sync_msg(Socket, Msg2) of
-                        {ok, _} ->
-                            % TODO: check result
-                            inet:setopts(Socket, [{active, true}]),
-
-                            {ok, State#state {
-                                socket = Socket
-                            }};
-                        {error, Reason} ->
-                            marina_utils:warning_msg("query error: ~p", [Reason]),
-                            gen_tcp:close(Socket),
-                            tcp_close(State)
-                    end;
+                    default_keyspace(State#state {
+                        socket = Socket
+                    });
                 {error, Reason} ->
                     marina_utils:warning_msg("startup error: ~p", [Reason]),
-                    tcp_close(State)
+                    gen_tcp:close(Socket),
+                    reconnect_timer(),
+                    {ok, State}
             end;
         {error, Reason} ->
             marina_utils:warning_msg("tcp connect error: ~p", [Reason]),
-            erlang:send_after(?DEFAULT_RECONNECT, self(), newsocket),
+            reconnect_timer(),
             {ok, State}
     end;
 handle_msg({tcp, _Port, Msg}, #state {
@@ -110,24 +103,28 @@ handle_msg({tcp, _Port, Msg}, #state {
     reply_frames(Frames, State#state {
         buffer = Buffer2
     });
+handle_msg({tcp_closed, Socket}, #state {
+        socket = Socket
+    } = State) ->
 
-handle_msg({tcp_closed, Socket}, #state {socket = Socket} = State) ->
     marina_utils:warning_msg("tcp closed", []),
     tcp_close(State);
-handle_msg({tcp_error, Socket, Reason}, #state {socket = Socket} = State) ->
+handle_msg({tcp_error, Socket, Reason}, #state {
+        socket = Socket
+    } = State) ->
 
     marina_utils:warning_msg("tcp error: ~p", [Reason]),
     gen_tcp:close(Socket),
-    tcp_close(State);
-handle_msg(Msg, State) ->
-    marina_utils:warning_msg("unexpected msg: ~p", [Msg]),
-    {ok, State}.
+    tcp_close(State).
 
 loop(State) ->
     receive Msg ->
         {ok, State2} = handle_msg(Msg, State),
         loop(State2)
     end.
+
+reconnect_timer() ->
+    erlang:send_after(?DEFAULT_RECONNECT, self(), newsocket).
 
 reply(Name, Ref, From, Msg) ->
     marina_backlog:decrement(Name),
@@ -156,8 +153,36 @@ tcp_close(#state {name = Name} = State) ->
     Msg = {error, tcp_close},
     Items = marina_queue:empty(Name),
     [reply(Name, Ref, From, Msg) || {_, {Ref, From}} <- Items],
-    erlang:send_after(?DEFAULT_RECONNECT, self(), newsocket),
+    reconnect_timer(),
 
     {ok, State#state {
         socket = undefined
     }}.
+
+default_keyspace(#state {
+        keyspace = undefined,
+        socket = Socket
+    } = State) ->
+
+    inet:setopts(Socket, [{active, true}]),
+    {ok, State};
+default_keyspace(#state {
+        socket = Socket,
+        keyspace = Keyspace
+    } = State) ->
+
+    Query = <<"USE \"", Keyspace/binary, "\"">>,
+    Msg = marina_request:query(0, Query, ?CONSISTENCY_ONE),
+    case sync_msg(Socket, Msg) of
+        {ok, Keyspace} ->
+            inet:setopts(Socket, [{active, true}]),
+            {ok, State};
+        {error, Reason} ->
+            marina_utils:warning_msg("query error: ~p", [Reason]),
+            gen_tcp:close(Socket),
+            reconnect_timer(),
+
+            {ok, State#state {
+                socket = undefined
+            }}
+    end.

@@ -1,0 +1,13 @@
+@author Louis-Philippe Gauthier
+@doc Non-blocking Erlang Cassandra CQL3 client
+
+<h2>TODO</h2>
+
+<ul>
+  <li>unit tests</li>
+  <li>prepared statements</li>
+  <li>compression</li>
+  <li>documentation</li>
+</ul>
+
+@end

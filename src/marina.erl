@@ -2,15 +2,19 @@
 -include("marina.hrl").
 
 -export([
-    query/0,
+    async_query/2,
+    async_query/3,
     query/1,
     query/2,
     query/3
 ]).
 
 %% public
-query() ->
-    query(<<"SELECT * FROM users LIMIT 1;">>).
+async_query(Query, Pid) ->
+    async_query(Query, Pid, ?CONSISTENCY_ONE).
+
+async_query(Query, Pid, ConsistencyLevel) ->
+    async_call({query, Query, ConsistencyLevel}, Pid).
 
 query(Query) ->
     query(Query, ?CONSISTENCY_ONE).

@@ -107,7 +107,7 @@ decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer, Rest/binary>
                     {Table, Rest4} = marina_types:decode_string(Rest3)
             end,
             decode_columns_metadata(Rest4, ColumnsCount, {Keyspace, Table});
-        1 ->
+        4 ->
             {[], Rest2}
     end,
     {RowsCount, Rest6} = marina_types:decode_int(Rest5),

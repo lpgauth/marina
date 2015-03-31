@@ -2,18 +2,18 @@
 -include("marina.hrl").
 
 -export([
-    query/3,
+    query/4,
     startup/0
 ]).
 
 %% public
-query(Stream, Query, ConsistencyLevel) ->
+query(Stream, Query, ConsistencyLevel, Flags) ->
     marina_frame:encode(#frame {
         flags = ?DEFAULT_FLAGS,
         stream = Stream,
         opcode = ?OP_QUERY,
         body = <<(marina_types:encode_long_string(Query))/binary,
-            (marina_types:encode_short(ConsistencyLevel))/binary, 0>>
+            (marina_types:encode_short(ConsistencyLevel))/binary, Flags>>
     }).
 
 startup() ->

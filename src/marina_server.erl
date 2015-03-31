@@ -172,7 +172,7 @@ default_keyspace(#state {
     } = State) ->
 
     Query = <<"USE \"", Keyspace/binary, "\"">>,
-    Msg = marina_request:query(0, Query, ?CONSISTENCY_ONE),
+    Msg = marina_request:query(0, Query, ?CONSISTENCY_ONE, ?DEFAULT_FLAGS),
     case sync_msg(Socket, Msg) of
         {ok, Keyspace} ->
             inet:setopts(Socket, [{active, true}]),

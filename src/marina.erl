@@ -5,6 +5,7 @@
     async_query/2,
     async_query/3,
     async_query/4,
+    execute/5,
     prepare/2,
     query/1,
     query/2,
@@ -22,6 +23,9 @@ async_query(Query, Pid, ConsistencyLevel) ->
 
 async_query(Query, Pid, ConsistencyLevel, Flags) ->
     async_call({query, Query, ConsistencyLevel, Flags}, Pid).
+
+execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) ->
+    response(call({execute, StatementId, Values, ConsistencyLevel, Flags}, Timeout)).
 
 prepare(Query, Timeout) ->
     response(call({prepare, Query}, Timeout)).

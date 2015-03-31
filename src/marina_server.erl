@@ -52,6 +52,8 @@ handle_msg({call, Ref, From, Call}, #state {
     Stream = Requests rem ?MAX_STREAM_ID,
 
     Msg = case Call of
+        {execute, StatementId, Values, ConsistencyLevel, Flags} ->
+            marina_request:execute(Stream, StatementId, Values, ConsistencyLevel, Flags);
         {prepare, Query} ->
             marina_request:prepare(Stream, Query);
         {query, Query, ConsistencyLevel, Flags} ->

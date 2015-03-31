@@ -43,14 +43,20 @@ handle_msg({call, Ref, From, _Msg}, #state {
 
     reply(Name, Ref, From, {error, no_socket}),
     {ok, State};
-handle_msg({call, Ref, From, {query, Query, ConsistencyLevel, Flags}}, #state {
+handle_msg({call, Ref, From, Call}, #state {
         socket = Socket,
         requests = Requests,
         name = Name
     } = State) ->
 
     Stream = Requests rem ?MAX_STREAM_ID,
-    Msg = marina_request:query(Stream, Query, ConsistencyLevel, Flags),
+
+    Msg = case Call of
+        {prepare, Query} ->
+            marina_request:prepare(Stream, Query);
+        {query, Query, ConsistencyLevel, Flags} ->
+            marina_request:query(Stream, Query, ConsistencyLevel, Flags)
+    end,
 
     case gen_tcp:send(Socket, Msg) of
         ok ->

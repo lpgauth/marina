@@ -5,10 +5,12 @@
     async_query/2,
     async_query/3,
     async_query/4,
+    prepare/2,
     query/1,
     query/2,
     query/3,
-    query/4
+    query/4,
+    response/1
 ]).
 
 %% public
@@ -21,6 +23,9 @@ async_query(Query, Pid, ConsistencyLevel) ->
 async_query(Query, Pid, ConsistencyLevel, Flags) ->
     async_call({query, Query, ConsistencyLevel, Flags}, Pid).
 
+prepare(Query, Timeout) ->
+    response(call({prepare, Query}, Timeout)).
+
 query(Query) ->
     query(Query, ?CONSISTENCY_ONE).
 
@@ -31,12 +36,12 @@ query(Query, ConsistencyLevel, Flags) ->
     query(Query, ConsistencyLevel, Flags, ?DEFAULT_TIMEOUT).
 
 query(Query, ConsistencyLevel, Flags, Timeout) ->
-    case call({query, Query, ConsistencyLevel, Flags}, Timeout) of
-        {ok, Frame} ->
-            marina_body:decode(Frame);
-        {error, Reason} ->
-            {error, Reason}
-    end.
+    response(call({query, Query, ConsistencyLevel, Flags}, Timeout)).
+
+response({ok, Frame}) ->
+    marina_body:decode(Frame);
+response({error, Reason}) ->
+    {error, Reason}.
 
 %% private
 -spec call(term(), pos_integer()) -> ok | {ok, term()} | {error, atom()}.

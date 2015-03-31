@@ -70,13 +70,13 @@
 
 -record(result_metadata, {
     columns_count = 0  :: integer(),
-    rows_count    = 0  :: integer(),
     columns       = [] :: list(column_spec())
 }).
 
 -record(result, {
-    metadata  :: result_metadata(),
-    rows = [] :: [[binary()]]
+    metadata        :: result_metadata(),
+    rows_count = 0  :: integer(),
+    rows       = [] :: [[binary()]]
 }).
 
 % types

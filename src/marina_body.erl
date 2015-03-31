@@ -29,12 +29,13 @@ decode(#frame {
     }) ->
 
     {Metadata, Rest2} = decode_result_metadata(Rest),
-    RowsCount = Metadata#result_metadata.rows_count,
+    {RowsCount, Rest3} = marina_types:decode_int(Rest2),
     ColumnsCount = Metadata#result_metadata.columns_count,
-    {Rows, <<>>} = decode_rows(Rest2, RowsCount, ColumnsCount),
+    {Rows, <<>>} = decode_rows(Rest3, RowsCount, ColumnsCount),
 
     {ok, #result {
         metadata = Metadata,
+        rows_count = RowsCount,
         rows = Rows
     }};
 decode(#frame {
@@ -44,6 +45,16 @@ decode(#frame {
 
     {Keyspace, <<>>} = marina_types:decode_string(Rest),
     {ok, Keyspace};
+decode(#frame {
+        opcode = ?OP_RESULT,
+        body = <<4:32/integer, Rest/binary>>
+    }) ->
+
+    {Id, Rest2} = marina_types:decode_short_bytes(Rest),
+    {_Metadata, Rest3} = decode_result_metadata(Rest2),
+    {_ResultMetadata, <<>>} = decode_result_metadata(Rest3),
+
+    {ok, Id};
 decode(#frame {}) ->
     {error, unknown_response}.
 
@@ -110,13 +121,11 @@ decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer, Rest/binary>
         4 ->
             {[], Rest2}
     end,
-    {RowsCount, Rest6} = marina_types:decode_int(Rest5),
 
     {#result_metadata {
         columns_count = ColumnsCount,
-        rows_count = RowsCount,
         columns = Columns
-    }, Rest6}.
+    }, Rest5}.
 
 decode_rows(Bin, Count, ColumnsCount) ->
     decode_rows(Bin, Count, ColumnsCount, []).

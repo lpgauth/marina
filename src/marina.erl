@@ -1,31 +1,26 @@
+% TODO: add missing specs
+
 -module(marina).
 -include("marina.hrl").
 
 -export([
     async_execute/5,
-    async_query/2,
-    async_query/3,
+    async_prepare/2,
     async_query/4,
     async_reusable_query/6,
     execute/5,
     prepare/2,
-    query/1,
-    query/2,
-    query/3,
     query/4,
-    reusable_query/5,
-    response/1
+    response/1,
+    reusable_query/5
 ]).
 
 %% public
 async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags) ->
     async_call({execute, StatementId, Values, ConsistencyLevel, Flags}, Pid).
 
-async_query(Query, Pid) ->
-    async_query(Query, Pid, ?CONSISTENCY_ONE).
-
-async_query(Query, Pid, ConsistencyLevel) ->
-    async_query(Query, Pid, ConsistencyLevel, ?DEFAULT_FLAGS).
+async_prepare(Query, Pid) ->
+    async_call({prepare, Query}, Pid).
 
 async_query(Query, Pid, ConsistencyLevel, Flags) ->
     async_call({query, Query, ConsistencyLevel, Flags}, Pid).
@@ -50,17 +45,13 @@ execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) ->
 prepare(Query, Timeout) ->
     response(call({prepare, Query}, Timeout)).
 
-query(Query) ->
-    query(Query, ?CONSISTENCY_ONE).
-
-query(Query, ConsistencyLevel) ->
-    query(Query, ConsistencyLevel, ?DEFAULT_FLAGS).
-
-query(Query, ConsistencyLevel, Flags) ->
-    query(Query, ConsistencyLevel, Flags, ?DEFAULT_TIMEOUT).
-
 query(Query, ConsistencyLevel, Flags, Timeout) ->
     response(call({query, Query, ConsistencyLevel, Flags}, Timeout)).
+
+response({ok, Frame}) ->
+    marina_body:decode(Frame);
+response({error, Reason}) ->
+    {error, Reason}.
 
 reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
     Timestamp = os:timestamp(),
@@ -78,13 +69,8 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
             end
     end.
 
-response({ok, Frame}) ->
-    marina_body:decode(Frame);
-response({error, Reason}) ->
-    {error, Reason}.
-
 %% private
--spec call(term(), pos_integer()) -> ok | {ok, term()} | {error, atom()}.
+-spec call(term(), pos_integer()) -> ok | {ok, term()} | {error, term()}.
 call(Msg, Timeout) ->
     case async_call(Msg, self()) of
         {ok, Ref} ->

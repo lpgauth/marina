@@ -1,5 +1,3 @@
-% TODO: add missing specs
-
 -module(marina).
 -include("marina.hrl").
 
@@ -16,16 +14,28 @@
 ]).
 
 %% public
-async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags) ->
+-spec async_execute(statement_id(), [value()], consistency(), flags(), pid()) ->
+    {ok, erlang:ref()} | {error, backlog_full}.
+
+async_execute(StatementId, Values, ConsistencyLevel, Flags, Pid) ->
     async_call({execute, StatementId, Values, ConsistencyLevel, Flags}, Pid).
+
+-spec async_prepare(query(), pid()) ->
+    {ok, erlang:ref()} | {error, backlog_full}.
 
 async_prepare(Query, Pid) ->
     async_call({prepare, Query}, Pid).
 
-async_query(Query, Pid, ConsistencyLevel, Flags) ->
+-spec async_query(query(), consistency(), flags(), pid()) ->
+    {ok, erlang:ref()} | {error, backlog_full}.
+
+async_query(Query, ConsistencyLevel, Flags, Pid) ->
     async_call({query, Query, ConsistencyLevel, Flags}, Pid).
 
-async_reusable_query(Query, Values, Pid, ConsistencyLevel, Flags, Timeout) ->
+-spec async_reusable_query(query(), [value()], consistency(), flags(), pid(), timeout()) ->
+    {ok, erlang:ref()} | {error, term()}.
+
+async_reusable_query(Query, Values, ConsistencyLevel, Flags, Pid, Timeout) ->
     case marina_cache:get(Query) of
         {ok, StatementId} ->
             async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags);
@@ -39,19 +49,34 @@ async_reusable_query(Query, Values, Pid, ConsistencyLevel, Flags, Timeout) ->
             end
     end.
 
+-spec execute(statement_id(), [value()], consistency(), flags(), timeout()) ->
+    {ok, term()} | {error, term()}.
+
 execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) ->
     response(call({execute, StatementId, Values, ConsistencyLevel, Flags}, Timeout)).
+
+-spec prepare(query(), timeout()) -> {ok, term()} | {error, term()}.
 
 prepare(Query, Timeout) ->
     response(call({prepare, Query}, Timeout)).
 
+
+-spec query(query(), consistency(), flags(), timeout()) ->
+    {ok, term()} | {error, term()}.
+
 query(Query, ConsistencyLevel, Flags, Timeout) ->
     response(call({query, Query, ConsistencyLevel, Flags}, Timeout)).
+
+-spec response({ok, term()} | {error, term()}) ->
+    {ok, term()} | {error, term()}.
 
 response({ok, Frame}) ->
     marina_body:decode(Frame);
 response({error, Reason}) ->
     {error, Reason}.
+
+-spec reusable_query(query(), [value()], consistency(), flags(), timeout()) ->
+    {ok, term()} | {error, term()}.
 
 reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
     Timestamp = os:timestamp(),
@@ -70,7 +95,6 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
     end.
 
 %% private
--spec call(term(), pos_integer()) -> ok | {ok, term()} | {error, term()}.
 call(Msg, Timeout) ->
     case async_call(Msg, self()) of
         {ok, Ref} ->
@@ -84,7 +108,6 @@ call(Msg, Timeout) ->
             {error, Reason}
     end.
 
--spec async_call(term(), pid()) -> {ok, erlang:ref()} | {error, backlog_full}.
 async_call(Msg, Pid) ->
     Ref = make_ref(),
     Server = random_server(),

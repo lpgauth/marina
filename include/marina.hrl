@@ -82,11 +82,16 @@
 % types
 -type buffer() :: #buffer {}.
 -type column_spec() :: #column_spec {}.
--type frame()  :: #frame {}.
+-type consistency() :: ?CONSISTENCY_ANY | ?CONSISTENCY_ONE | ?CONSISTENCY_TWO |
+?CONSISTENCY_THREE | ?CONSISTENCY_QUORUM | ?CONSISTENCY_ALL |
+?CONSISTENCY_LOCAL_QUORUM | ?CONSISTENCY_EACH_QUORUM | ?CONSISTENCY_SERIAL |
+?CONSISTENCY_LOCAL_SERIAL | ?CONSISTENCY_LOCAL_ONE.
+
+-type flags() :: 0..254.
+-type frame() :: #frame {}.
+-type query() :: binary().
 -type result() :: #result {}.
 -type result_metadata() :: #result_metadata {}.
-
--export_type([
-   buffer/0,
-   frame/0
-]).
+-type statement_id() :: binary().
+-type stream() :: 0..32768.
+-type value() :: binary().

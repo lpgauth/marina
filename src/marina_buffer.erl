@@ -8,6 +8,7 @@
 
 %% public
 -spec new() -> buffer().
+
 new() ->
     #buffer {
         buffered = [],
@@ -16,6 +17,7 @@ new() ->
     }.
 
 -spec decode(binary(), buffer()) -> {[frame()], buffer()}.
+
 decode(Data, #buffer {
         buffered = Buffered,
         current = Current,

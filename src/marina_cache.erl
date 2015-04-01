@@ -11,6 +11,7 @@
 
 %% public
 -spec get(binary()) -> {ok, term()} | {error, not_found}.
+
 get(Key) ->
     try
         Term = ets:lookup_element(?CACHE_TABLE_ID, Key, 2),
@@ -21,6 +22,7 @@ get(Key) ->
     end.
 
 -spec init() -> ?CACHE_TABLE_ID.
+
 init() ->
     ets:new(?CACHE_TABLE_ID, [
         named_table,
@@ -29,5 +31,6 @@ init() ->
     ]).
 
 -spec put(binary(), term()) -> true.
+
 put(Key, Value) ->
     ets:insert(?CACHE_TABLE_ID, {Key, Value}).

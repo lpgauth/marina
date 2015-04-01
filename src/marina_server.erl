@@ -32,6 +32,7 @@ init(Parent, Name) ->
     }).
 
 -spec start_link(atom()) -> {ok, pid()}.
+
 start_link(Name) ->
     proc_lib:start_link(?MODULE, init, [self(), Name]).
 

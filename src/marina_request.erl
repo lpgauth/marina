@@ -9,6 +9,9 @@
 ]).
 
 %% public
+-spec execute(stream(), statement_id(), [binary()], consistency(), flags()) ->
+    binary().
+
 execute(Stream, StatementId, Values, ConsistencyLevel, Flags) ->
     ValuesCount = length(Values),
     EncodedValues = [marina_types:encode_bytes(Value) || Value <- Values],
@@ -24,6 +27,8 @@ execute(Stream, StatementId, Values, ConsistencyLevel, Flags) ->
             (iolist_to_binary(EncodedValues))/binary>>
     }).
 
+-spec prepare(stream(), query()) -> binary().
+
 prepare(Stream, Query) ->
     marina_frame:encode(#frame {
         flags = ?DEFAULT_FLAGS,
@@ -31,6 +36,8 @@ prepare(Stream, Query) ->
         opcode = ?OP_PREPARE,
         body = <<(marina_types:encode_long_string(Query))/binary>>
     }).
+
+-spec query(stream(), query(), consistency(), flags()) -> binary().
 
 query(Stream, Query, ConsistencyLevel, Flags) ->
     marina_frame:encode(#frame {
@@ -40,6 +47,8 @@ query(Stream, Query, ConsistencyLevel, Flags) ->
         body = <<(marina_types:encode_long_string(Query))/binary,
             (marina_types:encode_short(ConsistencyLevel))/binary, Flags>>
     }).
+
+-spec startup() -> binary().
 
 startup() ->
     marina_frame:encode(#frame {

@@ -9,10 +9,12 @@
 
 %% public
 -spec decode(binary()) -> {binary(), [frame()]}.
+
 decode(Bin) ->
     decode(Bin, []).
 
 -spec encode(frame()) -> binary().
+
 encode(#frame {
         flags = Flags,
         stream = Stream,
@@ -25,6 +27,7 @@ encode(#frame {
         (size(Body)):32/unsigned-integer, Body/binary>>.
 
 -spec pending_size(binary()) -> pos_integer() | undefined.
+
 pending_size(<<1:1, ?PROTO_VERSION:7/unsigned-integer, _Flags:8/unsigned-integer,
         _Stream:16/signed-integer, _Opcode:8/unsigned-integer,
         Length:32/unsigned-integer, _Rest/binary>>) ->

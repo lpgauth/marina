@@ -11,6 +11,7 @@
 
 %% public
 -spec empty(atom()) -> [term()].
+
 empty(ServerName) ->
     Match = {{ServerName, '_'}, '_'},
     Items = ets:match_object(?QUEUE_TABLE_ID, Match),
@@ -18,6 +19,7 @@ empty(ServerName) ->
     Items.
 
 -spec init() -> ?QUEUE_TABLE_ID.
+
 init() ->
     ets:new(?QUEUE_TABLE_ID, [
         named_table,
@@ -27,10 +29,12 @@ init() ->
     ]).
 
 -spec in(atom(), non_neg_integer(), term()) -> true.
+
 in(ServerName, Stream, Item) ->
     ets:insert(?QUEUE_TABLE_ID, {{ServerName, Stream}, Item}).
 
 -spec out(atom(), non_neg_integer()) -> term().
+
 out(ServerName, Stream) ->
     Key = {ServerName, Stream},
     Item = ets:lookup_element(?QUEUE_TABLE_ID, Key, 2),

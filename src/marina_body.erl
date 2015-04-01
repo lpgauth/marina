@@ -7,6 +7,7 @@
 
 %% public
 -spec decode(frame()) -> {ok, term()} | {error, atom()}.
+
 decode(#frame {opcode = ?OP_READY}) ->
     {ok, undefined};
 decode(#frame {

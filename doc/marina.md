@@ -14,24 +14,60 @@
 
 
 
-### <a name="type-buffer">buffer()</a> ###
+### <a name="type-consistency">consistency()</a> ###
 
 
 
 <pre><code>
-buffer() = #buffer{buffered = undefined | iolist(), current = undefined | non_neg_integer(), pending = non_neg_integer() | undefined}
+consistency() = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 16
 </code></pre>
 
 
 
 
 
-### <a name="type-frame">frame()</a> ###
+### <a name="type-flags">flags()</a> ###
 
 
 
 <pre><code>
-frame() = #frame{flags = any(), stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | binary()}
+flags() = 0..254
+</code></pre>
+
+
+
+
+
+### <a name="type-query">query()</a> ###
+
+
+
+<pre><code>
+query() = binary()
+</code></pre>
+
+
+
+
+
+### <a name="type-statement_id">statement_id()</a> ###
+
+
+
+<pre><code>
+statement_id() = binary()
+</code></pre>
+
+
+
+
+
+### <a name="type-value">value()</a> ###
+
+
+
+<pre><code>
+value() = binary()
 </code></pre>
 
 
@@ -51,62 +87,98 @@ frame() = #frame{flags = any(), stream = undefined | integer(), opcode = undefin
 
 ### async_execute/5 ###
 
-`async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags) -> any()`
+
+<pre><code>
+async_execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Pid::pid()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, backlog_full}
+</code></pre>
+<br />
 
 
 <a name="async_prepare-2"></a>
 
 ### async_prepare/2 ###
 
-`async_prepare(Query, Pid) -> any()`
+
+<pre><code>
+async_prepare(Query::<a href="#type-query">query()</a>, Pid::pid()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, backlog_full}
+</code></pre>
+<br />
 
 
 <a name="async_query-4"></a>
 
 ### async_query/4 ###
 
-`async_query(Query, Pid, ConsistencyLevel, Flags) -> any()`
+
+<pre><code>
+async_query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Pid::pid()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, backlog_full}
+</code></pre>
+<br />
 
 
 <a name="async_reusable_query-6"></a>
 
 ### async_reusable_query/6 ###
 
-`async_reusable_query(Query, Values, Pid, ConsistencyLevel, Flags, Timeout) -> any()`
+
+<pre><code>
+async_reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Pid::pid(), Timeout::timeout()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, term()}
+</code></pre>
+<br />
 
 
 <a name="execute-5"></a>
 
 ### execute/5 ###
 
-`execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) -> any()`
+
+<pre><code>
+execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
+</code></pre>
+<br />
 
 
 <a name="prepare-2"></a>
 
 ### prepare/2 ###
 
-`prepare(Query, Timeout) -> any()`
+
+<pre><code>
+prepare(Query::<a href="#type-query">query()</a>, Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
+</code></pre>
+<br />
 
 
 <a name="query-4"></a>
 
 ### query/4 ###
 
-`query(Query, ConsistencyLevel, Flags, Timeout) -> any()`
+
+<pre><code>
+query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
+</code></pre>
+<br />
 
 
 <a name="response-1"></a>
 
 ### response/1 ###
 
-`response(X1) -> any()`
+
+<pre><code>
+response(X1::{ok, term()} | {error, term()}) -&gt; {ok, term()} | {error, term()}
+</code></pre>
+<br />
 
 
 <a name="reusable_query-5"></a>
 
 ### reusable_query/5 ###
 
-`reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) -> any()`
+
+<pre><code>
+reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
+</code></pre>
+<br />
 
 

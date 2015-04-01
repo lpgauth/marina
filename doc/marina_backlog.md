@@ -1,38 +1,8 @@
 
 
 # Module marina_backlog #
-* [Data Types](#types)
 * [Function Index](#index)
 * [Function Details](#functions)
-
-
-
-<a name="types"></a>
-
-## Data Types ##
-
-
-
-
-### <a name="type-buffer">buffer()</a> ###
-
-
-
-<pre><code>
-buffer() = #buffer{buffered = undefined | iolist(), current = undefined | non_neg_integer(), pending = non_neg_integer() | undefined}
-</code></pre>
-
-
-
-
-
-### <a name="type-frame">frame()</a> ###
-
-
-
-<pre><code>
-frame() = #frame{flags = any(), stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | binary()}
-</code></pre>
 
 
 <a name="index"></a>

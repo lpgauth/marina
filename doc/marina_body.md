@@ -14,18 +14,6 @@
 
 
 
-### <a name="type-buffer">buffer()</a> ###
-
-
-
-<pre><code>
-buffer() = #buffer{buffered = undefined | iolist(), current = undefined | non_neg_integer(), pending = non_neg_integer() | undefined}
-</code></pre>
-
-
-
-
-
 ### <a name="type-frame">frame()</a> ###
 
 

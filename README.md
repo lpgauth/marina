@@ -9,9 +9,9 @@ Non-blocking Erlang Cassandra CQL3 client
 
 ## Environment variables ##
 
-* ip        : server ip
-* port      : server port
-* keyspace  : default keyspace
+* ip : server ip
+* port : server port
+* keyspace : default keyspace
 * pool_size : number of connections
 
 

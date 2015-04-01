@@ -18,7 +18,7 @@ Non-blocking Erlang Cassandra CQL3 client
 
 
 ## TODO ##
-* user firendly API
+* user-friendly API
 * compression
 * unit / functional tests
 * documentation

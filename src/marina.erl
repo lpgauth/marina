@@ -38,12 +38,12 @@ async_query(Query, ConsistencyLevel, Flags, Pid) ->
 async_reusable_query(Query, Values, ConsistencyLevel, Flags, Pid, Timeout) ->
     case marina_cache:get(Query) of
         {ok, StatementId} ->
-            async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags);
+            async_execute(StatementId, Values, ConsistencyLevel, Flags, Pid);
         {error, not_found} ->
             case prepare(Query, Timeout) of
                 {ok, StatementId} ->
                     marina_cache:put(Query, StatementId),
-                    async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags);
+                    async_execute(StatementId, Values, ConsistencyLevel, Flags, Pid);
                 {error, Reason} ->
                     {error, Reason}
             end

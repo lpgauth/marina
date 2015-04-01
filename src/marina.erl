@@ -11,6 +11,7 @@
     query/2,
     query/3,
     query/4,
+    reusable_query/5,
     response/1
 ]).
 
@@ -41,6 +42,22 @@ query(Query, ConsistencyLevel, Flags) ->
 
 query(Query, ConsistencyLevel, Flags, Timeout) ->
     response(call({query, Query, ConsistencyLevel, Flags}, Timeout)).
+
+reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
+    Timestamp = os:timestamp(),
+    case marina_cache:get(Query) of
+        {ok, StatementId} ->
+            execute(StatementId, Values, ConsistencyLevel, Flags, Timeout);
+        {error, not_found} ->
+            case prepare(Query, Timeout) of
+                {ok, StatementId} ->
+                    marina_cache:put(Query, StatementId),
+                    Timeout2 = marina_utils:timeout(Timeout, Timestamp),
+                    execute(StatementId, Values, ConsistencyLevel, Flags, Timeout2);
+                {error, Reason} ->
+                    {error, Reason}
+            end
+    end.
 
 response({ok, Frame}) ->
     marina_body:decode(Frame);

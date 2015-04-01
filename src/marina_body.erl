@@ -14,9 +14,9 @@ decode(#frame {
         body = Body
     }) ->
 
-    {_Code, Rest} = marina_types:decode_int(Body),
+    {Code, Rest} = marina_types:decode_int(Body),
     {Msg, _Rest2} = marina_types:decode_string(Rest),
-    {error, Msg};
+    {error, {Code, Msg}};
 decode(#frame {
         opcode = ?OP_RESULT,
         body = <<1:32/integer>>

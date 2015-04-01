@@ -18,6 +18,7 @@ start_link() ->
 %% supervisor callbacks
 init([]) ->
     marina_backlog:init(),
+    marina_cache:init(),
     marina_queue:init(),
 
     {ok, {{one_for_one, 5, 10},

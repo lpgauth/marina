@@ -2,9 +2,11 @@
 -include("marina.hrl").
 
 -export([
+    async_execute/5,
     async_query/2,
     async_query/3,
     async_query/4,
+    async_reusable_query/6,
     execute/5,
     prepare/2,
     query/1,
@@ -16,6 +18,9 @@
 ]).
 
 %% public
+async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags) ->
+    async_call({execute, StatementId, Values, ConsistencyLevel, Flags}, Pid).
+
 async_query(Query, Pid) ->
     async_query(Query, Pid, ?CONSISTENCY_ONE).
 
@@ -24,6 +29,20 @@ async_query(Query, Pid, ConsistencyLevel) ->
 
 async_query(Query, Pid, ConsistencyLevel, Flags) ->
     async_call({query, Query, ConsistencyLevel, Flags}, Pid).
+
+async_reusable_query(Query, Values, Pid, ConsistencyLevel, Flags, Timeout) ->
+    case marina_cache:get(Query) of
+        {ok, StatementId} ->
+            async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags);
+        {error, not_found} ->
+            case prepare(Query, Timeout) of
+                {ok, StatementId} ->
+                    marina_cache:put(Query, StatementId),
+                    async_execute(StatementId, Values, Pid, ConsistencyLevel, Flags);
+                {error, Reason} ->
+                    {error, Reason}
+            end
+    end.
 
 execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) ->
     response(call({execute, StatementId, Values, ConsistencyLevel, Flags}, Timeout)).

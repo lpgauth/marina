@@ -1,12 +1,20 @@
 @author Louis-Philippe Gauthier
 @doc Non-blocking Erlang Cassandra CQL3 client
 
+<h2>Environment variables</h2>
+<ul>
+  <li>ip        : server ip</li>
+  <li>port      : server port</li>
+  <li>keyspace  : default keyspace</li>
+  <li>pool_size : number of connections</li>
+</ul>
+
 <h2>TODO</h2>
 
 <ul>
-  <li>unit tests</li>
-  <li>prepared statements</li>
+  <li>user firendly API</li>
   <li>compression</li>
+  <li>unit / functional tests</li>
   <li>documentation</li>
 </ul>
 

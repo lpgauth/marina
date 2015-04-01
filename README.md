@@ -7,10 +7,19 @@ __Authors:__ Louis-Philippe Gauthier.
 Non-blocking Erlang Cassandra CQL3 client
 
 
+## Environment variables ##
+
+* ip        : server ip
+* port      : server port
+* keyspace  : default keyspace
+* pool_size : number of connections
+
+
+
 ## TODO ##
-* unit tests
-* prepared statements
+* user firendly API
 * compression
+* unit / functional tests
 * documentation
 
 
@@ -25,6 +34,7 @@ Non-blocking Erlang Cassandra CQL3 client
 <tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_backlog.md" class="module">marina_backlog</a></td></tr>
 <tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_body.md" class="module">marina_body</a></td></tr>
 <tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_buffer.md" class="module">marina_buffer</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_cache.md" class="module">marina_cache</a></td></tr>
 <tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_frame.md" class="module">marina_frame</a></td></tr>
 <tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_queue.md" class="module">marina_queue</a></td></tr>
 <tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_request.md" class="module">marina_request</a></td></tr>

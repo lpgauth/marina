@@ -40,18 +40,32 @@ frame() = #frame{flags = any(), stream = undefined | integer(), opcode = undefin
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#query-3">query/3</a></td><td></td></tr><tr><td valign="top"><a href="#startup-0">startup/0</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#execute-5">execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-2">prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-4">query/4</a></td><td></td></tr><tr><td valign="top"><a href="#startup-0">startup/0</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
 
-<a name="query-3"></a>
+<a name="execute-5"></a>
 
-### query/3 ###
+### execute/5 ###
 
-`query(Stream, Query, ConsistencyLevel) -> any()`
+`execute(Stream, StatementId, Values, ConsistencyLevel, Flags) -> any()`
+
+
+<a name="prepare-2"></a>
+
+### prepare/2 ###
+
+`prepare(Stream, Query) -> any()`
+
+
+<a name="query-4"></a>
+
+### query/4 ###
+
+`query(Stream, Query, ConsistencyLevel, Flags) -> any()`
 
 
 <a name="startup-0"></a>

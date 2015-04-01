@@ -3,9 +3,9 @@
 
 <h2>Environment variables</h2>
 <ul>
-  <li>ip        : server ip</li>
-  <li>port      : server port</li>
-  <li>keyspace  : default keyspace</li>
+  <li>ip : server ip</li>
+  <li>port : server port</li>
+  <li>keyspace : default keyspace</li>
   <li>pool_size : number of connections</li>
 </ul>
 

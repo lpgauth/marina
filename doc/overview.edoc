@@ -7,6 +7,7 @@
   <li>port : server port</li>
   <li>keyspace : default keyspace</li>
   <li>pool_size : number of connections</li>
+  <li>max_backlog_size: maximum number of concurrent requests per connection</li>
 </ul>
 
 <h2>TODO</h2>

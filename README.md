@@ -13,6 +13,7 @@ Non-blocking Erlang Cassandra CQL3 client
 * port : server port
 * keyspace : default keyspace
 * pool_size : number of connections
+* max_backlog_size: maximum number of concurrent requests per connection
 
 
 

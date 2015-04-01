@@ -8,16 +8,16 @@
     new/1
 ]).
 
--define(BACKLOG_MAX_SIZE, 1024).
 -define(BACKLOG_TABLE_ID, marina_backlog).
 
 %% public
 -spec check(atom()) -> boolean().
 check(ServerName) ->
+    MaxBacklogSize = max_backlog_size(),
     case increment(ServerName) of
-        [?BACKLOG_MAX_SIZE, ?BACKLOG_MAX_SIZE] ->
+        [MaxBacklogSize, MaxBacklogSize] ->
             false;
-        [_, Value] when Value =< ?BACKLOG_MAX_SIZE ->
+        [_, Value] when Value =< MaxBacklogSize ->
             true;
         {error, tid_missing} ->
             false
@@ -41,7 +41,11 @@ new(ServerName) ->
 
 %% private
 increment(ServerName) ->
-    safe_update_counter(ServerName, [{2, 0}, {2, 1, ?BACKLOG_MAX_SIZE, ?BACKLOG_MAX_SIZE}]).
+    MaxBacklogSize = max_backlog_size(),
+    safe_update_counter(ServerName, [{2, 0}, {2, 1, MaxBacklogSize, MaxBacklogSize}]).
+
+max_backlog_size() ->
+    application:get_env(?APP, max_backlog_size, ?DEFAULT_MAX_BACKLOG_SIZE).
 
 safe_update_counter(ServerName, UpdateOp) ->
     try ets:update_counter(?BACKLOG_TABLE_ID, ServerName, UpdateOp)

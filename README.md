@@ -7,6 +7,18 @@ __Authors:__ Louis-Philippe Gauthier.
 Non-blocking Erlang Cassandra CQL3 client
 
 
+## Features ##
+
+* Async mode
+* Backpressure via backlog (OOM protection)
+* Binary protocol V3
+* CQL protocol 3.2.0
+* Performance optimized
+* Prepared statement cache
+* Request pipelining
+
+
+
 ## Environment variables ##
 
 * ip : server ip
@@ -18,10 +30,9 @@ Non-blocking Erlang Cassandra CQL3 client
 
 
 ## TODO ##
-* user firendly API
 * compression
-* unit / functional tests
 * documentation
+* tests
 
 
 

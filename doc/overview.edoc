@@ -1,9 +1,13 @@
 @author Louis-Philippe Gauthier
 @doc Non-blocking Erlang Cassandra CQL3 client
 
+<h2>Requirements</h2>
+<ul>
+  <li>Cassandra 2.1 +</li>
+</ul>
+
 <h2>Features</h2>
 <ul>
-  <li>Async mode</li>
   <li>Backpressure via backlog (OOM protection)</li>
   <li>Binary protocol V3</li>
   <li>CQL protocol 3.2.0</li>
@@ -21,13 +25,7 @@
   <li>max_backlog_size: maximum number of concurrent requests per connection</li>
 </ul>
 
-<h2>Requirements</h2>
-<ul>
-  <li>Cassandra 2.1 +</li>
-</ul>
-
 <h2>TODO</h2>
-
 <ul>
   <li>batched queries</li>
   <li>compression</li>

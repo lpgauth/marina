@@ -17,9 +17,12 @@ test_query() ->
     ?assertEqual({ok, undefined}, Response).
 
 test_reusable_query() ->
-    Response = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
-    Response = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
-    Response = reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>], 1),
+    Response = reusable_query(<<"SELECT * FROM user LIMIT 1;">>, []),
+    ?assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response),
+
+    Response2 = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
+    Response2 = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
+    Response2 = reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>], 1),
 
     ?assertEqual({ok,
         {result,
@@ -31,7 +34,7 @@ test_reusable_query() ->
             ]}, 1, [
                 [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>, <<"test">>, <<"test2">>, <<0,0,0,0>>]
         ]}
-    }, Response).
+    }, Response2).
 
 %% setup
 setup_schema() ->
@@ -48,10 +51,10 @@ set_keyspace() ->
 
 %% helpers
 query(Query) ->
-    marina:query(Query, ?CONSISTENCY_ONE, ?DEFAULT_FLAGS, ?DEFAULT_TIMEOUT).
+    marina:query(Query, ?CONSISTENCY_ONE, ?DEFAULT_FLAGS, ?TEST_TIMEOUT).
 
 reusable_query(Query, Values) ->
-    reusable_query(Query, Values, ?DEFAULT_FLAGS).
+    reusable_query(Query, Values, ?TEST_TIMEOUT).
 
 reusable_query(Query, Values, Flags) ->
-    marina:reusable_query(Query, Values, ?CONSISTENCY_ONE, Flags, ?DEFAULT_TIMEOUT).
+    marina:reusable_query(Query, Values, ?CONSISTENCY_ONE, Flags, ?TEST_TIMEOUT).

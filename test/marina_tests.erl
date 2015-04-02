@@ -1,5 +1,8 @@
 -module(marina_tests).
--include("test.hrl").
+-include_lib("eunit/include/eunit.hrl").
+-include_lib("marina/include/marina.hrl").
+
+-define(TEST_TIMEOUT, 10000).
 
 %% tests
 marina_test_() ->

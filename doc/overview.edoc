@@ -21,12 +21,17 @@
   <li>max_backlog_size: maximum number of concurrent requests per connection</li>
 </ul>
 
+<h2>Requirements</h2>
+<ul>
+  <li>Cassandra 2.1 +</li>
+</ul>
+
 <h2>TODO</h2>
 
 <ul>
+  <li>batched queries</li>
   <li>compression</li>
   <li>documentation</li>
-  <li>tests</li>
 </ul>
 
 @end

@@ -56,6 +56,29 @@ decode(#frame {
     {_ResultMetadata, <<>>} = decode_result_metadata(Rest3),
 
     {ok, Id};
+decode(#frame {
+        opcode = ?OP_RESULT,
+        body = <<5:32/integer, Rest/binary>>
+    }) ->
+
+    {ChangeType, Rest2} = marina_types:decode_string(Rest),
+    {Target, Rest3} = marina_types:decode_string(Rest2),
+
+    Options = case Target of
+        <<"KEYSPACE">> ->
+            {Option, <<>>} = marina_types:decode_string(Rest3),
+            {Option};
+        <<"TABLE">> ->
+            {Option, Rest4} = marina_types:decode_string(Rest3),
+            {Option2, <<>>} = marina_types:decode_string(Rest4),
+            {Option, Option2};
+        <<"TYPE">> ->
+            {Option, Rest4} = marina_types:decode_string(Rest3),
+            {Option2, <<>>} = marina_types:decode_string(Rest4),
+            {Option, Option2}
+    end,
+
+    {ok, {ChangeType, Target, Options}};
 decode(#frame {}) ->
     {error, unknown_response}.
 

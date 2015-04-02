@@ -1,0 +1,11 @@
+language: erlang
+
+notifications:
+  email: false
+
+otp_release:
+  - 17.4
+  - 17.0
+
+services:
+  - cassandra

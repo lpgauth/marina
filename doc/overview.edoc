@@ -9,7 +9,7 @@
 <h2>Features</h2>
 <ul>
   <li>Backpressure via backlog (OOM protection)</li>
-  <li>Binary protocol V3</li>
+  <li>Binary protocol version 3</li>
   <li>CQL protocol 3.2.0</li>
   <li>Performance optimized</li>
   <li>Prepared statement cache</li>
@@ -18,17 +18,17 @@
 
 <h2>Environment variables</h2>
 <ul>
-  <li>ip : server ip</li>
-  <li>port : server port</li>
-  <li>keyspace : default keyspace</li>
-  <li>pool_size : number of connections</li>
-  <li>max_backlog_size: maximum number of concurrent requests per connection</li>
+  <li>ip : server ip (default: "127.0.0.1")</li>
+  <li>port : server port (default: 9042)</li>
+  <li>keyspace : default keyspace (default: undefined)</li>
+  <li>pool_size : number of connections (default: 16)</li>
+  <li>max_backlog_size: maximum number of concurrent requests per connection (default: 1024)</li>
+  <li>compression: enable lz4 compression (default: false)</li>
 </ul>
 
 <h2>TODO</h2>
 <ul>
   <li>batched queries</li>
-  <li>compression</li>
   <li>documentation</li>
 </ul>
 

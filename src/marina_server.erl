@@ -7,17 +7,19 @@
 ]).
 
 -record(state, {
-    buffer   = marina_buffer:new(),
-    ip       = undefined,
-    keyspace = undefined,
-    name     = undefined,
-    port     = undefined,
-    requests = 0,
-    socket   = undefined
+    buffer      = marina_buffer:new(),
+    compression = undefined,
+    ip          = undefined,
+    keyspace    = undefined,
+    name        = undefined,
+    port        = undefined,
+    requests    = 0,
+    socket      = undefined
 }).
 
 %% public
 -spec init(pid(), atom()) -> no_return().
+
 init(Parent, Name) ->
     register(Name, self()),
     proc_lib:init_ack(Parent, {ok, self()}),
@@ -28,7 +30,8 @@ init(Parent, Name) ->
         name = Name,
         ip = application:get_env(?APP, ip, ?DEFAULT_IP),
         port = application:get_env(?APP, port, ?DEFAULT_PORT),
-        keyspace = application:get_env(?APP, keyspace, undefined)
+        keyspace = application:get_env(?APP, keyspace, undefined),
+        compression = application:get_env(?APP, compression, false)
     }).
 
 -spec start_link(atom()) -> {ok, pid()}.
@@ -47,18 +50,20 @@ handle_msg({call, Ref, From, _Msg}, #state {
 handle_msg({call, Ref, From, Call}, #state {
         socket = Socket,
         requests = Requests,
-        name = Name
+        name = Name,
+        compression = Compression
     } = State) ->
 
     Stream = Requests rem ?MAX_STREAM_ID,
+    FrameFlags = marina_frame:flags(Compression),
 
     Msg = case Call of
         {execute, StatementId, Values, ConsistencyLevel, Flags} ->
-            marina_request:execute(Stream, StatementId, Values, ConsistencyLevel, Flags);
+            marina_request:execute(Stream, FrameFlags, StatementId, Values, ConsistencyLevel, Flags);
         {prepare, Query} ->
-            marina_request:prepare(Stream, Query);
+            marina_request:prepare(Stream, FrameFlags, Query);
         {query, Query, ConsistencyLevel, Flags} ->
-            marina_request:query(Stream, Query, ConsistencyLevel, Flags)
+            marina_request:query(Stream, FrameFlags, Query, ConsistencyLevel, Flags)
     end,
 
     case gen_tcp:send(Socket, Msg) of
@@ -74,7 +79,8 @@ handle_msg({call, Ref, From, Call}, #state {
     end;
 handle_msg(newsocket, #state {
         ip = Ip,
-        port = Port
+        port = Port,
+        compression = Compression
     } = State) ->
 
     Opts = [
@@ -87,7 +93,8 @@ handle_msg(newsocket, #state {
 
     case gen_tcp:connect(Ip, Port, Opts) of
         {ok, Socket} ->
-            Msg = marina_request:startup(),
+            FrameFlags = marina_frame:flags(Compression),
+            Msg = marina_request:startup(FrameFlags),
             case sync_msg(Socket, Msg) of
                 {ok, undefined} ->
                     default_keyspace(State#state {
@@ -177,11 +184,13 @@ default_keyspace(#state {
     {ok, State};
 default_keyspace(#state {
         socket = Socket,
-        keyspace = Keyspace
+        keyspace = Keyspace,
+        compression = Compression
     } = State) ->
 
     Query = <<"USE \"", Keyspace/binary, "\"">>,
-    Msg = marina_request:query(0, Query, ?CONSISTENCY_ONE, ?DEFAULT_FLAGS),
+    FrameFlags = marina_frame:flags(Compression),
+    Msg = marina_request:query(0, FrameFlags, Query, ?CONSISTENCY_ONE, ?DEFAULT_FLAGS),
     case sync_msg(Socket, Msg) of
         {ok, Keyspace} ->
             inet:setopts(Socket, [{active, true}]),

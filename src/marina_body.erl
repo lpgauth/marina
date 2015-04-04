@@ -120,6 +120,7 @@ decode_columns_metadata(Bin, Count, {Keyspace, Table} = GlobalTableSpec, Acc) ->
     },
     decode_columns_metadata(Bin3, Count - 1, GlobalTableSpec, [ColumnSpec | Acc]).
 
+% TODO: cleanup
 decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer, Rest/binary>>) ->
     GlobalTableSpec = Flags band 1,
     HasMorePages = Flags band 2,

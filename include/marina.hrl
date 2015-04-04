@@ -16,6 +16,8 @@
 
 % protocol
 -define(CQL_VERSION, {<<"CQL_VERSION">>, <<"3.2.0">>}).
+-define(HEADER_SIZE, 9).
+-define(LZ4_COMPRESSION, {<<"COMPRESSION">>, <<"lz4">>}).
 -define(MAX_STREAM_ID, 32768).
 -define(PROTO_VERSION, 3).
 
@@ -90,9 +92,11 @@
 
 -type flags() :: 0..254.
 -type frame() :: #frame {}.
+-type frame_flag() :: 0 | 1.
 -type query() :: binary().
 -type result() :: #result {}.
 -type result_metadata() :: #result_metadata {}.
 -type statement_id() :: binary().
 -type stream() :: 0..32768.
 -type value() :: binary().
+

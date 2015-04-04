@@ -2,24 +2,24 @@
 -include("marina.hrl").
 
 -export([
-    execute/5,
-    prepare/2,
-    query/4,
-    startup/0
+    execute/6,
+    prepare/3,
+    query/5,
+    startup/1
 ]).
 
 %% public
--spec execute(stream(), statement_id(), [binary()], consistency(), flags()) ->
+-spec execute(stream(), frame_flag(), statement_id(), [binary()], consistency(), flags()) ->
     binary().
 
-execute(Stream, StatementId, Values, ConsistencyLevel, Flags) ->
+execute(Stream, FrameFlags, StatementId, Values, ConsistencyLevel, Flags) ->
     ValuesCount = length(Values),
     EncodedValues = [marina_types:encode_bytes(Value) || Value <- Values],
 
     marina_frame:encode(#frame {
-        flags = ?DEFAULT_FLAGS,
         stream = Stream,
         opcode = ?OP_EXECUTE,
+        flags = FrameFlags,
         body = <<(marina_types:encode_short_bytes(StatementId))/binary,
             (marina_types:encode_short(ConsistencyLevel))/binary,
             Flags,
@@ -27,33 +27,38 @@ execute(Stream, StatementId, Values, ConsistencyLevel, Flags) ->
             (iolist_to_binary(EncodedValues))/binary>>
     }).
 
--spec prepare(stream(), query()) -> binary().
+-spec prepare(stream(), frame_flag(), query()) -> binary().
 
-prepare(Stream, Query) ->
+prepare(Stream, FrameFlags, Query) ->
     marina_frame:encode(#frame {
-        flags = ?DEFAULT_FLAGS,
         stream = Stream,
         opcode = ?OP_PREPARE,
+        flags = FrameFlags,
         body = <<(marina_types:encode_long_string(Query))/binary>>
     }).
 
--spec query(stream(), query(), consistency(), flags()) -> binary().
+-spec query(stream(), frame_flag(), query(), consistency(), flags()) -> binary().
 
-query(Stream, Query, ConsistencyLevel, Flags) ->
+query(Stream, FrameFlags, Query, ConsistencyLevel, Flags) ->
     marina_frame:encode(#frame {
-        flags = ?DEFAULT_FLAGS,
         stream = Stream,
         opcode = ?OP_QUERY,
+        flags = FrameFlags,
         body = <<(marina_types:encode_long_string(Query))/binary,
             (marina_types:encode_short(ConsistencyLevel))/binary, Flags>>
     }).
 
--spec startup() -> binary().
+-spec startup(frame_flag()) -> binary().
 
-startup() ->
+startup(FrameFlags) ->
+    Body = case FrameFlags of
+        1 -> [?CQL_VERSION, ?LZ4_COMPRESSION];
+        0 -> [?CQL_VERSION]
+    end,
+
     marina_frame:encode(#frame {
-        flags = ?DEFAULT_FLAGS,
         stream = ?DEFAULT_STREAM,
         opcode = ?OP_STARTUP,
-        body = marina_types:encode_string_map([?CQL_VERSION])
+        flags = FrameFlags,
+        body = marina_types:encode_string_map(Body)
     }).

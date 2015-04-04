@@ -28,7 +28,7 @@ frame() = #frame{flags = any(), stream = undefined | integer(), opcode = undefin
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#decode-1">decode/1</a></td><td></td></tr><tr><td valign="top"><a href="#encode-1">encode/1</a></td><td></td></tr><tr><td valign="top"><a href="#pending_size-1">pending_size/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#decode-1">decode/1</a></td><td></td></tr><tr><td valign="top"><a href="#encode-1">encode/1</a></td><td></td></tr><tr><td valign="top"><a href="#flags-1">flags/1</a></td><td></td></tr><tr><td valign="top"><a href="#pending_size-1">pending_size/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -53,6 +53,17 @@ decode(Bin::binary()) -&gt; {binary(), [<a href="#type-frame">frame()</a>]}
 
 <pre><code>
 encode(Frame::<a href="#type-frame">frame()</a>) -&gt; binary()
+</code></pre>
+<br />
+
+
+<a name="flags-1"></a>
+
+### flags/1 ###
+
+
+<pre><code>
+flags(X1::boolean()) -&gt; 0 | 1
 </code></pre>
 <br />
 

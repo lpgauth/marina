@@ -38,6 +38,18 @@ flags() = 0..254
 
 
 
+### <a name="type-frame_flag">frame_flag()</a> ###
+
+
+
+<pre><code>
+frame_flag() = 0 | 1
+</code></pre>
+
+
+
+
+
 ### <a name="type-query">query()</a> ###
 
 
@@ -76,53 +88,53 @@ stream() = 0..32768
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#execute-5">execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-2">prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-4">query/4</a></td><td></td></tr><tr><td valign="top"><a href="#startup-0">startup/0</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#execute-6">execute/6</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-3">prepare/3</a></td><td></td></tr><tr><td valign="top"><a href="#query-5">query/5</a></td><td></td></tr><tr><td valign="top"><a href="#startup-1">startup/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
 
-<a name="execute-5"></a>
+<a name="execute-6"></a>
 
-### execute/5 ###
+### execute/6 ###
 
 
 <pre><code>
-execute(Stream::<a href="#type-stream">stream()</a>, StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[binary()], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>) -&gt; binary()
+execute(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-frame_flag">frame_flag()</a>, StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[binary()], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>) -&gt; binary()
 </code></pre>
 <br />
 
 
-<a name="prepare-2"></a>
+<a name="prepare-3"></a>
 
-### prepare/2 ###
+### prepare/3 ###
 
 
 <pre><code>
-prepare(Stream::<a href="#type-stream">stream()</a>, Query::<a href="#type-query">query()</a>) -&gt; binary()
+prepare(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-frame_flag">frame_flag()</a>, Query::<a href="#type-query">query()</a>) -&gt; binary()
 </code></pre>
 <br />
 
 
-<a name="query-4"></a>
+<a name="query-5"></a>
 
-### query/4 ###
+### query/5 ###
 
 
 <pre><code>
-query(Stream::<a href="#type-stream">stream()</a>, Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>) -&gt; binary()
+query(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-frame_flag">frame_flag()</a>, Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>) -&gt; binary()
 </code></pre>
 <br />
 
 
-<a name="startup-0"></a>
+<a name="startup-1"></a>
 
-### startup/0 ###
+### startup/1 ###
 
 
 <pre><code>
-startup() -&gt; binary()
+startup(FrameFlags::<a href="#type-frame_flag">frame_flag()</a>) -&gt; binary()
 </code></pre>
 <br />
 

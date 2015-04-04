@@ -7,11 +7,16 @@ __Authors:__ Louis-Philippe Gauthier.
 Non-blocking Erlang Cassandra CQL3 client
 
 
+## Requirements ##
+
+* Cassandra 2.1 +
+
+
+
 ## Features ##
 
-* Async mode
 * Backpressure via backlog (OOM protection)
-* Binary protocol V3
+* Binary protocol version 3
 * CQL protocol 3.2.0
 * Performance optimized
 * Prepared statement cache
@@ -21,23 +26,18 @@ Non-blocking Erlang Cassandra CQL3 client
 
 ## Environment variables ##
 
-* ip : server ip
-* port : server port
-* keyspace : default keyspace
-* pool_size : number of connections
-* max_backlog_size: maximum number of concurrent requests per connection
-
-
-
-## Requirements ##
-
-* Cassandra 2.1 +
+* ip : server ip (default: "127.0.0.1")
+* port : server port (default: 9042)
+* keyspace : default keyspace (default: undefined)
+* pool_size : number of connections (default: 16)
+* max_backlog_size: maximum number of concurrent requests per connection (default: 1024)
+* compression: enable lz4 compression (default: false)
 
 
 
 ## TODO ##
+
 * batched queries
-* compression
 * documentation
 
 

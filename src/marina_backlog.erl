@@ -12,6 +12,7 @@
 
 %% public
 -spec check(atom()) -> boolean().
+
 check(ServerName) ->
     MaxBacklogSize = max_backlog_size(),
     case increment(ServerName) of
@@ -24,6 +25,7 @@ check(ServerName) ->
     end.
 
 -spec decrement(atom()) -> non_neg_integer() | {error, tid_missing}.
+
 decrement(ServerName) ->
     safe_update_counter(ServerName, {2, -1, 0, 0}).
 
@@ -36,6 +38,7 @@ init() ->
     ]).
 
 -spec new(atom()) -> true.
+
 new(ServerName) ->
     ets:insert(?BACKLOG_TABLE_ID, {ServerName, 0}).
 

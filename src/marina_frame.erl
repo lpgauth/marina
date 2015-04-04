@@ -32,7 +32,7 @@ pending_size(<<1:1, ?PROTO_VERSION:7/unsigned-integer, _Flags:8/unsigned-integer
         _Stream:16/signed-integer, _Opcode:8/unsigned-integer,
         Length:32/unsigned-integer, _Rest/binary>>) ->
 
-    Length + 9;
+    Length + ?HEADER_SIZE;
 pending_size(_) ->
     undefined.
 
@@ -41,12 +41,11 @@ decode(<<1:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,
         Stream:16/signed-integer, Opcode:8/unsigned-integer,
         Length:32/unsigned-integer, Body:Length/binary, Rest/binary>>, Acc) ->
 
-    Frame = #frame {
+    decode(Rest, [#frame {
         flags = Flags,
         stream = Stream,
         opcode = Opcode,
         body = Body
-    },
-    decode(Rest, [Frame | Acc]);
+    } | Acc]);
 decode(Rest, Acc) ->
     {Rest, Acc}.

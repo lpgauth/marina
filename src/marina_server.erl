@@ -18,6 +18,7 @@
 
 %% public
 -spec init(pid(), atom()) -> no_return().
+
 init(Parent, Name) ->
     register(Name, self()),
     proc_lib:init_ack(Parent, {ok, self()}),

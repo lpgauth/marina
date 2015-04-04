@@ -87,7 +87,7 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
             case prepare(Query, Timeout) of
                 {ok, StatementId} ->
                     marina_cache:put(Query, StatementId),
-                    Timeout2 = marina_utils:timeout(Timeout, Timestamp),
+                    Timeout2 = marina_utils:timeout(Timestamp, Timeout),
                     execute(StatementId, Values, ConsistencyLevel, Flags, Timeout2);
                 {error, Reason} ->
                     {error, Reason}
@@ -122,4 +122,4 @@ async_call(Msg, Pid) ->
 random_server() ->
     PoolSize = application:get_env(?APP, pool_size, ?DEFAULT_POOL_SIZE),
     Random = erlang:phash2({os:timestamp(), self()}, PoolSize) + 1,
-    list_to_existing_atom(?SERVER_BASE_NAME ++ integer_to_list(Random)).
+    marina_utils:child_name(Random).

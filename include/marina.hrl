@@ -16,6 +16,7 @@
 
 % protocol
 -define(CQL_VERSION, {<<"CQL_VERSION">>, <<"3.2.0">>}).
+-define(HEADER_SIZE, 9).
 -define(MAX_STREAM_ID, 32768).
 -define(PROTO_VERSION, 3).
 

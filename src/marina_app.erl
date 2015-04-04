@@ -13,6 +13,7 @@
 
 %% public
 -spec start() -> ok.
+
 start() ->
     {ok, _} = application:ensure_all_started(?APP),
     ok.

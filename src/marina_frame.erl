@@ -33,12 +33,11 @@ encode(#frame {
     }) ->
 
     Body2 = encode_body(Flags, Body),
-
     <<0:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,
         Stream:16/signed-integer, Opcode:8/unsigned-integer,
         (size(Body2)):32/unsigned-integer, Body2/binary>>.
 
--spec flags(boolean()) -> 0 | 1.
+-spec flags(boolean()) -> frame_flag().
 
 flags(true) -> 1;
 flags(false) -> 0.
@@ -65,7 +64,6 @@ decode(<<1:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,
         Length:32/unsigned-integer, Body:Length/binary, Rest/binary>>, Acc) ->
 
     Body2 = decode_body(Flags, Body),
-
     decode(Rest, [#frame {
         flags = Flags,
         stream = Stream,

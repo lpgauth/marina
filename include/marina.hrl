@@ -1,5 +1,6 @@
 % application
 -define(APP, marina).
+-define(CONNECT_RETRY_MSG, connect_retry).
 -define(SERVER_BASE_NAME, "marina_server_").
 
 % defaults
@@ -8,7 +9,7 @@
 -define(DEFAULT_IP, "127.0.0.1").
 -define(DEFAULT_POOL_SIZE, 16).
 -define(DEFAULT_PORT, 9042).
--define(DEFAULT_RECONNECT, 5000).
+-define(DEFAULT_CONNECT_RETRY, 500).
 -define(DEFAULT_RECV_TIMEOUT, 1000).
 -define(DEFAULT_SEND_TIMEOUT, 20).
 -define(DEFAULT_STREAM, 0).
@@ -58,7 +59,7 @@
 }).
 
 -record(frame, {
-    flags,
+    flags  :: frame_flag(),
     stream :: integer(),
     opcode :: non_neg_integer(),
     body   :: binary()

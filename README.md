@@ -26,12 +26,10 @@ Non-blocking Erlang Cassandra CQL3 client
 
 ## Environment variables ##
 
-* ip : server ip (default: "127.0.0.1")
-* port : server port (default: 9042)
-* keyspace : default keyspace (default: undefined)
-* pool_size : number of connections (default: 16)
-* max_backlog_size: maximum number of concurrent requests per connection (default: 1024)
-* compression: enable lz4 compression (default: false)
+
+
+<table width="100%" border="0"><tr><td>Name</td><td>Type</td><td>Default</td><td>Description</td></tr><tr><td>ip</td><td>list()</td><td>"127.0.0.1"</td><td>server ip</td></tr><tr><td>port</td><td>pos_integer()</td><td>9042</td><td>server port</td></tr><tr><td>keyspace</td><td>undefined | binary()</td><td>undefined</td><td>default keyspace</td></tr><tr><td>pool_size</td><td>pos_integer()</td><td>16</td><td>number of connections</td></tr><tr><td>max_backlog_size</td><td>pos_integer()</td><td>1024</td><td>maximum number of concurrent requests per connection</td></tr><tr><td>compression</td><td>boolean()</td><td>false</td><td>enable lz4 compression</td></tr>
+</table>
 
 
 
@@ -39,6 +37,7 @@ Non-blocking Erlang Cassandra CQL3 client
 
 * batched queries
 * documentation
+* token aware load balancing
 
 
 
@@ -47,17 +46,17 @@ Non-blocking Erlang Cassandra CQL3 client
 
 
 <table width="100%" border="0" summary="list of modules">
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md" class="module">marina</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_app.md" class="module">marina_app</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_backlog.md" class="module">marina_backlog</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_body.md" class="module">marina_body</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_buffer.md" class="module">marina_buffer</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_cache.md" class="module">marina_cache</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_frame.md" class="module">marina_frame</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_queue.md" class="module">marina_queue</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_request.md" class="module">marina_request</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_server.md" class="module">marina_server</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_sup.md" class="module">marina_sup</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_types.md" class="module">marina_types</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_utils.md" class="module">marina_utils</a></td></tr></table>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina.md" class="module">marina</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_app.md" class="module">marina_app</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_backlog.md" class="module">marina_backlog</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_body.md" class="module">marina_body</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_buffer.md" class="module">marina_buffer</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_cache.md" class="module">marina_cache</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_frame.md" class="module">marina_frame</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_queue.md" class="module">marina_queue</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_request.md" class="module">marina_request</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_server.md" class="module">marina_server</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_sup.md" class="module">marina_sup</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_types.md" class="module">marina_types</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/marina/blob/dev/doc/marina_utils.md" class="module">marina_utils</a></td></tr></table>
 

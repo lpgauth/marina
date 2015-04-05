@@ -19,7 +19,19 @@
 
 
 <pre><code>
-frame() = #frame{flags = any(), stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | binary()}
+frame() = #frame{flags = undefined | <a href="#type-frame_flag">frame_flag()</a>, stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | binary()}
+</code></pre>
+
+
+
+
+
+### <a name="type-frame_flag">frame_flag()</a> ###
+
+
+
+<pre><code>
+frame_flag() = 0 | 1
 </code></pre>
 
 
@@ -63,7 +75,7 @@ encode(Frame::<a href="#type-frame">frame()</a>) -&gt; binary()
 
 
 <pre><code>
-flags(X1::boolean()) -&gt; 0 | 1
+flags(X1::boolean()) -&gt; <a href="#type-frame_flag">frame_flag()</a>
 </code></pre>
 <br />
 

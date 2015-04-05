@@ -31,7 +31,19 @@ buffer() = #buffer{buffered = undefined | iolist(), current = undefined | non_ne
 
 
 <pre><code>
-frame() = #frame{flags = any(), stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | binary()}
+frame() = #frame{flags = undefined | <a href="#type-frame_flag">frame_flag()</a>, stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | binary()}
+</code></pre>
+
+
+
+
+
+### <a name="type-frame_flag">frame_flag()</a> ###
+
+
+
+<pre><code>
+frame_flag() = 0 | 1
 </code></pre>
 
 

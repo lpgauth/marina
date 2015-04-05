@@ -4,10 +4,10 @@
 -define(SERVER_BASE_NAME, "marina_server_").
 
 % defaults
+-define(DEFAULT_BACKLOG_SIZE, 1024).
 -define(DEFAULT_CONNECT_RETRY, 500).
 -define(DEFAULT_FLAGS, 0).
 -define(DEFAULT_IP, "127.0.0.1").
--define(DEFAULT_MAX_BACKLOG_SIZE, 1024).
 -define(DEFAULT_POOL_SIZE, 16).
 -define(DEFAULT_PORT, 9042).
 -define(DEFAULT_RECV_TIMEOUT, 1000).

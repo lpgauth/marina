@@ -43,7 +43,7 @@ marina_backlog_test_() ->
     setup_schema(),
     set_env([
         {keyspace, <<"test">>},
-        {max_backlog_size, 1}
+        {backlog_size, 1}
     ]),
 
     Responses = [async_query(<<"SELECT * FROM users LIMIT 1;">>) || _ <- lists:seq(1,100)],

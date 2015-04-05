@@ -4,10 +4,10 @@
 
 -define(TEST_TIMEOUT, 10000).
 
-%% tests
+%% public
 marina_test_() ->
     setup_schema(),
-    set_keyspace(),
+    set_env([{keyspace, <<"test">>}]),
 
     {inparallel, [
         test_async_prepare(),
@@ -21,6 +21,40 @@ marina_test_() ->
         test_timeout()
     ]}.
 
+marina_compression_test_() ->
+    setup_schema(),
+    set_env([
+        {keyspace, <<"test">>},
+        {compression, true}
+    ]),
+
+    test_query().
+
+marina_connection_error_test_() ->
+    setup_schema(),
+    set_env([
+        {keyspace, <<"test">>},
+        {port, 9043}
+    ]),
+
+    test_no_socket().
+
+marina_backlog_test_() ->
+    setup_schema(),
+    set_env([
+        {keyspace, <<"test">>},
+        {max_backlog_size, 1}
+    ]),
+
+    Responses = [async_query(<<"SELECT * FROM users LIMIT 1;">>) || _ <- lists:seq(1,100)],
+    BacklogFull = lists:any(fun
+        ({error, backlog_full}) -> true;
+        (_) -> false
+    end, Responses),
+
+    ?_assert(BacklogFull).
+
+%% tests
 test_async_prepare() ->
     {ok, Ref} = async_prepare(<<"SELECT * FROM users LIMIT 1;">>),
     {X, _} = receive_response(Ref),
@@ -92,6 +126,11 @@ test_query_no_metadata() ->
         ]}
     }, Response2).
 
+test_no_socket() ->
+    Response = query(<<"SELECT * FROM users LIMIT 1;">>),
+
+    ?_assertEqual({error, no_socket}, Response).
+
 test_reusable_query() ->
     Response = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
     Response = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
@@ -128,9 +167,9 @@ setup_schema() ->
     query(<<"INSERT INTO users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>),
     application:stop(marina).
 
-set_keyspace() ->
+set_env(Vars) ->
     application:load(marina),
-    ok = application:set_env(?APP, keyspace, <<"test">>),
+    [application:set_env(?APP, K, V) || {K, V} <- Vars],
     application:start(marina).
 
 %% helpers

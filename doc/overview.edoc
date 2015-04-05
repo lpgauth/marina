@@ -23,13 +23,14 @@
   <li>keyspace : default keyspace (default: undefined)</li>
   <li>pool_size : number of connections (default: 16)</li>
   <li>max_backlog_size: maximum number of concurrent requests per connection (default: 1024)</li>
-  <li>compression: enable lz4 compression (default: false)</li>
+  <li>compression: set to true to enable lz4 compression (default: false)</li>
 </ul>
 
 <h2>TODO</h2>
 <ul>
   <li>batched queries</li>
   <li>documentation</li>
+  <li>token aware load balancing</li>
 </ul>
 
 @end

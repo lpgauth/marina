@@ -4,7 +4,6 @@
 -export([
     decode/1,
     encode/1,
-    flags/1,
     pending_size/1
 ]).
 
@@ -22,9 +21,9 @@ encode(#frame {
         body = Body
     }) ->
 
-    <<0:1, ?PROTO_VERSION:7/unsigned-integer, ?DEFAULT_FLAGS:8/unsigned-integer,
+    [<<0:1, ?PROTO_VERSION:7/unsigned-integer, ?DEFAULT_FLAGS:8/unsigned-integer,
         Stream:16/signed-integer, ?OP_STARTUP:8/unsigned-integer,
-        (size(Body)):32/unsigned-integer, Body/binary>>;
+        (size(Body)):32/unsigned-integer>>, Body];
 encode(#frame {
         flags = Flags,
         stream = Stream,
@@ -33,15 +32,9 @@ encode(#frame {
     }) ->
 
     Body2 = encode_body(Flags, Body),
-
-    <<0:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,
+    [<<0:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,
         Stream:16/signed-integer, Opcode:8/unsigned-integer,
-        (size(Body2)):32/unsigned-integer, Body2/binary>>.
-
--spec flags(boolean()) -> 0 | 1.
-
-flags(true) -> 1;
-flags(false) -> 0.
+        (size(Body2)):32/unsigned-integer>>, Body2].
 
 -spec pending_size(binary()) -> pos_integer() | undefined.
 
@@ -65,7 +58,6 @@ decode(<<1:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,
         Length:32/unsigned-integer, Body:Length/binary, Rest/binary>>, Acc) ->
 
     Body2 = decode_body(Flags, Body),
-
     decode(Rest, [#frame {
         flags = Flags,
         stream = Stream,

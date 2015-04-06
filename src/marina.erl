@@ -14,7 +14,7 @@
 ]).
 
 %% public
--spec async_execute(statement_id(), [value()], consistency(), flags(), pid()) ->
+-spec async_execute(statement_id(), [value()], consistency(), [flag()], pid()) ->
     {ok, erlang:ref()} | {error, backlog_full}.
 
 async_execute(StatementId, Values, ConsistencyLevel, Flags, Pid) ->
@@ -26,13 +26,13 @@ async_execute(StatementId, Values, ConsistencyLevel, Flags, Pid) ->
 async_prepare(Query, Pid) ->
     async_call({prepare, Query}, Pid).
 
--spec async_query(query(), consistency(), flags(), pid()) ->
+-spec async_query(query(), consistency(), [flag()], pid()) ->
     {ok, erlang:ref()} | {error, backlog_full}.
 
 async_query(Query, ConsistencyLevel, Flags, Pid) ->
     async_call({query, Query, ConsistencyLevel, Flags}, Pid).
 
--spec async_reusable_query(query(), [value()], consistency(), flags(), pid(), timeout()) ->
+-spec async_reusable_query(query(), [value()], consistency(), [flag()], pid(), timeout()) ->
     {ok, erlang:ref()} | {error, term()}.
 
 async_reusable_query(Query, Values, ConsistencyLevel, Flags, Pid, Timeout) ->
@@ -49,7 +49,7 @@ async_reusable_query(Query, Values, ConsistencyLevel, Flags, Pid, Timeout) ->
             end
     end.
 
--spec execute(statement_id(), [value()], consistency(), flags(), timeout()) ->
+-spec execute(statement_id(), [value()], consistency(), [flag()], timeout()) ->
     {ok, term()} | {error, term()}.
 
 execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) ->
@@ -61,7 +61,7 @@ prepare(Query, Timeout) ->
     response(call({prepare, Query}, Timeout)).
 
 
--spec query(query(), consistency(), flags(), timeout()) ->
+-spec query(query(), consistency(), [flag()], timeout()) ->
     {ok, term()} | {error, term()}.
 
 query(Query, ConsistencyLevel, Flags, Timeout) ->
@@ -75,7 +75,7 @@ response({ok, Frame}) ->
 response({error, Reason}) ->
     {error, Reason}.
 
--spec reusable_query(query(), [value()], consistency(), flags(), timeout()) ->
+-spec reusable_query(query(), [value()], consistency(), [flag()], timeout()) ->
     {ok, term()} | {error, term()}.
 
 reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->

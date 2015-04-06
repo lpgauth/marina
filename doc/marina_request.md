@@ -26,12 +26,12 @@ consistency() = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 16
 
 
 
-### <a name="type-flags">flags()</a> ###
+### <a name="type-flag">flag()</a> ###
 
 
 
 <pre><code>
-flags() = 0..254
+flag() = {skip_metadata, boolean()} | {values, boolean()}
 </code></pre>
 
 
@@ -43,7 +43,7 @@ flags() = 0..254
 
 
 <pre><code>
-frame_flag() = 0 | 1
+frame_flag() = {compression, boolean()}
 </code></pre>
 
 
@@ -101,7 +101,7 @@ stream() = 0..32768
 
 
 <pre><code>
-execute(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-frame_flag">frame_flag()</a>, StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[binary()], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>) -&gt; binary()
+execute(Stream::<a href="#type-stream">stream()</a>, FrameFlags::[<a href="#type-frame_flag">frame_flag()</a>], StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[binary()], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>]) -&gt; binary()
 </code></pre>
 <br />
 
@@ -112,7 +112,7 @@ execute(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-
 
 
 <pre><code>
-prepare(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-frame_flag">frame_flag()</a>, Query::<a href="#type-query">query()</a>) -&gt; binary()
+prepare(Stream::<a href="#type-stream">stream()</a>, FrameFlags::[<a href="#type-frame_flag">frame_flag()</a>], Query::<a href="#type-query">query()</a>) -&gt; binary()
 </code></pre>
 <br />
 
@@ -123,7 +123,7 @@ prepare(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-
 
 
 <pre><code>
-query(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-frame_flag">frame_flag()</a>, Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>) -&gt; binary()
+query(Stream::<a href="#type-stream">stream()</a>, FrameFlags::[<a href="#type-frame_flag">frame_flag()</a>], Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>]) -&gt; binary()
 </code></pre>
 <br />
 
@@ -134,7 +134,7 @@ query(Stream::<a href="#type-stream">stream()</a>, FrameFlags::<a href="#type-fr
 
 
 <pre><code>
-startup(FrameFlags::<a href="#type-frame_flag">frame_flag()</a>) -&gt; binary()
+startup(FrameFlags::[<a href="#type-frame_flag">frame_flag()</a>]) -&gt; binary()
 </code></pre>
 <br />
 

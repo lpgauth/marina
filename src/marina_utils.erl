@@ -2,20 +2,21 @@
 -include("marina.hrl").
 
 -export([
-    child_name/1,
     childs_specs/0,
+    child_name/1,
     info_msg/2,
     timeout/2,
     warning_msg/2
+
 ]).
 
 %% public
-child_name(N) ->
-    list_to_atom(?SERVER_BASE_NAME ++ integer_to_list(N)).
-
 childs_specs() ->
     PoolSize = application:get_env(?APP, pool_size, ?DEFAULT_POOL_SIZE),
     [child_spec(N) || N <- lists:seq(1, PoolSize)].
+
+child_name(N) ->
+    list_to_atom(?SERVER_BASE_NAME ++ integer_to_list(N)).
 
 info_msg(Format, Data) ->
     error_logger:info_msg(Format, Data).

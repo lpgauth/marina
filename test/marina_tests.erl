@@ -2,12 +2,13 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("marina/include/marina.hrl").
 
+-define(TEST_KEYSPACE, <<"test">>).
 -define(TEST_TIMEOUT, 10000).
 
-%% tests
+%% public
 marina_test_() ->
     setup_schema(),
-    set_keyspace(),
+    set_env([{keyspace, ?TEST_KEYSPACE}]),
 
     {inparallel, [
         test_async_prepare(),
@@ -21,6 +22,40 @@ marina_test_() ->
         test_timeout()
     ]}.
 
+marina_compression_test_() ->
+    setup_schema(),
+    set_env([
+        {keyspace, <<"test">>},
+        {compression, true}
+    ]),
+
+    test_query().
+
+marina_connection_error_test_() ->
+    setup_schema(),
+    set_env([
+        {keyspace, <<"test">>},
+        {port, 9043}
+    ]),
+
+    test_no_socket().
+
+marina_backlog_test_() ->
+    setup_schema(),
+    set_env([
+        {keyspace, <<"test">>},
+        {backlog_size, 1}
+    ]),
+
+    Responses = [async_query(<<"SELECT * FROM users LIMIT 1;">>) || _ <- lists:seq(1,100)],
+    BacklogFull = lists:any(fun
+        ({error, backlog_full}) -> true;
+        (_) -> false
+    end, Responses),
+
+    ?_assert(BacklogFull).
+
+%% tests
 test_async_prepare() ->
     {ok, Ref} = async_prepare(<<"SELECT * FROM users LIMIT 1;">>),
     {X, _} = receive_response(Ref),
@@ -44,10 +79,10 @@ test_async_query() ->
     }, Response).
 
 test_async_reusable_query() ->
-    {ok, Ref} = async_reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>], 1),
+    {ok, Ref} = async_reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
     Response = receive_response(Ref),
 
-    {ok, Ref2} = async_reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>], 1),
+    {ok, Ref2} = async_reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
     Response = receive_response(Ref2),
 
     ?_assertEqual({ok,
@@ -63,7 +98,7 @@ test_async_reusable_query() ->
     }, Response).
 
 test_async_reusable_query_invalid_query() ->
-    Response = async_reusable_query(<<"SELECT * FROM user WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>], 1),
+    Response = async_reusable_query(<<"SELECT * FROM user WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
 
     ?_assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
 
@@ -83,7 +118,7 @@ test_query() ->
     }, Response).
 
 test_query_no_metadata() ->
-    Response2 = query(<<"SELECT * FROM users LIMIT 1;">>, 2),
+    Response2 = query(<<"SELECT * FROM users LIMIT 1;">>, [{skip_metadata, true}]),
 
     ?_assertEqual({ok,
         {result,
@@ -92,10 +127,15 @@ test_query_no_metadata() ->
         ]}
     }, Response2).
 
+test_no_socket() ->
+    Response = query(<<"SELECT * FROM users LIMIT 1;">>),
+
+    ?_assertEqual({error, no_socket}, Response).
+
 test_reusable_query() ->
     Response = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
     Response = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
-    Response = reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>], 1),
+    Response = reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
 
     ?_assertEqual({ok,
         {result,
@@ -115,7 +155,7 @@ test_reusable_query_invalid_query() ->
     ?_assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
 
 test_timeout() ->
-    Response = marina:query(<<"SELECT * FROM users LIMIT 1;">>, ?CONSISTENCY_ONE, ?DEFAULT_FLAGS, 0),
+    Response = marina:query(<<"SELECT * FROM users LIMIT 1;">>, ?CONSISTENCY_ONE, [], 0),
 
     ?_assertEqual({error, timeout}, Response).
 
@@ -125,12 +165,12 @@ setup_schema() ->
     query(<<"DROP KEYSPACE test;">>),
     query(<<"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>),
     query(<<"CREATE TABLE test.users (key uuid, column1 text, column2 text, value blob, PRIMARY KEY (key, column1, column2));">>),
-    query(<<"INSERT INTO users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>),
+    query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>),
     application:stop(marina).
 
-set_keyspace() ->
+set_env(Vars) ->
     application:load(marina),
-    ok = application:set_env(?APP, keyspace, <<"test">>),
+    [application:set_env(?APP, K, V) || {K, V} <- Vars],
     application:start(marina).
 
 %% helpers
@@ -138,13 +178,13 @@ async_prepare(Query) ->
     marina:async_prepare(Query, self()).
 
 async_query(Query) ->
-    marina:async_query(Query, ?CONSISTENCY_ONE, ?DEFAULT_FLAGS, self()).
+    marina:async_query(Query, ?CONSISTENCY_ONE, [], self()).
 
-async_reusable_query(Query, Values, Flags) ->
-    marina:async_reusable_query(Query, Values, ?CONSISTENCY_ONE, Flags, self(), ?TEST_TIMEOUT).
+async_reusable_query(Query, Values) ->
+    marina:async_reusable_query(Query, Values, ?CONSISTENCY_ONE, [], self(), ?TEST_TIMEOUT).
 
 query(Query) ->
-    query(Query, ?DEFAULT_FLAGS).
+    query(Query, []).
 
 query(Query, Flags) ->
     marina:query(Query, ?CONSISTENCY_ONE, Flags, ?TEST_TIMEOUT).
@@ -158,7 +198,7 @@ receive_response(Ref) ->
     end.
 
 reusable_query(Query, Values) ->
-    reusable_query(Query, Values, ?TEST_TIMEOUT).
+    reusable_query(Query, Values, []).
 
 reusable_query(Query, Values, Flags) ->
     marina:reusable_query(Query, Values, ?CONSISTENCY_ONE, Flags, ?TEST_TIMEOUT).

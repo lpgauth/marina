@@ -14,7 +14,7 @@
 -spec check(atom()) -> boolean().
 
 check(ServerName) ->
-    MaxBacklogSize = max_backlog_size(),
+    MaxBacklogSize = backlog_size(),
     case increment(ServerName) of
         [MaxBacklogSize, MaxBacklogSize] ->
             false;
@@ -44,11 +44,11 @@ new(ServerName) ->
 
 %% private
 increment(ServerName) ->
-    MaxBacklogSize = max_backlog_size(),
+    MaxBacklogSize = backlog_size(),
     safe_update_counter(ServerName, [{2, 0}, {2, 1, MaxBacklogSize, MaxBacklogSize}]).
 
-max_backlog_size() ->
-    application:get_env(?APP, max_backlog_size, ?DEFAULT_MAX_BACKLOG_SIZE).
+backlog_size() ->
+    application:get_env(?APP, backlog_size, ?DEFAULT_BACKLOG_SIZE).
 
 safe_update_counter(ServerName, UpdateOp) ->
     try ets:update_counter(?BACKLOG_TABLE_ID, ServerName, UpdateOp)

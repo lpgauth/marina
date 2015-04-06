@@ -1,14 +1,15 @@
 % application
 -define(APP, marina).
+-define(CONNECT_RETRY_MSG, connect_retry).
 -define(SERVER_BASE_NAME, "marina_server_").
 
 % defaults
--define(DEFAULT_MAX_BACKLOG_SIZE, 1024).
+-define(DEFAULT_BACKLOG_SIZE, 1024).
+-define(DEFAULT_CONNECT_RETRY, 500).
 -define(DEFAULT_FLAGS, 0).
 -define(DEFAULT_IP, "127.0.0.1").
 -define(DEFAULT_POOL_SIZE, 16).
 -define(DEFAULT_PORT, 9042).
--define(DEFAULT_RECONNECT, 5000).
 -define(DEFAULT_RECV_TIMEOUT, 1000).
 -define(DEFAULT_SEND_TIMEOUT, 20).
 -define(DEFAULT_STREAM, 0).
@@ -58,7 +59,7 @@
 }).
 
 -record(frame, {
-    flags,
+    flags  :: frame_flag(),
     stream :: integer(),
     opcode :: non_neg_integer(),
     body   :: binary()
@@ -90,13 +91,12 @@
 ?CONSISTENCY_LOCAL_QUORUM | ?CONSISTENCY_EACH_QUORUM | ?CONSISTENCY_SERIAL |
 ?CONSISTENCY_LOCAL_SERIAL | ?CONSISTENCY_LOCAL_ONE.
 
--type flags() :: 0..254.
+-type flag() :: {skip_metadata, boolean()} | {values, boolean()}.
 -type frame() :: #frame {}.
--type frame_flag() :: 0 | 1.
+-type frame_flag() :: {compression, boolean()}.
 -type query() :: binary().
 -type result() :: #result {}.
 -type result_metadata() :: #result_metadata {}.
 -type statement_id() :: binary().
 -type stream() :: 0..32768.
 -type value() :: binary().
-

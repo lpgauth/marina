@@ -7,6 +7,7 @@
     async_query/4,
     async_reusable_query/6,
     execute/5,
+    flags/1,
     prepare/2,
     query/4,
     response/1,
@@ -54,6 +55,14 @@ async_reusable_query(Query, Values, ConsistencyLevel, Flags, Pid, Timeout) ->
 
 execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) ->
     response(call({execute, StatementId, Values, ConsistencyLevel, Flags}, Timeout)).
+
+-spec flags(boolean()) -> 0 | 1.
+
+flags(NoMetadata) ->
+    case NoMetadata of
+        true -> 1;
+        _ -> 0
+    end.
 
 -spec prepare(query(), timeout()) -> {ok, term()} | {error, term()}.
 

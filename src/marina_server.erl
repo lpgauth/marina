@@ -64,7 +64,7 @@ default_keyspace(#state {
     } = State) ->
 
     Query = <<"USE \"", Keyspace/binary, "\"">>,
-    Msg = marina_request:query(0, FrameFlags, Query, ?CONSISTENCY_ONE, []),
+    Msg = marina_request:query(0, FrameFlags, Query, [], ?CONSISTENCY_ONE, []),
     case sync_msg(Socket, Msg) of
         {ok, Keyspace} ->
             inet:setopts(Socket, [{active, true}]),
@@ -134,8 +134,8 @@ handle_msg({call, Ref, From, Call}, #state {
             marina_request:execute(Stream, FrameFlags, StatementId, Values, ConsistencyLevel, Flags);
         {prepare, Query} ->
             marina_request:prepare(Stream, FrameFlags, Query);
-        {query, Query, ConsistencyLevel, Flags} ->
-            marina_request:query(Stream, FrameFlags, Query, ConsistencyLevel, Flags)
+        {query, Query, Values, ConsistencyLevel, Flags} ->
+            marina_request:query(Stream, FrameFlags, Query, Values, ConsistencyLevel, Flags)
     end,
 
     case gen_tcp:send(Socket, Msg) of

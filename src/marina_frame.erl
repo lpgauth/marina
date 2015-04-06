@@ -13,7 +13,7 @@
 decode(Bin) ->
     decode(Bin, []).
 
--spec encode(frame()) -> binary().
+-spec encode(frame()) -> iolist().
 
 encode(#frame {
         stream = Stream,
@@ -23,7 +23,7 @@ encode(#frame {
 
     [<<0:1, ?PROTO_VERSION:7/unsigned-integer, ?DEFAULT_FLAGS:8/unsigned-integer,
         Stream:16/signed-integer, ?OP_STARTUP:8/unsigned-integer,
-        (size(Body)):32/unsigned-integer>>, Body];
+        (iolist_size(Body)):32/unsigned-integer>>, Body];
 encode(#frame {
         flags = Flags,
         stream = Stream,
@@ -34,7 +34,7 @@ encode(#frame {
     Body2 = encode_body(Flags, Body),
     [<<0:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,
         Stream:16/signed-integer, Opcode:8/unsigned-integer,
-        (size(Body2)):32/unsigned-integer>>, Body2].
+        (iolist_size(Body2)):32/unsigned-integer>>, Body2].
 
 -spec pending_size(binary()) -> pos_integer() | undefined.
 
@@ -70,5 +70,5 @@ decode(Rest, Acc) ->
 encode_body(0, Body) ->
     Body;
 encode_body(1, Body) ->
-    {ok, Body2} = lz4:pack(Body),
+    {ok, Body2} = lz4:pack(iolist_to_binary(Body)),
     Body2.

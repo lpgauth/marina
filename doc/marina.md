@@ -76,12 +76,23 @@ value() = binary()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_execute-5">async_execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#async_prepare-2">async_prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#async_query-4">async_query/4</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-6">async_reusable_query/6</a></td><td></td></tr><tr><td valign="top"><a href="#execute-5">execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-2">prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-4">query/4</a></td><td></td></tr><tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-5">reusable_query/5</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_execute-4">async_execute/4</a></td><td></td></tr><tr><td valign="top"><a href="#async_execute-5">async_execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#async_prepare-2">async_prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#async_query-4">async_query/4</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-5">async_reusable_query/5</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-6">async_reusable_query/6</a></td><td></td></tr><tr><td valign="top"><a href="#execute-4">execute/4</a></td><td></td></tr><tr><td valign="top"><a href="#execute-5">execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-2">prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-4">query/4</a></td><td></td></tr><tr><td valign="top"><a href="#query-5">query/5</a></td><td></td></tr><tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-4">reusable_query/4</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-5">reusable_query/5</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
+
+<a name="async_execute-4"></a>
+
+### async_execute/4 ###
+
+
+<pre><code>
+async_execute(StatementId::<a href="#type-statement_id">statement_id()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, backlog_full}
+</code></pre>
+<br />
+
 
 <a name="async_execute-5"></a>
 
@@ -116,6 +127,17 @@ async_query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href=
 <br />
 
 
+<a name="async_reusable_query-5"></a>
+
+### async_reusable_query/5 ###
+
+
+<pre><code>
+async_reusable_query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid(), Timeout::timeout()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, term()}
+</code></pre>
+<br />
+
+
 <a name="async_reusable_query-6"></a>
 
 ### async_reusable_query/6 ###
@@ -123,6 +145,17 @@ async_query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href=
 
 <pre><code>
 async_reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid(), Timeout::timeout()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, term()}
+</code></pre>
+<br />
+
+
+<a name="execute-4"></a>
+
+### execute/4 ###
+
+
+<pre><code>
+execute(StatementId::<a href="#type-statement_id">statement_id()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
 </code></pre>
 <br />
 
@@ -160,6 +193,17 @@ query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type
 <br />
 
 
+<a name="query-5"></a>
+
+### query/5 ###
+
+
+<pre><code>
+query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
+</code></pre>
+<br />
+
+
 <a name="response-1"></a>
 
 ### response/1 ###
@@ -167,6 +211,17 @@ query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type
 
 <pre><code>
 response(X1::{ok, term()} | {error, term()}) -&gt; {ok, term()} | {error, term()}
+</code></pre>
+<br />
+
+
+<a name="reusable_query-4"></a>
+
+### reusable_query/4 ###
+
+
+<pre><code>
+reusable_query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
 </code></pre>
 <br />
 

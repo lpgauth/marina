@@ -59,10 +59,10 @@
 }).
 
 -record(frame, {
-    flags  :: frame_flag(),
+    flags  :: 0 | 1,
     stream :: integer(),
     opcode :: non_neg_integer(),
-    body   :: binary()
+    body   :: iolist() | binary()
 }).
 
 -record(column_spec, {

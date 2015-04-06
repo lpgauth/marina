@@ -26,12 +26,12 @@ consistency() = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 16
 
 
 
-### <a name="type-flags">flags()</a> ###
+### <a name="type-flag">flag()</a> ###
 
 
 
 <pre><code>
-flags() = 0..254
+flag() = {skip_metadata, boolean()} | {values, boolean()}
 </code></pre>
 
 
@@ -76,7 +76,7 @@ value() = binary()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_execute-5">async_execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#async_prepare-2">async_prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#async_query-4">async_query/4</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-6">async_reusable_query/6</a></td><td></td></tr><tr><td valign="top"><a href="#execute-5">execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#flags-1">flags/1</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-2">prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-4">query/4</a></td><td></td></tr><tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-5">reusable_query/5</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_execute-5">async_execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#async_prepare-2">async_prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#async_query-4">async_query/4</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-6">async_reusable_query/6</a></td><td></td></tr><tr><td valign="top"><a href="#execute-5">execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-2">prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-4">query/4</a></td><td></td></tr><tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-5">reusable_query/5</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -89,7 +89,7 @@ value() = binary()
 
 
 <pre><code>
-async_execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Pid::pid()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, backlog_full}
+async_execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, backlog_full}
 </code></pre>
 <br />
 
@@ -111,7 +111,7 @@ async_prepare(Query::<a href="#type-query">query()</a>, Pid::pid()) -&gt; {ok, <
 
 
 <pre><code>
-async_query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Pid::pid()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, backlog_full}
+async_query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, backlog_full}
 </code></pre>
 <br />
 
@@ -122,7 +122,7 @@ async_query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href=
 
 
 <pre><code>
-async_reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Pid::pid(), Timeout::timeout()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, term()}
+async_reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid(), Timeout::timeout()) -&gt; {ok, <a href="erlang.md#type-ref">erlang:ref()</a>} | {error, term()}
 </code></pre>
 <br />
 
@@ -133,18 +133,7 @@ async_reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href=
 
 
 <pre><code>
-execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
-</code></pre>
-<br />
-
-
-<a name="flags-1"></a>
-
-### flags/1 ###
-
-
-<pre><code>
-flags(NoMetadata::boolean()) -&gt; 0 | 1
+execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
 </code></pre>
 <br />
 
@@ -166,7 +155,7 @@ prepare(Query::<a href="#type-query">query()</a>, Timeout::timeout()) -&gt; {ok,
 
 
 <pre><code>
-query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
+query(Query::<a href="#type-query">query()</a>, ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
 </code></pre>
 <br />
 
@@ -188,7 +177,7 @@ response(X1::{ok, term()} | {error, term()}) -&gt; {ok, term()} | {error, term()
 
 
 <pre><code>
-reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::<a href="#type-flags">flags()</a>, Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
+reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | {error, term()}
 </code></pre>
 <br />
 

@@ -4,7 +4,6 @@
 -export([
     decode/1,
     encode/1,
-    flags/1,
     pending_size/1
 ]).
 
@@ -36,11 +35,6 @@ encode(#frame {
     [<<0:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,
         Stream:16/signed-integer, Opcode:8/unsigned-integer,
         (size(Body2)):32/unsigned-integer>>, Body2].
-
--spec flags(boolean()) -> frame_flag().
-
-flags(true) -> 1;
-flags(false) -> 0.
 
 -spec pending_size(binary()) -> pos_integer() | undefined.
 

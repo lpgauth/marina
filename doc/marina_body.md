@@ -31,7 +31,7 @@ frame() = #frame{flags = undefined | <a href="#type-frame_flag">frame_flag()</a>
 
 
 <pre><code>
-frame_flag() = 0 | 1
+frame_flag() = {compression, boolean()}
 </code></pre>
 
 

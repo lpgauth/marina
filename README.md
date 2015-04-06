@@ -21,10 +21,8 @@ Non-blocking Erlang Cassandra CQL3 client
 
 ## Examples
 
-_Query_
-
 ```erlang
-marina:query(<<"SELECT * FROM \"test\".users LIMIT 1;">>, 1, 0, 1000).
+marina:query(<<"SELECT * FROM \"test\".users LIMIT 1;">>, ?CONSISTENCY_ONE, [], 1000).
 {ok,{result,{result_metadata,4,
                              [{column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
                               {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},

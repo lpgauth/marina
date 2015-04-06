@@ -9,7 +9,7 @@
 -record(state, {
     buffer        = marina_buffer:new(),
     connect_retry = 0,
-    compression   = undefined,
+    frame_flags   = [] :: [frame_flag()],
     ip            = undefined,
     keyspace      = undefined,
     name          = undefined,
@@ -25,6 +25,7 @@
 init(Parent, Name) ->
     register(Name, self()),
     proc_lib:init_ack(Parent, {ok, self()}),
+
     marina_backlog:new(Name),
     self() ! ?CONNECT_RETRY_MSG,
 
@@ -33,7 +34,7 @@ init(Parent, Name) ->
         ip = application:get_env(?APP, ip, ?DEFAULT_IP),
         port = application:get_env(?APP, port, ?DEFAULT_PORT),
         keyspace = application:get_env(?APP, keyspace, undefined),
-        compression = application:get_env(?APP, compression, false)
+        frame_flags = frame_flags()
     }).
 
 -spec start_link(atom()) -> {ok, pid()}.
@@ -59,12 +60,11 @@ default_keyspace(#state {
 default_keyspace(#state {
         socket = Socket,
         keyspace = Keyspace,
-        compression = Compression
+        frame_flags = FrameFlags
     } = State) ->
 
     Query = <<"USE \"", Keyspace/binary, "\"">>,
-    FrameFlags = marina_frame:flags(Compression),
-    Msg = marina_request:query(0, FrameFlags, Query, ?CONSISTENCY_ONE, ?DEFAULT_FLAGS),
+    Msg = marina_request:query(0, FrameFlags, Query, ?CONSISTENCY_ONE, []),
     case sync_msg(Socket, Msg) of
         {ok, Keyspace} ->
             inet:setopts(Socket, [{active, true}]),
@@ -75,10 +75,17 @@ default_keyspace(#state {
             connect_retry(State)
     end.
 
+frame_flags() ->
+    Compression = application:get_env(?APP, compression, false),
+    case Compression of
+        true -> [{compression, true}];
+        _ -> []
+    end.
+
 handle_msg(?CONNECT_RETRY_MSG, #state {
         ip = Ip,
         port = Port,
-        compression = Compression
+        frame_flags = FrameFlags
     } = State) ->
 
     Opts = [
@@ -91,7 +98,6 @@ handle_msg(?CONNECT_RETRY_MSG, #state {
 
     case gen_tcp:connect(Ip, Port, Opts) of
         {ok, Socket} ->
-            FrameFlags = marina_frame:flags(Compression),
             Msg = marina_request:startup(FrameFlags),
             case sync_msg(Socket, Msg) of
                 {ok, undefined} ->
@@ -119,12 +125,10 @@ handle_msg({call, Ref, From, Call}, #state {
         socket = Socket,
         requests = Requests,
         name = Name,
-        compression = Compression
+        frame_flags = FrameFlags
     } = State) ->
 
     Stream = Requests rem ?MAX_STREAM_ID,
-    FrameFlags = marina_frame:flags(Compression),
-
     Msg = case Call of
         {execute, StatementId, Values, ConsistencyLevel, Flags} ->
             marina_request:execute(Stream, FrameFlags, StatementId, Values, ConsistencyLevel, Flags);

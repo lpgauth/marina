@@ -21,7 +21,48 @@ Non-blocking Erlang Cassandra CQL3 client
 
 ### Environment variables
 
-<table width="100%" border="0"><theader><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr><tr><td>ip</td><td>list()</td><td>"127.0.0.1"</td><td>server ip</td></tr><tr><td>port</td><td>pos_integer()</td><td>9042</td><td>server port</td></tr><tr><td>keyspace</td><td>undefined | binary()</td><td>undefined</td><td>default keyspace</td></tr><tr><td>pool_size</td><td>pos_integer()</td><td>16</td><td>number of connections</td></tr><tr><td>backlog_size</td><td>pos_integer()</td><td>1024</td><td>maximum number of concurrent requests per connection</td></tr><tr><td>compression</td><td>boolean()</td><td>false</td><td>enable lz4 compression</td></tr>
+<table width="100%">
+  <theader>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Description</th>
+  </theader>
+  <tr>
+    <td>ip</td>
+    <td>list()</td>
+    <td>"127.0.0.1"</td>
+    <td>server ip</td>
+  </tr>
+  <tr>
+    <td>port</td>
+    <td>pos_integer()</td>
+    <td>9042</td>
+    <td>server port</td>
+  </tr>
+  <tr>
+    <td>keyspace</td>
+    <td>undefined | binary()</td>
+    <td>undefined</td>
+    <td>default keyspace</td>
+  </tr>
+  <tr>
+    <td>pool_size</td>
+    <td>pos_integer()</td>
+    <td>16</td>
+    <td>number of connections</td>
+  </tr>
+  <tr>
+    <td>backlog_size</td>
+    <td>pos_integer()</td>
+    <td>1024</td>
+    <td>maximum number of concurrent requests per connection</td>
+  </tr>
+  <tr>
+    <td>compression</td>
+    <td>boolean()</td>
+    <td>false</td>
+    <td>enable lz4 compression</td></tr>
 </table>
 
 ### TODO
@@ -90,3 +131,34 @@ Shell got {marina,#Ref<0.0.0.124>,
 <tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_sup.md" class="module">marina_sup</a></td></tr>
 <tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_types.md" class="module">marina_types</a></td></tr>
 <tr><td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_utils.md" class="module">marina_utils</a></td></tr></table>
+
+## Tests
+
+```
+make eunit
+make build-plt && make dialyze
+```
+
+## License
+
+The MIT License (MIT)
+
+Copyright (c) 2015 Louis-Philippe Gauthier
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

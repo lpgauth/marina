@@ -13,6 +13,7 @@
     prepare/2,
     query/4,
     query/5,
+    receive_response/2,
     response/1,
     reusable_query/4,
     reusable_query/5
@@ -100,6 +101,16 @@ query(Query, ConsistencyLevel, Flags, Timeout) ->
 
 query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
     response(call({query, Query, Values, ConsistencyLevel, Flags}, Timeout)).
+
+-spec receive_response(reference(), non_neg_integer()) -> {ok, term()} | {error, term()}.
+
+receive_response(Ref, Timeout) ->
+    receive
+        {?APP, Ref, Reply} ->
+            response(Reply)
+    after Timeout ->
+        {error, timeout}
+    end.
 
 -spec response({ok, term()} | {error, term()}) ->
     {ok, term()} | {error, term()}.

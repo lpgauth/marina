@@ -36,4 +36,7 @@ eunit:
 
 test: all eunit
 
-.PHONY: deps doc test
+xref:
+	@$(REBAR) skip_deps=true xref
+
+.PHONY: deps dialyze doc eunit xref

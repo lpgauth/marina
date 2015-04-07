@@ -20,43 +20,43 @@
 
 %% public
 -spec async_execute(statement_id(), consistency(), [flag()], pid()) ->
-    {ok, erlang:ref()} | {error, backlog_full}.
+    {ok, reference()} | {error, backlog_full}.
 
 async_execute(StatementId, ConsistencyLevel, Flags, Pid) ->
     async_execute(StatementId, [], ConsistencyLevel, Flags, Pid).
 
 -spec async_execute(statement_id(), [value()], consistency(), [flag()], pid()) ->
-    {ok, erlang:ref()} | {error, backlog_full}.
+    {ok, reference()} | {error, backlog_full}.
 
 async_execute(StatementId, Values, ConsistencyLevel, Flags, Pid) ->
     async_call({execute, StatementId, Values, ConsistencyLevel, Flags}, Pid).
 
 -spec async_prepare(query(), pid()) ->
-    {ok, erlang:ref()} | {error, backlog_full}.
+    {ok, reference()} | {error, backlog_full}.
 
 async_prepare(Query, Pid) ->
     async_call({prepare, Query}, Pid).
 
 -spec async_query(query(), consistency(), [flag()], pid()) ->
-    {ok, erlang:ref()} | {error, backlog_full}.
+    {ok, reference()} | {error, backlog_full}.
 
 async_query(Query, ConsistencyLevel, Flags, Pid) ->
     async_query(Query, [], ConsistencyLevel, Flags, Pid).
 
 -spec async_query(query(), [value()], consistency(), [flag()], pid()) ->
-    {ok, erlang:ref()} | {error, backlog_full}.
+    {ok, reference()} | {error, backlog_full}.
 
 async_query(Query, Values, ConsistencyLevel, Flags, Pid) ->
     async_call({query, Query, Values, ConsistencyLevel, Flags}, Pid).
 
 -spec async_reusable_query(query(), consistency(), [flag()], pid(), timeout()) ->
-    {ok, erlang:ref()} | {error, term()}.
+    {ok, reference()} | {error, term()}.
 
 async_reusable_query(Query, ConsistencyLevel, Flags, Pid, Timeout) ->
     async_reusable_query(Query, [], ConsistencyLevel, Flags, Pid, Timeout).
 
 -spec async_reusable_query(query(), [value()], consistency(), [flag()], pid(), timeout()) ->
-    {ok, erlang:ref()} | {error, term()}.
+    {ok, reference()} | {error, term()}.
 
 async_reusable_query(Query, Values, ConsistencyLevel, Flags, Pid, Timeout) ->
     case marina_cache:get(Query) of

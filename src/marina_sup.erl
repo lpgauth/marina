@@ -23,5 +23,5 @@ init([]) ->
     marina_queue:init(),
 
     {ok, {{one_for_one, 5, 10},
-        marina_utils:childs_specs()
+        marina_utils:child_specs()
     }}.

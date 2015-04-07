@@ -30,7 +30,7 @@ prepare(Stream, FrameFlags, Query) ->
         stream = Stream,
         opcode = ?OP_PREPARE,
         flags = frame_flags(FrameFlags),
-        body = [<<(marina_types:encode_long_string(Query))/binary>>]
+        body = [marina_types:encode_long_string(Query)]
     }).
 
 -spec query(stream(), [frame_flag()], query(), [value()], consistency(), [flag()]) -> iolist().
@@ -41,9 +41,9 @@ query(Stream, FrameFlags, Query, Values, ConsistencyLevel, Flags) ->
         stream = Stream,
         opcode = ?OP_QUERY,
         flags = frame_flags(FrameFlags),
-        body = [<<(marina_types:encode_long_string(Query))/binary,
-            (marina_types:encode_short(ConsistencyLevel))/binary, Flags2,
-            Values2/binary>>]
+        body = [marina_types:encode_long_string(Query),
+            marina_types:encode_short(ConsistencyLevel), Flags2,
+            Values2]
     }).
 
 -spec startup([frame_flag()]) -> iolist().
@@ -77,8 +77,7 @@ flags_and_values(Flags, Values) ->
     Flags2 = flags([{values, true} | Flags]),
     ValuesCount = length(Values),
     EncodedValues = [marina_types:encode_bytes(Value) || Value <- Values],
-    Values2 = <<(marina_types:encode_short(ValuesCount))/binary,
-        (iolist_to_binary(EncodedValues))/binary>>,
+    Values2 = [marina_types:encode_short(ValuesCount), EncodedValues],
     {Flags2, Values2}.
 
 frame_flags([]) ->

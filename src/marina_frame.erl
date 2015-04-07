@@ -50,7 +50,7 @@ pending_size(_) ->
 decode_body(0, Body) ->
     Body;
 decode_body(1, Body) ->
-    {ok, Body2} = lz4:unpack(Body),
+    {ok, Body2} = marina_utils:unpack(Body),
     Body2.
 
 decode(<<1:1, ?PROTO_VERSION:7/unsigned-integer, Flags:8/unsigned-integer,

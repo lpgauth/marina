@@ -41,15 +41,15 @@ marina_compression_test_() ->
     ]}}.
 
 marina_connection_error_test_() ->
-        {setup,
-            fun () ->
-                set_env([
-                    {keyspace, ?TEST_KEYSPACE},
-                    {port, 9043}
-                ])
-            end,
-            fun (_) -> cleanup() end,
-        [{"test_no_socket", ?MODULE, test_no_socket}]}.
+    {setup,
+        fun () ->
+            set_env([
+                {keyspace, ?TEST_KEYSPACE},
+                {port, 9043}
+            ])
+        end,
+        fun (_) -> cleanup() end,
+    [{"test_no_socket", ?MODULE, test_no_socket}]}.
 
 marina_backlog_test_() ->
     {setup,

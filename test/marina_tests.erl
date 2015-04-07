@@ -13,15 +13,18 @@ marina_test_() ->
         fun () -> set_env([{keyspace, ?TEST_KEYSPACE}]) end,
         fun (_) -> cleanup() end,
     {inparallel, [
+        {"test_async_execute", ?MODULE, test_async_execute},
         {"test_async_prepare", ?MODULE, test_async_prepare},
         {"test_async_query", ?MODULE, test_async_query},
         {"test_async_reusable_query", ?MODULE, test_async_reusable_query},
         {"test_async_reusable_query_invalid_query", ?MODULE, test_async_reusable_query_invalid_query},
+        {"test_execute", ?MODULE, test_execute},
         {"test_query", ?MODULE, test_query},
         {"test_query_no_metadata", ?MODULE, test_query_no_metadata},
         {"test_reusable_query", ?MODULE, test_reusable_query},
         {"test_reusable_query_invalid_query", ?MODULE, test_reusable_query_invalid_query},
-        {"test_timeout", ?MODULE, test_timeout}
+        {"test_timeout_async", ?MODULE, test_timeout_async},
+        {"test_timeout_sync", ?MODULE, test_timeout_sync}
     ]}}.
 
 marina_compression_test_() ->
@@ -60,18 +63,28 @@ marina_backlog_test_() ->
             ])
         end,
         fun (_) -> cleanup() end,
-    [{"test_backlogfull", ?MODULE, test_backlogfull}]}.
+    {inparallel, [
+        {"test_backlogfull_async", ?MODULE, test_backlogfull_async},
+        {"test_backlogfull_sync", ?MODULE, test_backlogfull_sync}
+    ]}}.
 
 %% tests
+test_async_execute() ->
+    {ok, StatementId} = marina:prepare(<<"SELECT * FROM users LIMIT 1;">>, ?TEST_TIMEOUT),
+    {ok, Ref} = marina:async_execute(StatementId, ?CONSISTENCY_ONE, [], self()),
+    {X, _} = marina:receive_response(Ref, ?TEST_TIMEOUT),
+
+    ?_assertEqual(ok, X).
+
 test_async_prepare() ->
-    {ok, Ref} = async_prepare(<<"SELECT * FROM users LIMIT 1;">>),
-    {X, _} = receive_response(Ref),
+    {ok, Ref} = marina:async_prepare(<<"SELECT * FROM users LIMIT 1;">>, self()),
+    {X, _} = marina:receive_response(Ref, ?TEST_TIMEOUT),
 
     ?_assertEqual(ok, X).
 
 test_async_query() ->
     {ok, Ref} = async_query(<<"SELECT * FROM users LIMIT 1;">>),
-    Response = receive_response(Ref),
+    Response = marina:receive_response(Ref, ?TEST_TIMEOUT),
 
     ?_assertEqual({ok,
         {result,
@@ -86,11 +99,16 @@ test_async_query() ->
     }, Response).
 
 test_async_reusable_query() ->
-    {ok, Ref} = async_reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
-    Response = receive_response(Ref),
+    Query = <<"SELECT * FROM users WHERE key = 99492dfe-d94a-11e4-af39-58f44110757d;">>,
+    {ok, Ref} = marina:async_reusable_query(Query, ?CONSISTENCY_ONE, [], self(), ?TEST_TIMEOUT),
+    Response = marina:receive_response(Ref, ?TEST_TIMEOUT),
 
-    {ok, Ref2} = async_reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
-    Response = receive_response(Ref2),
+    Query2 = <<"SELECT * FROM users WHERE key = ?;">>,
+    Values = [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>],
+    {ok, Ref2} = marina:async_reusable_query(Query2, Values, ?CONSISTENCY_ONE, [], self(), ?TEST_TIMEOUT),
+    Response = marina:receive_response(Ref2, ?TEST_TIMEOUT),
+    {ok, Ref3} = marina:async_reusable_query(Query2, Values, ?CONSISTENCY_ONE, [], self(), ?TEST_TIMEOUT),
+    Response = marina:receive_response(Ref3, ?TEST_TIMEOUT),
 
     ?_assertEqual({ok,
         {result,
@@ -105,16 +123,41 @@ test_async_reusable_query() ->
     }, Response).
 
 test_async_reusable_query_invalid_query() ->
-    Response = async_reusable_query(<<"SELECT * FROM user WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
+    Query = <<"SELECT * FROM user WHERE key = ?;">>,
+    Values = [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>],
+    Response = marina:async_reusable_query(Query, Values, ?CONSISTENCY_ONE, [], self(), ?TEST_TIMEOUT),
 
     ?_assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
 
-test_backlogfull() ->
+test_backlogfull_async() ->
     Responses = [async_query(<<"SELECT * FROM users LIMIT 1;">>) || _ <- lists:seq(1,100)],
     ?_assert(lists:any(fun
         ({error, backlog_full}) -> true;
         (_) -> false
     end, Responses)).
+
+test_backlogfull_sync() ->
+    Responses = [spawn(fun () -> query(<<"SELECT * FROM users LIMIT 1;">>) end) || _ <- lists:seq(1,20)],
+    ?_assert(lists:any(fun
+        ({error, backlog_full}) -> true;
+        (_) -> false
+    end, Responses)).
+
+test_execute() ->
+    {ok, StatementId} = marina:prepare(<<"SELECT * FROM users LIMIT 1;">>, ?TEST_TIMEOUT),
+    Response = marina:execute(StatementId, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?_assertEqual({ok,
+        {result,
+            {result_metadata, 4, [
+                {column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
+                {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
+                {column_spec,<<"test">>,<<"users">>,<<"column2">>,varchar},
+                {column_spec,<<"test">>,<<"users">>,<<"value">>,blob}
+            ]}, 1, [
+                [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>, <<"test">>, <<"test2">>, <<0,0,0,0>>]
+        ]}
+    }, Response).
 
 test_query() ->
     Response = query(<<"SELECT * FROM users LIMIT 1;">>),
@@ -147,9 +190,13 @@ test_no_socket() ->
     ?_assertEqual({error, no_socket}, Response).
 
 test_reusable_query() ->
-    Response = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
-    Response = reusable_query(<<"SELECT * FROM users LIMIT 1;">>, []),
-    Response = reusable_query(<<"SELECT * FROM users WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
+    Query = <<"SELECT * FROM users LIMIT 1;">>,
+    Response = marina:reusable_query(Query, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    Response = marina:reusable_query(Query, [], ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    Query2 = <<"SELECT * FROM users WHERE key = ?;">>,
+    Values = [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>],
+    Response = marina:reusable_query(Query2, Values, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
 
     ?_assertEqual({ok,
         {result,
@@ -168,7 +215,13 @@ test_reusable_query_invalid_query() ->
 
     ?_assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
 
-test_timeout() ->
+test_timeout_async() ->
+    {ok, Ref} = marina:async_query(<<"SELECT * FROM users LIMIT 1;">>, ?CONSISTENCY_ONE, [], self()),
+    Response = marina:receive_response(Ref, 0),
+
+    ?_assertEqual({error, timeout}, Response).
+
+test_timeout_sync() ->
     Response = marina:query(<<"SELECT * FROM users LIMIT 1;">>, ?CONSISTENCY_ONE, [], 0),
 
     ?_assertEqual({error, timeout}, Response).
@@ -193,28 +246,14 @@ set_env(Vars) ->
     application:start(marina).
 
 %% helpers
-async_prepare(Query) ->
-    marina:async_prepare(Query, self()).
-
 async_query(Query) ->
     marina:async_query(Query, ?CONSISTENCY_ONE, [], self()).
-
-async_reusable_query(Query, Values) ->
-    marina:async_reusable_query(Query, Values, ?CONSISTENCY_ONE, [], self(), ?TEST_TIMEOUT).
 
 query(Query) ->
     query(Query, []).
 
 query(Query, Flags) ->
     marina:query(Query, ?CONSISTENCY_ONE, Flags, ?TEST_TIMEOUT).
-
-receive_response(Ref) ->
-    receive
-        {?APP, Ref, Reply} ->
-            marina:response(Reply)
-    after ?TEST_TIMEOUT ->
-        {error, timeout}
-    end.
 
 reusable_query(Query, Values) ->
     reusable_query(Query, Values, []).

@@ -26,8 +26,12 @@ child_name(N) ->
 
 -spec info_msg(string(), [term()]) -> ok.
 
+-ifdef(TEST).
+info_msg(_Format, _Data) -> ok.
+-else.
 info_msg(Format, Data) ->
     error_logger:info_msg(Format, Data).
+-endif.
 
 -spec pack(binary() | iolist()) -> {ok, binary()} | {error, term()}.
 
@@ -57,8 +61,12 @@ unpack(<<Size:32/unsigned-integer, Binary/binary>>) ->
 
 -spec warning_msg(string(), [term()]) -> ok.
 
+-ifdef(TEST).
+warning_msg(_Format, _Data) -> ok.
+-else.
 warning_msg(Format, Data) ->
     error_logger:warning_msg(Format, Data).
+-endif.
 
 %% private
 child_spec(N) ->

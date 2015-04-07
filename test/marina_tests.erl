@@ -2,58 +2,65 @@
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("marina/include/marina.hrl").
 
+-compile(export_all).
+
 -define(TEST_KEYSPACE, <<"test">>).
 -define(TEST_TIMEOUT, 10000).
 
-%% public
+%% runners
 marina_test_() ->
-    setup_schema(),
-    set_env([{keyspace, ?TEST_KEYSPACE}]),
-
+    {setup,
+        fun () -> set_env([{keyspace, ?TEST_KEYSPACE}]) end,
+        fun (_) -> cleanup() end,
     {inparallel, [
-        test_async_prepare(),
-        test_async_query(),
-        test_async_reusable_query(),
-        test_async_reusable_query_invalid_query(),
-        test_query(),
-        test_query_no_metadata(),
-        test_reusable_query(),
-        test_reusable_query_invalid_query(),
-        test_timeout()
-    ]}.
+        {"test_async_prepare", ?MODULE, test_async_prepare},
+        {"test_async_query", ?MODULE, test_async_query},
+        {"test_async_reusable_query", ?MODULE, test_async_reusable_query},
+        {"test_async_reusable_query_invalid_query", ?MODULE, test_async_reusable_query_invalid_query},
+        {"test_query", ?MODULE, test_query},
+        {"test_query_no_metadata", ?MODULE, test_query_no_metadata},
+        {"test_reusable_query", ?MODULE, test_reusable_query},
+        {"test_reusable_query_invalid_query", ?MODULE, test_reusable_query_invalid_query},
+        {"test_timeout", ?MODULE, test_timeout}
+    ]}}.
 
 marina_compression_test_() ->
-    setup_schema(),
-    set_env([
-        {keyspace, <<"test">>},
-        {compression, true}
-    ]),
-
-    test_query().
+    {setup,
+        fun () ->
+            set_env([
+                {compression, true},
+                {keyspace, ?TEST_KEYSPACE}
+            ])
+        end,
+        fun (_) -> cleanup() end,
+    {inparallel, [
+        {"test_async_query", ?MODULE, test_async_query},
+        {"test_async_reusable_query", ?MODULE, test_async_reusable_query},
+        {"test_query", ?MODULE, test_query},
+        {"test_query_no_metadata", ?MODULE, test_query_no_metadata}
+    ]}}.
 
 marina_connection_error_test_() ->
-    setup_schema(),
-    set_env([
-        {keyspace, <<"test">>},
-        {port, 9043}
-    ]),
-
-    test_no_socket().
+        {setup,
+            fun () ->
+                set_env([
+                    {keyspace, ?TEST_KEYSPACE},
+                    {port, 9043}
+                ])
+            end,
+            fun (_) -> cleanup() end,
+        [{"test_no_socket", ?MODULE, test_no_socket}]}.
 
 marina_backlog_test_() ->
-    setup_schema(),
-    set_env([
-        {keyspace, <<"test">>},
-        {backlog_size, 1}
-    ]),
-
-    Responses = [async_query(<<"SELECT * FROM users LIMIT 1;">>) || _ <- lists:seq(1,100)],
-    BacklogFull = lists:any(fun
-        ({error, backlog_full}) -> true;
-        (_) -> false
-    end, Responses),
-
-    ?_assert(BacklogFull).
+    {setup,
+        fun () ->
+            set_env([
+                {backlog_size, 1},
+                {keyspace, ?TEST_KEYSPACE}
+            ])
+        end,
+        fun (_) -> cleanup() end,
+    [{"test_backlogfull", ?MODULE, test_backlogfull}]}.
 
 %% tests
 test_async_prepare() ->
@@ -101,6 +108,13 @@ test_async_reusable_query_invalid_query() ->
     Response = async_reusable_query(<<"SELECT * FROM user WHERE key = ?;">>, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]),
 
     ?_assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
+
+test_backlogfull() ->
+    Responses = [async_query(<<"SELECT * FROM users LIMIT 1;">>) || _ <- lists:seq(1,100)],
+    ?_assert(lists:any(fun
+        ({error, backlog_full}) -> true;
+        (_) -> false
+    end, Responses)).
 
 test_query() ->
     Response = query(<<"SELECT * FROM users LIMIT 1;">>),
@@ -160,6 +174,11 @@ test_timeout() ->
     ?_assertEqual({error, timeout}, Response).
 
 %% setup
+cleanup() ->
+    error_logger:tty(false),
+    application:stop(marina),
+    error_logger:tty(true).
+
 setup_schema() ->
     marina_app:start(),
     query(<<"DROP KEYSPACE test;">>),

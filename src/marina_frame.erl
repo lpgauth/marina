@@ -70,5 +70,5 @@ decode(Rest, Acc) ->
 encode_body(0, Body) ->
     Body;
 encode_body(1, Body) ->
-    {ok, Body2} = lz4:pack(iolist_to_binary(Body)),
+    {ok, Body2} = marina_utils:pack(Body),
     Body2.

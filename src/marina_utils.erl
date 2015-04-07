@@ -5,7 +5,9 @@
     childs_specs/0,
     child_name/1,
     info_msg/2,
+    pack/1,
     timeout/2,
+    unpack/1,
     warning_msg/2
 
 ]).
@@ -21,12 +23,25 @@ child_name(N) ->
 info_msg(Format, Data) ->
     error_logger:info_msg(Format, Data).
 
+pack(Iolist) when is_list(Iolist) ->
+    pack(iolist_to_binary(Iolist));
+pack(Binary) ->
+    case lz4:compress(Binary, []) of
+        {ok, Compressed} ->
+            {ok, <<(size(Binary)):32/unsigned-integer, Compressed/binary>>};
+        Error ->
+            Error
+    end.
+
 timeout(Timestamp, Timeout) ->
     Diff = timer:now_diff(os:timestamp(), Timestamp) div 1000,
     case Timeout - Diff of
         X when X < 0 -> 0;
         X -> X
     end.
+
+unpack(<<Size:32/unsigned-integer, Binary/binary>>) ->
+    lz4:uncompress(Binary, Size).
 
 warning_msg(Format, Data) ->
     error_logger:warning_msg(Format, Data).

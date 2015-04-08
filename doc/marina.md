@@ -31,7 +31,7 @@ consistency() = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 16
 
 
 <pre><code>
-flag() = {skip_metadata, boolean()} | {values, boolean()}
+flag() = {page_size, pos_integer()} | {paging_state, binary()} | {skip_metadata, boolean()} | {values, boolean()}
 </code></pre>
 
 

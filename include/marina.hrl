@@ -1,3 +1,6 @@
+% macros
+-define(L(Key, Values, Default), marina_utils:lookup(Key, Values, Default)).
+
 % application
 -define(APP, marina).
 -define(CONNECT_RETRY_MSG, connect_retry).
@@ -73,8 +76,9 @@
 }).
 
 -record(result_metadata, {
-    columns_count = 0  :: integer(),
-    columns       = [] :: list(column_spec())
+    columns_count = 0         :: integer(),
+    columns       = []        :: list(column_spec()),
+    paging_state  = undefined :: binary() | undefined
 }).
 
 -record(result, {
@@ -91,7 +95,9 @@
 ?CONSISTENCY_LOCAL_QUORUM | ?CONSISTENCY_EACH_QUORUM | ?CONSISTENCY_SERIAL |
 ?CONSISTENCY_LOCAL_SERIAL | ?CONSISTENCY_LOCAL_ONE.
 
--type flag() :: {skip_metadata, boolean()} | {values, boolean()}.
+-type flag() :: {page_size, pos_integer()} | {paging_state, binary()} |
+    {skip_metadata, boolean()} | {values, boolean()}.
+
 -type frame() :: #frame {}.
 -type frame_flag() :: {compression, boolean()}.
 -type query() :: binary().

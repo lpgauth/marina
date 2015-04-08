@@ -10,7 +10,7 @@
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#child_name-1">child_name/1</a></td><td></td></tr><tr><td valign="top"><a href="#child_specs-0">child_specs/0</a></td><td></td></tr><tr><td valign="top"><a href="#info_msg-2">info_msg/2</a></td><td></td></tr><tr><td valign="top"><a href="#pack-1">pack/1</a></td><td></td></tr><tr><td valign="top"><a href="#timeout-2">timeout/2</a></td><td></td></tr><tr><td valign="top"><a href="#unpack-1">unpack/1</a></td><td></td></tr><tr><td valign="top"><a href="#warning_msg-2">warning_msg/2</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#child_name-1">child_name/1</a></td><td></td></tr><tr><td valign="top"><a href="#child_specs-0">child_specs/0</a></td><td></td></tr><tr><td valign="top"><a href="#info_msg-2">info_msg/2</a></td><td></td></tr><tr><td valign="top"><a href="#lookup-3">lookup/3</a></td><td></td></tr><tr><td valign="top"><a href="#pack-1">pack/1</a></td><td></td></tr><tr><td valign="top"><a href="#timeout-2">timeout/2</a></td><td></td></tr><tr><td valign="top"><a href="#unpack-1">unpack/1</a></td><td></td></tr><tr><td valign="top"><a href="#warning_msg-2">warning_msg/2</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -46,6 +46,17 @@ child_specs() -&gt; [<a href="supervisor.md#type-child_spec">supervisor:child_sp
 
 <pre><code>
 info_msg(Format::string(), Data::[term()]) -&gt; ok
+</code></pre>
+<br />
+
+
+<a name="lookup-3"></a>
+
+### lookup/3 ###
+
+
+<pre><code>
+lookup(Key::term(), Values::[{term(), term()}], Default::term()) -&gt; term()
 </code></pre>
 <br />
 

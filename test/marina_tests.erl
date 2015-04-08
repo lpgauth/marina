@@ -4,6 +4,7 @@
 
 -compile(export_all).
 
+-define(T, fun (Test) -> test(Test) end).
 -define(TEST_TIMEOUT, 10000).
 -define(VAR_KEYSPACE, {keyspace, <<"test">>}).
 
@@ -31,40 +32,41 @@ marina_test_() ->
         fun () -> setup([?VAR_KEYSPACE]) end,
         fun (_) -> cleanup() end,
     {inparallel, [
-        {"test_async_execute", ?MODULE, test_async_execute},
-        {"test_async_prepare", ?MODULE, test_async_prepare},
-        {"test_async_query", ?MODULE, test_async_query},
-        {"test_async_reusable_query", ?MODULE, test_async_reusable_query},
-        {"test_async_reusable_query_invalid_query", ?MODULE, test_async_reusable_query_invalid_query},
-        {"test_execute", ?MODULE, test_execute},
-        {"test_query", ?MODULE, test_query},
-        {"test_query_metedata_types", ?MODULE, test_query_metedata_types},
-        {"test_query_no_metadata", ?MODULE, test_query_no_metadata},
-        {"test_reusable_query", ?MODULE, test_reusable_query},
-        {"test_reusable_query_invalid_query", ?MODULE, test_reusable_query_invalid_query},
-        {"test_timeout_async", ?MODULE, test_timeout_async},
-        {"test_timeout_sync", ?MODULE, test_timeout_sync}
+        ?T(test_async_execute),
+        ?T(test_async_prepare),
+        ?T(test_async_query),
+        ?T(test_async_reusable_query),
+        ?T(test_async_reusable_query_invalid_query),
+        ?T(test_execute),
+        ?T(test_query),
+        ?T(test_query_metedata_types),
+        ?T(test_query_no_metadata),
+        ?T(test_reusable_query),
+        ?T(test_reusable_query_invalid_query),
+        ?T(test_schema_changes),
+        ?T(test_timeout_async),
+        ?T(test_timeout_sync)
     ]}}.
 
 marina_compression_test_() ->
     {setup,
         fun () -> setup([{compression, true}, ?VAR_KEYSPACE]) end,
         fun (_) -> cleanup() end,
-    [{"test_query", ?MODULE, test_query}]}.
+    [?T(test_query)]}.
 
 marina_connection_error_test_() ->
     {setup,
         fun () -> setup([?VAR_KEYSPACE, {port, 9043}]) end,
         fun (_) -> cleanup() end,
-    [{"test_no_socket", ?MODULE, test_no_socket}]}.
+    [?T(test_no_socket)]}.
 
 marina_backlog_test_() ->
     {setup,
         fun () -> setup([{backlog_size, 1}, ?VAR_KEYSPACE]) end,
         fun (_) -> cleanup() end,
     {inparallel, [
-        {"test_backlogfull_async", ?MODULE, test_backlogfull_async},
-        {"test_backlogfull_sync", ?MODULE, test_backlogfull_sync}
+        ?T(test_backlogfull_async),
+        ?T(test_backlogfull_sync)
     ]}}.
 
 %% tests
@@ -162,17 +164,15 @@ test_query_metedata_types() ->
              {column_spec,<<"test">>,<<"entries">>,<<"col7">>,float},
              {column_spec,<<"test">>,<<"entries">>,<<"col8">>,int},
              {column_spec,<<"test">>,<<"entries">>,<<"col9">>,timestamp}]},
-            0, []}}, Response2).
+    0, []}}, Response2).
 
 test_query_no_metadata() ->
     Response2 = marina:query(?QUERY1, ?CONSISTENCY_ONE, [{skip_metadata, true}], ?TEST_TIMEOUT),
 
-    ?assertEqual({ok,
-        {result,
-            {result_metadata, 4, []}, 1, [
-                [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>, <<"test">>, <<"test2">>, <<0,0,0,0>>]
-        ]}
-    }, Response2).
+    ?assertEqual({ok,{result,
+    {result_metadata, 4, []}, 1, [
+        [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>, <<"test">>, <<"test2">>, <<0,0,0,0>>]
+    ]}}, Response2).
 
 test_no_socket() ->
     Response = marina:query(?QUERY1, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
@@ -190,6 +190,29 @@ test_reusable_query_invalid_query() ->
     Response = marina:reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
 
     ?assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
+
+test_schema_changes() ->
+    marina:query(<<"DROP KEYSPACE test2;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"CREATE KEYSPACE test2 WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"CREATE TYPE test2.address (street text, city text, zip_code int, phones set<text>);">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"CREATE TABLE test2.users (key uuid, column1 text, column2 frozen<test2.address>, value blob, PRIMARY KEY (key, column1, column2));">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    Response = marina:query(<<"SELECT * FROM test2.users LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok,{result,
+    {result_metadata,4,
+        [{column_spec,<<"test2">>,<<"users">>,<<"key">>,uid},
+         {column_spec,<<"test2">>,<<"users">>,<<"column1">>,varchar},
+         {column_spec,<<"test2">>,<<"users">>,<<"column2">>,
+             {udt,<<"test2">>,<<"address">>,
+                 [{<<"street">>,varchar},
+                  {<<"city">>,varchar},
+                  {<<"zip_code">>,int},
+                  {<<"phones">>,{set,varchar}}]}},
+         {column_spec,<<"test2">>,<<"users">>,<<"value">>,blob}]},
+    0,[]}}, Response),
+
+    marina:query(<<"DROP TABLE test2.users;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"DROP KEYSPACE test2;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT).
 
 test_timeout_async() ->
     {ok, Ref} = marina:async_query(?QUERY1, ?CONSISTENCY_ONE, [], self()),
@@ -239,3 +262,6 @@ setup(EnvironmentVars) ->
     error_logger:tty(false),
     marina_app:start(),
     error_logger:tty(true).
+
+test(Test) ->
+    {atom_to_list(Test), ?MODULE, Test}.

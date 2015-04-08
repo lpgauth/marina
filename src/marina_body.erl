@@ -120,6 +120,25 @@ decode_columns_metadata(Bin, Count, {Keyspace, Table} = GlobalTableSpec, Acc) ->
     },
     decode_columns_metadata(Bin3, Count - 1, GlobalTableSpec, [ColumnSpec | Acc]).
 
+decode_elements(Bin, N) ->
+    decode_elements(Bin, N, []).
+
+decode_elements(Rest, 0, Acc) ->
+    {lists:reverse(Acc), Rest};
+decode_elements(Bin, N, Acc) ->
+    {Type, Rest} = decode_type(Bin),
+    decode_elements(Rest, N - 1, [Type | Acc]).
+
+decode_fields(Bin, N) ->
+    decode_fields(Bin, N, []).
+
+decode_fields(Rest, 0, Acc) ->
+    {lists:reverse(Acc), Rest};
+decode_fields(Bin, N, Acc) ->
+    {Name, Rest} = marina_types:decode_string(Bin),
+    {Type, Rest2} = decode_type(Rest),
+    decode_fields(Rest2, N - 1, [{Name, Type} | Acc]).
+
 % TODO: cleanup
 decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer, Rest/binary>>) ->
     GlobalTableSpec = Flags band 1,
@@ -203,4 +222,14 @@ decode_type(<<16#21:16, Rest/binary>>) ->
     {{map, KeyType, ValueType}, Rest3};
 decode_type(<<16#22:16, Rest/binary >>) ->
     {Type, Rest2} = decode_type(Rest),
-    {{set, Type}, Rest2}.
+    {{set, Type}, Rest2};
+decode_type(<<16#30:16, Rest/binary >>) ->
+    {Keyspace, Rest2} = marina_types:decode_string(Rest),
+    {Name, Rest3} = marina_types:decode_string(Rest2),
+    {FieldsCount, Rest4} = marina_types:decode_short(Rest3),
+    {Fields, Rest5} = decode_fields(Rest4, FieldsCount),
+    {{udt, Keyspace, Name, Fields}, Rest5};
+decode_type(<<16#31:16, Rest/binary >>) ->
+    {ElementsCount, Rest2} = marina_types:decode_short(Rest),
+    {Elements, Rest3} = decode_elements(Rest2, ElementsCount),
+    {{tuple, Elements}, Rest3}.

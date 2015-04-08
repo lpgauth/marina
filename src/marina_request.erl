@@ -14,13 +14,15 @@
 
 execute(Stream, FrameFlags, StatementId, Values, ConsistencyLevel, Flags) ->
     {Flags2, Values2} = flags_and_values(Flags, Values),
+    {PageSize, PagingState} = paging(Flags),
+
     marina_frame:encode(#frame {
         stream = Stream,
         opcode = ?OP_EXECUTE,
         flags = frame_flags(FrameFlags),
         body = [marina_types:encode_short_bytes(StatementId),
             marina_types:encode_short(ConsistencyLevel),
-            Flags2, Values2]
+            Flags2, Values2, PageSize, PagingState]
     }).
 
 -spec prepare(stream(), [frame_flag()], query()) -> iolist().
@@ -37,13 +39,15 @@ prepare(Stream, FrameFlags, Query) ->
 
 query(Stream, FrameFlags, Query, Values, ConsistencyLevel, Flags) ->
     {Flags2, Values2} = flags_and_values(Flags, Values),
+    {PageSize, PagingState} = paging(Flags),
+
     marina_frame:encode(#frame {
         stream = Stream,
         opcode = ?OP_QUERY,
         flags = frame_flags(FrameFlags),
         body = [marina_types:encode_long_string(Query),
             marina_types:encode_short(ConsistencyLevel), Flags2,
-            Values2]
+            Values2, PageSize, PagingState]
     }).
 
 -spec startup([frame_flag()]) -> iolist().
@@ -64,15 +68,19 @@ startup(FrameFlags) ->
 %% private
 flags([]) ->
     0;
-flags([{skip_metadata, true} | T]) ->
-    2 + flags(T);
 flags([{values, true} | T]) ->
     1 + flags(T);
+flags([{skip_metadata, true} | T]) ->
+    2 + flags(T);
+flags([{page_size, PageSize} | T]) when is_integer(PageSize) ->
+    4 + flags(T);
+flags([{paging_state, PagingState} | T]) when is_binary(PagingState) ->
+    8 + flags(T);
 flags([_ | T]) ->
     flags(T).
 
 flags_and_values(Flags, []) ->
-    {flags(Flags), <<>>};
+    {flags(Flags), []};
 flags_and_values(Flags, Values) ->
     Flags2 = flags([{values, true} | Flags]),
     ValuesCount = length(Values),
@@ -86,3 +94,16 @@ frame_flags([{compression, true} | T]) ->
     1 + frame_flags(T);
 frame_flags([_ | T]) ->
     frame_flags(T).
+
+paging(Flags) ->
+    PageSize2 = case ?L(page_size, Flags, undefined) of
+        undefined -> [];
+        PageSize ->
+            marina_types:encode_int(PageSize)
+    end,
+    PagingState2 = case ?L(paging_state, Flags, undefined) of
+        undefined -> [];
+        PagingState ->
+            marina_types:encode_bytes(PagingState)
+    end,
+    {PageSize2, PagingState2}.

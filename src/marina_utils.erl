@@ -5,11 +5,11 @@
     child_specs/0,
     child_name/1,
     info_msg/2,
+    lookup/3,
     pack/1,
     timeout/2,
     unpack/1,
     warning_msg/2
-
 ]).
 
 %% public
@@ -32,6 +32,14 @@ info_msg(_Format, _Data) -> ok.
 info_msg(Format, Data) ->
     error_logger:info_msg(Format, Data).
 -endif.
+
+-spec lookup(term(), [{term(), term()}], term()) -> term().
+
+lookup(Key, Values, Default) ->
+    case lists:keyfind(Key, 1, Values) of
+        false -> Default;
+        {_, Value} -> Value
+    end.
 
 -spec pack(binary() | iolist()) -> {ok, binary()} | {error, term()}.
 

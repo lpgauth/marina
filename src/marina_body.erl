@@ -92,8 +92,12 @@ decode_columns(Bin, Count, Acc) ->
     {Column, Rest} = marina_types:decode_bytes(Bin),
     decode_columns(Rest, Count - 1, [Column | Acc]).
 
-decode_columns_metadata(Bin, Count, GlobalTableSpec) ->
-    decode_columns_metadata(Bin, Count, GlobalTableSpec, []).
+decode_columns_metadata(Bin, ColumnsCount, true) ->
+    {Keyspace, Rest} = marina_types:decode_string(Bin),
+    {Table, Rest2} = marina_types:decode_string(Rest),
+    decode_columns_metadata(Rest2, ColumnsCount, {Keyspace, Table}, []);
+decode_columns_metadata(Bin, ColumnsCount, false) ->
+    decode_columns_metadata(Bin, ColumnsCount, {undefined, undefined}, []).
 
 decode_columns_metadata(Rest, 0, _GlobalTableSpec, Acc) ->
     {lists:reverse(Acc), Rest};
@@ -139,37 +143,33 @@ decode_fields(Bin, N, Acc) ->
     {Type, Rest2} = decode_type(Rest),
     decode_fields(Rest2, N - 1, [{Name, Type} | Acc]).
 
-% TODO: cleanup
+decode_result_flags(Flags) ->
+    GlobalTableSpec = Flags band 1 == 1,
+    HasMorePages = Flags band 2 == 2,
+    NoMetaData = Flags band 4 == 4,
+    {GlobalTableSpec, HasMorePages, NoMetaData}.
+
+
+decode_result_paging_state(Bin, true) ->
+    {Paging, Rest} = marina_types:decode_bytes(Bin),
+    {Paging, Rest};
+decode_result_paging_state(Rest, false) ->
+    {undefined, Rest}.
+
 decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer, Rest/binary>>) ->
-    GlobalTableSpec = Flags band 1,
-    HasMorePages = Flags band 2,
-    NoMetaData = Flags band 4,
-
-    {_PagingState, Rest2} = case HasMorePages of
-        0 -> {undefined, Rest};
-        1 -> marina_types:decode_bytes(Rest)
-    end,
-
-    {Columns, Rest5} = case NoMetaData of
-        0 ->
-            case GlobalTableSpec of
-                0 ->
-                    Keyspace = undefined,
-                    Table = undefined,
-                    Rest4 = Rest2;
-                1 ->
-                    {Keyspace, Rest3} = marina_types:decode_string(Rest2),
-                    {Table, Rest4} = marina_types:decode_string(Rest3)
-            end,
-            decode_columns_metadata(Rest4, ColumnsCount, {Keyspace, Table});
-        4 ->
-            {[], Rest2}
+    {GlobalTableSpec, HasMorePages, NoMetaData} = decode_result_flags(Flags),
+    {PagingState, Rest2} = decode_result_paging_state(Rest, HasMorePages),
+    {Columns, Rest3} = case NoMetaData of
+        true -> {[], Rest2};
+        false ->
+            decode_columns_metadata(Rest2, ColumnsCount, GlobalTableSpec)
     end,
 
     {#result_metadata {
         columns_count = ColumnsCount,
-        columns = Columns
-    }, Rest5}.
+        columns = Columns,
+        paging_state = PagingState
+    }, Rest3}.
 
 decode_rows(Bin, Count, ColumnsCount) ->
     decode_rows(Bin, Count, ColumnsCount, []).

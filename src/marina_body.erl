@@ -78,9 +78,7 @@ decode(#frame {
             {Option, Option2}
     end,
 
-    {ok, {ChangeType, Target, Options}};
-decode(#frame {}) ->
-    {error, unknown_response}.
+    {ok, {ChangeType, Target, Options}}.
 
 %% private
 decode_columns(Bin, Count) ->
@@ -148,7 +146,6 @@ decode_result_flags(Flags) ->
     HasMorePages = Flags band 2 == 2,
     NoMetaData = Flags band 4 == 4,
     {GlobalTableSpec, HasMorePages, NoMetaData}.
-
 
 decode_result_paging_state(Bin, true) ->
     {Paging, Rest} = marina_types:decode_bytes(Bin),

@@ -50,7 +50,8 @@ marina_test_() ->
         ?T(test_reusable_query_invalid_query),
         ?T(test_schema_changes),
         ?T(test_timeout_async),
-        ?T(test_timeout_sync)
+        ?T(test_timeout_sync),
+        ?T(test_tuples)
     ]}}.
 
 marina_compression_test_() ->
@@ -270,6 +271,20 @@ test_timeout_sync() ->
     Response = marina:query(?QUERY1, ?CONSISTENCY_ONE, [], 0),
 
     ?assertEqual({error, timeout}, Response).
+
+test_tuples() ->
+    marina:query(<<"CREATE TABLE collect_things (k int PRIMARY KEY, v frozen <tuple<int, text, float>>);">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    Response = marina:query(<<"SELECT * FROM test.collect_things;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok,{result,
+        {result_metadata,2,
+            [{column_spec,<<"test">>,<<"collect_things">>,<<"k">>,int},
+             {column_spec,<<"test">>,<<"collect_things">>,<<"v">>,
+                 {tuple,[int,varchar,float]}}],
+            undefined},
+    0,[]}}, Response),
+
+    marina:query(<<"DROP TABLE collect_things;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT).
 
 %% utils
 cleanup() ->

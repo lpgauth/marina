@@ -37,6 +37,7 @@ marina_test_() ->
         ?T(test_async_query),
         ?T(test_async_reusable_query),
         ?T(test_async_reusable_query_invalid_query),
+        ?T(test_counters),
         ?T(test_execute),
         ?T(test_query),
         ?T(test_query_metedata_types),
@@ -122,6 +123,21 @@ test_backlogfull_sync() ->
         ({error, backlog_full}) -> true;
         (_) -> false
     end, receive_loop(20))).
+
+test_counters() ->
+    marina:query(<<"DROP TABLE test.page_view_counts;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"CREATE TABLE test.page_view_counts (counter_value counter, url_name varchar, page_name varchar, PRIMARY KEY (url_name, page_name));">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"UPDATE test.page_view_counts SET counter_value = counter_value + 1 WHERE url_name='adgear.com' AND page_name='home';">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    Response = marina:query(<<"SELECT * FROM test.page_view_counts">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok,{result,
+        {result_metadata,3,
+            [{column_spec,<<"test">>,<<"page_view_counts">>,<<"url_name">>,varchar},
+             {column_spec,<<"test">>,<<"page_view_counts">>,<<"page_name">>,varchar},
+             {column_spec,<<"test">>,<<"page_view_counts">>,<<"counter_value">>,counter}]},
+        1,
+        [[<<"adgear.com">>,<<"home">>,<<0,0,0,0,0,0,0,1>>]]
+    }}, Response).
 
 test_execute() ->
     {ok, StatementId} = marina:prepare(?QUERY1, ?TEST_TIMEOUT),

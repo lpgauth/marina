@@ -133,9 +133,36 @@ test_query() ->
     ?assertEqual(?QUERY1_RESULT, Response).
 
 test_query_metedata_types() ->
-    {X, _} = marina:query(<<"SELECT * FROM system.peers;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"DROP TABLE entries;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    Columns = datatypes_columns([ascii, bigint, blob, boolean, decimal, double,
+        float, int, timestamp, uuid, varchar, varint, timeuuid, inet,
+        'list<text>', 'map<text,text>', 'set<text>']),
+    Query = <<"CREATE TABLE entries(",  Columns/binary, " PRIMARY KEY(col1));">>,
+    Response = marina:query(Query, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
 
-    ?assertEqual(ok, X).
+    ?assertEqual({ok,{<<"CREATED">>,<<"TABLE">>,{<<"test">>,<<"entries">>}}}, Response),
+    Response2 = marina:query(<<"SELECT * FROM entries LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok, {result,
+        {result_metadata,17,
+            [{column_spec,<<"test">>,<<"entries">>,<<"col1">>,ascii},
+             {column_spec,<<"test">>,<<"entries">>,<<"col10">>,uid},
+             {column_spec,<<"test">>,<<"entries">>,<<"col11">>,varchar},
+             {column_spec,<<"test">>,<<"entries">>,<<"col12">>,varint},
+             {column_spec,<<"test">>,<<"entries">>,<<"col13">>,timeuuid},
+             {column_spec,<<"test">>,<<"entries">>,<<"col14">>,inet},
+             {column_spec,<<"test">>,<<"entries">>,<<"col15">>,{list,varchar}},
+             {column_spec,<<"test">>,<<"entries">>,<<"col16">>,{map,varchar,varchar}},
+             {column_spec,<<"test">>,<<"entries">>,<<"col17">>,{set,varchar}},
+             {column_spec,<<"test">>,<<"entries">>,<<"col2">>,bigint},
+             {column_spec,<<"test">>,<<"entries">>,<<"col3">>,blob},
+             {column_spec,<<"test">>,<<"entries">>,<<"col4">>,boolean},
+             {column_spec,<<"test">>,<<"entries">>,<<"col5">>,decimal},
+             {column_spec,<<"test">>,<<"entries">>,<<"col6">>,double},
+             {column_spec,<<"test">>,<<"entries">>,<<"col7">>,float},
+             {column_spec,<<"test">>,<<"entries">>,<<"col8">>,int},
+             {column_spec,<<"test">>,<<"entries">>,<<"col9">>,timestamp}]},
+            0, []}}, Response2).
 
 test_query_no_metadata() ->
     Response2 = marina:query(?QUERY1, ?CONSISTENCY_ONE, [{skip_metadata, true}], ?TEST_TIMEOUT),
@@ -180,6 +207,15 @@ cleanup() ->
     error_logger:tty(false),
     application:stop(marina),
     error_logger:tty(true).
+
+datatypes_columns(Cols) ->
+    list_to_binary(datatypes_columns(1, Cols)).
+
+datatypes_columns(_I, []) ->
+    [];
+datatypes_columns(I, [ColumnType|Rest]) ->
+    Column = io_lib:format("col~B ~s, ", [I, ColumnType]),
+    [Column | datatypes_columns(I+1, Rest)].
 
 receive_loop(0) -> [];
 receive_loop(N) ->

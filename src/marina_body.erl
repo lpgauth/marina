@@ -193,4 +193,14 @@ decode_type(<<14:16, Rest/binary>>) ->
 decode_type(<<15:16, Rest/binary>>) ->
     {timeuuid, Rest};
 decode_type(<<16:16, Rest/binary>>) ->
-    {inet, Rest}.
+    {inet, Rest};
+decode_type(<<0,32, Rest/binary>>) ->
+    {Type, Rest2} = decode_type(Rest),
+    {{list, Type}, Rest2};
+decode_type(<<0,33, Rest/binary>>) ->
+    {KeyType, Rest2} = decode_type(Rest),
+    {ValueType, Rest3} = decode_type(Rest2),
+    {{map, KeyType, ValueType}, Rest3};
+decode_type(<<0,34, Rest/binary >>) ->
+    {Type, Rest2} = decode_type(Rest),
+    {{set, Type}, Rest2}.

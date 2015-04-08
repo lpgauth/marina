@@ -65,11 +65,6 @@ Non-blocking Erlang Cassandra CQL3 client
     <td>enable lz4 compression</td></tr>
 </table>
 
-### TODO
-
-* batched queries
-* token aware load balancing
-
 ## API
 
 TODO
@@ -173,6 +168,11 @@ make eunit
 make build-plt && make dialyze
 make xref
 ```
+
+## TODO
+
+* batched queries
+* token aware load balancing
 
 ## License
 

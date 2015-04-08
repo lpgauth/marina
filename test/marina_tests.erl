@@ -4,6 +4,10 @@
 
 -compile(export_all).
 
+-define(DATA_TYPES, [ascii, bigint, blob, boolean, decimal,
+    double, float, int, timestamp, uuid, varchar, varint,
+    timeuuid, inet, 'list<text>', 'map<text,text>', 'set<text>'
+]).
 -define(T, fun (Test) -> test(Test) end).
 -define(TEST_TIMEOUT, 10000).
 -define(VAR_KEYSPACE, {keyspace, <<"test">>}).
@@ -166,16 +170,25 @@ test_query() ->
 
 test_query_metedata_types() ->
     marina:query(<<"DROP TABLE entries;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
-    Columns = datatypes_columns([ascii, bigint, blob, boolean, decimal, double,
-        float, int, timestamp, uuid, varchar, varint, timeuuid, inet,
-        'list<text>', 'map<text,text>', 'set<text>']),
+    Columns = datatypes_columns(?DATA_TYPES),
     Query = <<"CREATE TABLE entries(",  Columns/binary, " PRIMARY KEY(col1));">>,
     Response = marina:query(Query, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
 
     ?assertEqual({ok,{<<"CREATED">>,<<"TABLE">>,{<<"test">>,<<"entries">>}}}, Response),
-    Response2 = marina:query(<<"SELECT * FROM entries LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
 
-    ?assertEqual({ok, {result,
+    Values = [
+        <<"hello">>,
+        marina_types:encode_long(100000),
+        <<"blob">>,
+        marina_types:encode_boolean(true)
+    ] ,
+    Response2 = marina:query(<<"INSERT INTO entries (col1, col2, col3, col4) VALUES (?, ?, ?, ?)">>, Values, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok, undefined}, Response2),
+
+    Response3 = marina:query(<<"SELECT * FROM entries LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok,{result,
         {result_metadata,17,
             [{column_spec,<<"test">>,<<"entries">>,<<"col1">>,ascii},
              {column_spec,<<"test">>,<<"entries">>,<<"col10">>,uid},
@@ -193,8 +206,11 @@ test_query_metedata_types() ->
              {column_spec,<<"test">>,<<"entries">>,<<"col6">>,double},
              {column_spec,<<"test">>,<<"entries">>,<<"col7">>,float},
              {column_spec,<<"test">>,<<"entries">>,<<"col8">>,int},
-             {column_spec,<<"test">>,<<"entries">>,<<"col9">>,timestamp}], undefined},
-    0, []}}, Response2).
+             {column_spec,<<"test">>,<<"entries">>,<<"col9">>,timestamp}],
+            undefined},
+        1,
+        [[<<"hello">>,null,null,null,null,null,null,null,null,<<0,0,0,0,0,1,134,160>>,<<"blob">>,<<1>>,null,null,null,null,null]]
+    }}, Response3).
 
 test_query_no_metadata() ->
     Response2 = marina:query(?QUERY1, ?CONSISTENCY_ONE, [{skip_metadata, true}], ?TEST_TIMEOUT),

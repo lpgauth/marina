@@ -70,6 +70,10 @@ Non-blocking Erlang Cassandra CQL3 client
 * batched queries
 * token aware load balancing
 
+## API
+
+TODO
+
 ## Examples
 
 ```erlang

@@ -201,5 +201,5 @@ setup(EnvironmentVars) ->
     marina:query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
 
     error_logger:tty(false),
-    application:start(marina),
+    marina_app:start(),
     error_logger:tty(true).

@@ -161,46 +161,46 @@ decode_rows(Bin, Count, ColumnsCount, Acc) ->
     {Row, Rest} = decode_columns(Bin, ColumnsCount),
     decode_rows(Rest, Count - 1, ColumnsCount, [Row | Acc]).
 
-decode_type(<<0:16, Rest/binary>>) ->
+decode_type(<<16#0:16, Rest/binary>>) ->
     {Type, Rest2} = marina_types:decode_string(Rest),
     {Type, Rest2};
-decode_type(<<1:16, Rest/binary>>) ->
+decode_type(<<16#1:16, Rest/binary>>) ->
     {ascii, Rest};
-decode_type(<<2:16, Rest/binary>>) ->
+decode_type(<<16#2:16, Rest/binary>>) ->
     {bigint, Rest};
-decode_type(<<3:16, Rest/binary>>) ->
+decode_type(<<16#3:16, Rest/binary>>) ->
     {blob, Rest};
-decode_type(<<4:16, Rest/binary>>) ->
+decode_type(<<16#4:16, Rest/binary>>) ->
     {boolean, Rest};
-decode_type(<<5:16, Rest/binary>>) ->
+decode_type(<<16#5:16, Rest/binary>>) ->
     {counter, Rest};
-decode_type(<<6:16, Rest/binary>>) ->
+decode_type(<<16#6:16, Rest/binary>>) ->
     {decimal, Rest};
-decode_type(<<7:16, Rest/binary>>) ->
+decode_type(<<16#7:16, Rest/binary>>) ->
     {double, Rest};
-decode_type(<<8:16, Rest/binary>>) ->
+decode_type(<<16#8:16, Rest/binary>>) ->
     {float, Rest};
-decode_type(<<9:16, Rest/binary>>) ->
+decode_type(<<16#9:16, Rest/binary>>) ->
     {int, Rest};
-decode_type(<<11:16, Rest/binary>>) ->
+decode_type(<<16#B:16, Rest/binary>>) ->
     {timestamp, Rest};
-decode_type(<<12:16, Rest/binary>>) ->
+decode_type(<<16#C:16, Rest/binary>>) ->
     {uid, Rest};
-decode_type(<<13:16, Rest/binary>>) ->
+decode_type(<<16#D:16, Rest/binary>>) ->
     {varchar, Rest};
-decode_type(<<14:16, Rest/binary>>) ->
+decode_type(<<16#E:16, Rest/binary>>) ->
     {varint, Rest};
-decode_type(<<15:16, Rest/binary>>) ->
+decode_type(<<16#F:16, Rest/binary>>) ->
     {timeuuid, Rest};
-decode_type(<<16:16, Rest/binary>>) ->
+decode_type(<<16#10:16, Rest/binary>>) ->
     {inet, Rest};
-decode_type(<<0,32, Rest/binary>>) ->
+decode_type(<<16#20:16, Rest/binary>>) ->
     {Type, Rest2} = decode_type(Rest),
     {{list, Type}, Rest2};
-decode_type(<<0,33, Rest/binary>>) ->
+decode_type(<<16#21:16, Rest/binary>>) ->
     {KeyType, Rest2} = decode_type(Rest),
     {ValueType, Rest3} = decode_type(Rest2),
     {{map, KeyType, ValueType}, Rest3};
-decode_type(<<0,34, Rest/binary >>) ->
+decode_type(<<16#22:16, Rest/binary >>) ->
     {Type, Rest2} = decode_type(Rest),
     {{set, Type}, Rest2}.

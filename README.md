@@ -161,6 +161,11 @@ Shell got {marina,#Ref<0.0.0.124>,
   </tr>
 </table>
 
+## TODO
+
+* batched queries
+* token aware load balancing
+
 ## Tests
 
 ```makefile
@@ -168,11 +173,6 @@ make eunit
 make build-plt && make dialyze
 make xref
 ```
-
-## TODO
-
-* batched queries
-* token aware load balancing
 
 ## License
 

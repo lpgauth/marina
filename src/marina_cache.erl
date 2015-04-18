@@ -4,7 +4,8 @@
 -export([
     get/1,
     init/0,
-    put/2
+    put/2,
+    remove/1
 ]).
 
 -define(CACHE_TABLE_ID, marina_cache).
@@ -34,3 +35,12 @@ init() ->
 
 put(Key, Value) ->
     ets:insert(?CACHE_TABLE_ID, {Key, Value}).
+
+-spec remove(binary()) -> true | {error, not_found}.
+
+remove(Key) ->
+    try ets:delete(?CACHE_TABLE_ID, Key)
+    catch
+        error:badarg ->
+            {error, not_found}
+    end.

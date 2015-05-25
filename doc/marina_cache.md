@@ -10,7 +10,7 @@
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get-1">get/1</a></td><td></td></tr><tr><td valign="top"><a href="#init-0">init/0</a></td><td></td></tr><tr><td valign="top"><a href="#put-2">put/2</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get-1">get/1</a></td><td></td></tr><tr><td valign="top"><a href="#init-0">init/0</a></td><td></td></tr><tr><td valign="top"><a href="#put-2">put/2</a></td><td></td></tr><tr><td valign="top"><a href="#remove-1">remove/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -46,6 +46,17 @@ init() -&gt; marina_cache
 
 <pre><code>
 put(Key::binary(), Value::term()) -&gt; true
+</code></pre>
+<br />
+
+
+<a name="remove-1"></a>
+
+### remove/1 ###
+
+
+<pre><code>
+remove(Key::binary()) -&gt; true | {error, not_found}
 </code></pre>
 <br />
 

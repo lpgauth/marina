@@ -40,4 +40,3 @@ out(ServerName, Stream) ->
     Item = ets:lookup_element(?QUEUE_TABLE_ID, Key, 2),
     ets:delete(?QUEUE_TABLE_ID, Key),
     Item.
-

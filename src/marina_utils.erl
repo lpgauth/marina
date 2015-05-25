@@ -2,8 +2,8 @@
 -include("marina.hrl").
 
 -export([
-    child_specs/0,
     child_name/1,
+    child_specs/0,
     info_msg/2,
     lookup/3,
     pack/1,
@@ -13,16 +13,16 @@
 ]).
 
 %% public
+-spec child_name(integer()) -> atom().
+
+child_name(N) ->
+    list_to_atom(?SERVER_BASE_NAME ++ integer_to_list(N)).
+
 -spec child_specs() -> [supervisor:child_spec()].
 
 child_specs() ->
     PoolSize = application:get_env(?APP, pool_size, ?DEFAULT_POOL_SIZE),
     [child_spec(N) || N <- lists:seq(1, PoolSize)].
-
--spec child_name(integer()) -> atom().
-
-child_name(N) ->
-    list_to_atom(?SERVER_BASE_NAME ++ integer_to_list(N)).
 
 -spec info_msg(string(), [term()]) -> ok.
 

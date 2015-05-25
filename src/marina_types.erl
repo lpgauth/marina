@@ -13,6 +13,7 @@
     decode_string_map/1,
     decode_string_multimap/1,
     decode_uuid/1,
+    encode_boolean/1,
     encode_bytes/1,
     encode_int/1,
     encode_long/1,
@@ -26,8 +27,10 @@
 ]).
 
 %% public
--spec decode_bytes(binary()) -> {binary(), binary()}.
+-spec decode_bytes(binary()) -> {null, binary()} | {binary(), binary()}.
 
+decode_bytes(<<255,255,255,255, Rest/binary>>) ->
+    {null, Rest};
 decode_bytes(Bin) ->
     {Pos, Rest} = decode_int(Bin),
     split_binary(Rest, Pos).
@@ -55,6 +58,8 @@ decode_short(<<Value:16, Rest/binary>>) ->
 
 -spec decode_short_bytes(binary()) -> {binary(), binary()}.
 
+decode_short_bytes(<<255,255, Rest/binary>>) ->
+    {null, Rest};
 decode_short_bytes(Bin) ->
     {Pos, Rest} = decode_short(Bin),
     split_binary(Rest, Pos).
@@ -88,8 +93,15 @@ decode_string_multimap(Bin) ->
 decode_uuid(Bin) ->
     split_binary(Bin, 16).
 
+-spec encode_boolean(boolean()) -> binary().
+
+encode_boolean(false) -> <<0>>;
+encode_boolean(true) -> <<1>>.
+
 -spec encode_bytes(binary()) -> binary().
 
+encode_bytes(null) ->
+    <<255,255,255,255>>;
 encode_bytes(Value) ->
     <<(encode_int(size(Value)))/binary, Value/binary>>.
 
@@ -114,6 +126,8 @@ encode_short(Value) ->
 
 -spec encode_short_bytes(binary()) -> binary().
 
+encode_short_bytes(null) ->
+    <<255,255>>;
 encode_short_bytes(Value) ->
     <<(encode_short(size(Value)))/binary, Value/binary>>.
 

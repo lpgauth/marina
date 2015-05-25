@@ -133,7 +133,14 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
     Timestamp = os:timestamp(),
     case marina_cache:get(Query) of
         {ok, StatementId} ->
-            execute(StatementId, Values, ConsistencyLevel, Flags, Timeout);
+            case execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) of
+                {error, {9472, _}} ->
+                    marina_cache:remove(Query),
+                    Timeout3 = marina_utils:timeout(Timestamp, Timeout),
+                    reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout3);
+                Response ->
+                    Response
+            end;
         {error, not_found} ->
             case prepare(Query, Timeout) of
                 {ok, StatementId} ->

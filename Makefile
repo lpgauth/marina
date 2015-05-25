@@ -34,7 +34,7 @@ eunit:
 	@echo "Running rebar eunit..."
 	@$(REBAR) skip_deps=true eunit
 
-test: all eunit
+test: all eunit dialyze xref
 
 xref:
 	@$(REBAR) skip_deps=true xref

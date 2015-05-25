@@ -1,29 +1,7 @@
 -module(marina_tests).
--include_lib("eunit/include/eunit.hrl").
--include_lib("marina/include/marina.hrl").
+-include("test.hrl").
 
 -compile(export_all).
-
--define(T, fun (Test) -> test(Test) end).
--define(TEST_TIMEOUT, 10000).
--define(VAR_KEYSPACE, {keyspace, <<"test">>}).
-
--define(QUERY1, <<"SELECT * FROM users LIMIT 1;">>).
--define(QUERY1_RESULT, {ok, {result,
-    {result_metadata, 4, [
-        {column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
-        {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
-        {column_spec,<<"test">>,<<"users">>,<<"column2">>,varchar},
-        {column_spec,<<"test">>,<<"users">>,<<"value">>,blob}
-    ], undefined},
-    1, [
-        [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>, <<"test">>, <<"test2">>, <<0,0,0,0>>]
-]}}).
-
--define(QUERY2, <<"SELECT * FROM users WHERE key = ?;">>).
--define(QUERY2_VALUES, [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>]).
-
--define(QUERY3, <<"SELECT * FROM users WHERE key = 99492dfe-d94a-11e4-af39-58f44110757d;">>).
 
 %% runners
 marina_test_() ->
@@ -46,7 +24,8 @@ marina_test_() ->
         ?T(test_reusable_query_invalid_query),
         ?T(test_schema_changes),
         ?T(test_timeout_async),
-        ?T(test_timeout_sync)
+        ?T(test_timeout_sync),
+        ?T(test_tuples)
     ]}}.
 
 marina_compression_test_() ->
@@ -166,16 +145,25 @@ test_query() ->
 
 test_query_metedata_types() ->
     marina:query(<<"DROP TABLE entries;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
-    Columns = datatypes_columns([ascii, bigint, blob, boolean, decimal, double,
-        float, int, timestamp, uuid, varchar, varint, timeuuid, inet,
-        'list<text>', 'map<text,text>', 'set<text>']),
+    Columns = datatypes_columns(?DATA_TYPES),
     Query = <<"CREATE TABLE entries(",  Columns/binary, " PRIMARY KEY(col1));">>,
     Response = marina:query(Query, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
 
     ?assertEqual({ok,{<<"CREATED">>,<<"TABLE">>,{<<"test">>,<<"entries">>}}}, Response),
-    Response2 = marina:query(<<"SELECT * FROM entries LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
 
-    ?assertEqual({ok, {result,
+    Values = [
+        <<"hello">>,
+        marina_types:encode_long(100000),
+        <<"blob">>,
+        marina_types:encode_boolean(true)
+    ] ,
+    Response2 = marina:query(<<"INSERT INTO entries (col1, col2, col3, col4) VALUES (?, ?, ?, ?)">>, Values, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok, undefined}, Response2),
+
+    Response3 = marina:query(<<"SELECT * FROM entries LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok,{result,
         {result_metadata,17,
             [{column_spec,<<"test">>,<<"entries">>,<<"col1">>,ascii},
              {column_spec,<<"test">>,<<"entries">>,<<"col10">>,uid},
@@ -193,8 +181,11 @@ test_query_metedata_types() ->
              {column_spec,<<"test">>,<<"entries">>,<<"col6">>,double},
              {column_spec,<<"test">>,<<"entries">>,<<"col7">>,float},
              {column_spec,<<"test">>,<<"entries">>,<<"col8">>,int},
-             {column_spec,<<"test">>,<<"entries">>,<<"col9">>,timestamp}], undefined},
-    0, []}}, Response2).
+             {column_spec,<<"test">>,<<"entries">>,<<"col9">>,timestamp}],
+            undefined},
+        1,
+        [[<<"hello">>,null,null,null,null,null,null,null,null,<<0,0,0,0,0,1,134,160>>,<<"blob">>,<<1>>,null,null,null,null,null]]
+    }}, Response3).
 
 test_query_no_metadata() ->
     Response2 = marina:query(?QUERY1, ?CONSISTENCY_ONE, [{skip_metadata, true}], ?TEST_TIMEOUT),
@@ -254,6 +245,20 @@ test_timeout_sync() ->
     Response = marina:query(?QUERY1, ?CONSISTENCY_ONE, [], 0),
 
     ?assertEqual({error, timeout}, Response).
+
+test_tuples() ->
+    marina:query(<<"CREATE TABLE collect_things (k int PRIMARY KEY, v frozen <tuple<int, text, float>>);">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    Response = marina:query(<<"SELECT * FROM test.collect_things;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+
+    ?assertEqual({ok,{result,
+        {result_metadata,2,
+            [{column_spec,<<"test">>,<<"collect_things">>,<<"k">>,int},
+             {column_spec,<<"test">>,<<"collect_things">>,<<"v">>,
+                 {tuple,[int,varchar,float]}}],
+            undefined},
+    0,[]}}, Response),
+
+    marina:query(<<"DROP TABLE collect_things;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT).
 
 %% utils
 cleanup() ->

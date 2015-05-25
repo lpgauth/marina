@@ -11,8 +11,8 @@ Non-blocking Erlang Cassandra CQL3 client
 
 ### Features
 
-* Binary protocol version 3
-* CQL protocol 3.2.0
+* Native protocol v3
+* CQL spec 3.2.0
 * Performance optimized
 * Request pipelining
 * Backpressure via backlog (OOM protection)
@@ -65,10 +65,9 @@ Non-blocking Erlang Cassandra CQL3 client
     <td>enable lz4 compression</td></tr>
 </table>
 
-### TODO
+## API
 
-* batched queries
-* token aware load balancing
+TODO
 
 ## Examples
 
@@ -161,6 +160,11 @@ Shell got {marina,#Ref<0.0.0.124>,
     <td><a href="http://github.com/lpgauth/marina/blob/master/doc/marina_utils.md" class="module">marina_utils</a></td>
   </tr>
 </table>
+
+## TODO
+
+* batched queries
+* token aware load balancing
 
 ## Tests
 

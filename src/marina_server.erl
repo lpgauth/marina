@@ -201,7 +201,7 @@ sync_msg(Socket, Msg) ->
     end.
 
 tcp_close(#state {name = Name} = State) ->
-    Msg = {error, tcp_close},
+    Msg = {error, tcp_closed},
     Items = marina_queue:empty(Name),
     [reply(Name, Ref, From, Msg) || {_, {Ref, From}} <- Items],
     connect_retry(State).

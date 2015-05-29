@@ -1,4 +1,6 @@
-# marina #
+# marina
+
+__Author:__ Louis-Philippe Gauthier.
 
 Non-blocking Erlang Cassandra CQL3 client
 

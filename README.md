@@ -71,8 +71,7 @@ Non-blocking Erlang Cassandra CQL3 client
 </table>
 
 ## API
-
-<a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md" class="module">marina</a>
+<a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md#index" class="module">Function Index</a>
 
 ## Examples
 

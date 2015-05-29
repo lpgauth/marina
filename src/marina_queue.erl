@@ -14,9 +14,9 @@
 
 empty(ServerName) ->
     Match = {{ServerName, '_'}, '_'},
-    Items = ets:match_object(?QUEUE_TABLE_ID, Match),
+    Matches = ets:match_object(?QUEUE_TABLE_ID, Match),
     ets:match_delete(?QUEUE_TABLE_ID, Match),
-    Items.
+    [Item || {_, Item} <- Matches].
 
 -spec init() -> ?QUEUE_TABLE_ID.
 

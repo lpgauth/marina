@@ -1,5 +1,3 @@
-
-
 # marina #
 
 Non-blocking Erlang Cassandra CQL3 client
@@ -64,11 +62,17 @@ Non-blocking Erlang Cassandra CQL3 client
     <td>false</td>
     <td>enable lz4 compression</td>
   </tr>
+  <tr>
+    <td>reconnect</td>
+    <td>boolean()</td>
+    <td>true</td>
+    <td>reconnect closed connections</td>
+  </tr>
 </table>
 
 ## API
 
-TODO
+<a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md" class="module">marina</a>
 
 ## Examples
 
@@ -177,6 +181,7 @@ make xref
 
 ## License
 
+```license
 The MIT License (MIT)
 
 Copyright (c) 2015 Louis-Philippe Gauthier
@@ -198,3 +203,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```

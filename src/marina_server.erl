@@ -14,6 +14,7 @@
     keyspace      = undefined,
     name          = undefined,
     port          = undefined,
+    reconnect     = undefined,
     requests      = 0,
     socket        = undefined,
     timer         = undefined
@@ -30,11 +31,12 @@ init(Parent, Name) ->
     self() ! ?CONNECT_RETRY_MSG,
 
     loop(#state {
-        name = Name,
+        frame_flags = frame_flags(),
         ip = application:get_env(?APP, ip, ?DEFAULT_IP),
-        port = application:get_env(?APP, port, ?DEFAULT_PORT),
         keyspace = application:get_env(?APP, keyspace, undefined),
-        frame_flags = frame_flags()
+        name = Name,
+        port = application:get_env(?APP, port, ?DEFAULT_PORT),
+        reconnect = application:get_env(?APP, reconnect, ?DEFAULT_RECONNECT)
     }).
 
 -spec start_link(atom()) -> {ok, pid()}.
@@ -43,11 +45,15 @@ start_link(Name) ->
     proc_lib:start_link(?MODULE, init, [self(), Name]).
 
 %% private
+connect_retry(#state {reconnect = false} = State) ->
+    {ok, State#state {
+        socket = undefined
+    }};
 connect_retry(#state {connect_retry = ConnectRetry} = State) ->
     {ok, State#state {
+        connect_retry = ConnectRetry + 1,
         socket = undefined,
-        timer = erlang:send_after(timeout(State), self(), ?CONNECT_RETRY_MSG),
-        connect_retry = ConnectRetry + 1
+        timer = erlang:send_after(timeout(State), self(), ?CONNECT_RETRY_MSG)
     }}.
 
 default_keyspace(#state {
@@ -58,9 +64,9 @@ default_keyspace(#state {
     inet:setopts(Socket, [{active, true}]),
     {ok, State};
 default_keyspace(#state {
-        socket = Socket,
+        frame_flags = FrameFlags,
         keyspace = Keyspace,
-        frame_flags = FrameFlags
+        socket = Socket
     } = State) ->
 
     Query = <<"USE \"", Keyspace/binary, "\"">>,
@@ -83,9 +89,9 @@ frame_flags() ->
     end.
 
 handle_msg(?CONNECT_RETRY_MSG, #state {
+        frame_flags = FrameFlags,
         ip = Ip,
-        port = Port,
-        frame_flags = FrameFlags
+        port = Port
     } = State) ->
 
     Opts = [
@@ -122,10 +128,10 @@ handle_msg({call, Ref, From, _Msg}, #state {
     reply(Name, Ref, From, {error, no_socket}),
     {ok, State};
 handle_msg({call, Ref, From, Call}, #state {
-        socket = Socket,
-        requests = Requests,
+        frame_flags = FrameFlags,
         name = Name,
-        frame_flags = FrameFlags
+        requests = Requests,
+        socket = Socket
     } = State) ->
 
     Stream = Requests rem ?MAX_STREAM_ID,
@@ -203,7 +209,7 @@ sync_msg(Socket, Msg) ->
 tcp_close(#state {name = Name} = State) ->
     Msg = {error, tcp_closed},
     Items = marina_queue:empty(Name),
-    [reply(Name, Ref, From, Msg) || {_, {Ref, From}} <- Items],
+    [reply(Name, Ref, From, Msg) || {Ref, From} <- Items],
     connect_retry(State).
 
 timeout(#state {connect_retry = ConnectRetry}) when ConnectRetry > 10 ->

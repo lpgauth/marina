@@ -62,7 +62,8 @@ Non-blocking Erlang Cassandra CQL3 client
     <td>compression</td>
     <td>boolean()</td>
     <td>false</td>
-    <td>enable lz4 compression</td></tr>
+    <td>enable lz4 compression</td>
+  </tr>
 </table>
 
 ## API

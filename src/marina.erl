@@ -153,6 +153,17 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
     end.
 
 %% private
+async_call(Msg, Pid) ->
+    Ref = make_ref(),
+    Server = random_server(),
+    case marina_backlog:check(Server) of
+        true ->
+            Server ! {call, Ref, Pid, Msg},
+            {ok, Ref};
+        _ ->
+            {error, backlog_full}
+    end.
+
 call(Msg, Timeout) ->
     case async_call(Msg, self()) of
         {ok, Ref} ->
@@ -164,17 +175,6 @@ call(Msg, Timeout) ->
             end;
         {error, Reason} ->
             {error, Reason}
-    end.
-
-async_call(Msg, Pid) ->
-    Ref = make_ref(),
-    Server = random_server(),
-    case marina_backlog:check(Server) of
-        true ->
-            Server ! {call, Ref, Pid, Msg},
-            {ok, Ref};
-        _ ->
-            {error, backlog_full}
     end.
 
 random_server() ->

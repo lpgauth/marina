@@ -83,12 +83,12 @@ execute(StatementId, ConsistencyLevel, Flags, Timeout) ->
     {ok, term()} | {error, term()}.
 
 execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) ->
-    response(call({execute, StatementId, Values, ConsistencyLevel, Flags}, Timeout)).
+    call({execute, StatementId, Values, ConsistencyLevel, Flags}, Timeout).
 
 -spec prepare(query(), timeout()) -> {ok, term()} | {error, term()}.
 
 prepare(Query, Timeout) ->
-    response(call({prepare, Query}, Timeout)).
+    call({prepare, Query}, Timeout).
 
 -spec query(query(), consistency(), [flag()], timeout()) ->
     {ok, term()} | {error, term()}.
@@ -100,7 +100,7 @@ query(Query, ConsistencyLevel, Flags, Timeout) ->
     {ok, term()} | {error, term()}.
 
 query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
-    response(call({query, Query, Values, ConsistencyLevel, Flags}, Timeout)).
+    call({query, Query, Values, ConsistencyLevel, Flags}, Timeout).
 
 -spec receive_response(reference(), non_neg_integer()) -> {ok, term()} | {error, term()}.
 
@@ -164,7 +164,7 @@ async_call(Msg, Pid) ->
         true ->
             Server ! {call, Ref, Pid, Msg},
             {ok, Ref};
-        _ ->
+        false ->
             {error, backlog_full}
     end.
 

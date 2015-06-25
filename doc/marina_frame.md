@@ -5,8 +5,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
-
 <a name="types"></a>
 
 ## Data Types ##
@@ -17,11 +15,9 @@
 ### <a name="type-frame">frame()</a> ###
 
 
-
 <pre><code>
 frame() = #frame{flags = undefined | 0 | 1, stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | iolist() | binary()}
 </code></pre>
-
 
 <a name="index"></a>
 
@@ -39,32 +35,26 @@ frame() = #frame{flags = undefined | 0 | 1, stream = undefined | integer(), opco
 
 ### decode/1 ###
 
-
 <pre><code>
 decode(Bin::binary()) -&gt; {binary(), [<a href="#type-frame">frame()</a>]}
 </code></pre>
 <br />
 
-
 <a name="encode-1"></a>
 
 ### encode/1 ###
-
 
 <pre><code>
 encode(Frame::<a href="#type-frame">frame()</a>) -&gt; iolist()
 </code></pre>
 <br />
 
-
 <a name="pending_size-1"></a>
 
 ### pending_size/1 ###
-
 
 <pre><code>
 pending_size(X1::binary()) -&gt; pos_integer() | undefined
 </code></pre>
 <br />
-
 

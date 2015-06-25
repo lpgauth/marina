@@ -4,7 +4,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
 <a name="index"></a>
 
 ## Function Index ##
@@ -21,21 +20,17 @@
 
 ### init/2 ###
 
-
 <pre><code>
 init(Parent::pid(), Name::atom()) -&gt; no_return()
 </code></pre>
 <br />
 
-
 <a name="start_link-1"></a>
 
 ### start_link/1 ###
-
 
 <pre><code>
 start_link(Name::atom()) -&gt; {ok, pid()}
 </code></pre>
 <br />
-
 

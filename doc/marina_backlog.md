@@ -4,7 +4,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
 <a name="index"></a>
 
 ## Function Index ##
@@ -21,43 +20,35 @@
 
 ### check/1 ###
 
-
 <pre><code>
 check(ServerName::atom()) -&gt; boolean()
 </code></pre>
 <br />
 
-
 <a name="decrement-1"></a>
 
 ### decrement/1 ###
-
 
 <pre><code>
 decrement(ServerName::atom()) -&gt; non_neg_integer() | {error, tid_missing}
 </code></pre>
 <br />
 
-
 <a name="init-0"></a>
 
 ### init/0 ###
-
 
 <pre><code>
 init() -&gt; marina_backlog
 </code></pre>
 <br />
 
-
 <a name="new-1"></a>
 
 ### new/1 ###
-
 
 <pre><code>
 new(ServerName::atom()) -&gt; true
 </code></pre>
 <br />
-
 

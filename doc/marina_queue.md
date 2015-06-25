@@ -4,7 +4,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
 <a name="index"></a>
 
 ## Function Index ##
@@ -21,43 +20,35 @@
 
 ### empty/1 ###
 
-
 <pre><code>
 empty(ServerName::atom()) -&gt; [term()]
 </code></pre>
 <br />
 
-
 <a name="in-3"></a>
 
 ### in/3 ###
-
 
 <pre><code>
 in(ServerName::atom(), Stream::non_neg_integer(), Item::term()) -&gt; true
 </code></pre>
 <br />
 
-
 <a name="init-0"></a>
 
 ### init/0 ###
-
 
 <pre><code>
 init() -&gt; marina_queue
 </code></pre>
 <br />
 
-
 <a name="out-2"></a>
 
 ### out/2 ###
-
 
 <pre><code>
 out(ServerName::atom(), Stream::non_neg_integer()) -&gt; term()
 </code></pre>
 <br />
-
 

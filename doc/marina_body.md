@@ -5,8 +5,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
-
 <a name="types"></a>
 
 ## Data Types ##
@@ -17,11 +15,9 @@
 ### <a name="type-frame">frame()</a> ###
 
 
-
 <pre><code>
 frame() = #frame{flags = undefined | 0 | 1, stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | iolist() | binary()}
 </code></pre>
-
 
 <a name="index"></a>
 
@@ -39,10 +35,8 @@ frame() = #frame{flags = undefined | 0 | 1, stream = undefined | integer(), opco
 
 ### decode/1 ###
 
-
 <pre><code>
 decode(Frame::<a href="#type-frame">frame()</a>) -&gt; {ok, term()} | {error, atom()}
 </code></pre>
 <br />
-
 

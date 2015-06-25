@@ -5,8 +5,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
-
 <a name="types"></a>
 
 ## Data Types ##
@@ -17,7 +15,6 @@
 ### <a name="type-buffer">buffer()</a> ###
 
 
-
 <pre><code>
 buffer() = #buffer{buffered = undefined | iolist(), current = undefined | non_neg_integer(), pending = non_neg_integer() | undefined}
 </code></pre>
@@ -25,15 +22,12 @@ buffer() = #buffer{buffered = undefined | iolist(), current = undefined | non_ne
 
 
 
-
 ### <a name="type-frame">frame()</a> ###
-
 
 
 <pre><code>
 frame() = #frame{flags = undefined | 0 | 1, stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | iolist() | binary()}
 </code></pre>
-
 
 <a name="index"></a>
 
@@ -51,21 +45,17 @@ frame() = #frame{flags = undefined | 0 | 1, stream = undefined | integer(), opco
 
 ### decode/2 ###
 
-
 <pre><code>
 decode(Data::binary(), Buffer::<a href="#type-buffer">buffer()</a>) -&gt; {[<a href="#type-frame">frame()</a>], <a href="#type-buffer">buffer()</a>}
 </code></pre>
 <br />
 
-
 <a name="new-0"></a>
 
 ### new/0 ###
-
 
 <pre><code>
 new() -&gt; <a href="#type-buffer">buffer()</a>
 </code></pre>
 <br />
-
 

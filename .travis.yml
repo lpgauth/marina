@@ -1,6 +1,6 @@
 before_install:
   - sudo rm -rf /var/lib/cassandra/*
-  - wget http://apache.mirror.gtcomm.net/cassandra/2.1.7/apache-cassandra-2.1.7-bin.tar.gz && tar -xvzf apache-cassandra-2.1.7-bin.tar.gz && sudo sh apache-cassandra-2.1.7/bin/cassandra
+  - wget http://apache.mirror.gtcomm.net/cassandra/2.1.7/apache-cassandra-2.1.7-bin.tar.gz && tar -xvzf apache-cassandra-2.1.7-bin.tar.gz && sudo sh apache-cassandra-2.1.7/bin/cassandra && sleep 10
 language: erlang
 notifications:
   email: false

@@ -1,0 +1,11 @@
+before_install:
+  - sudo rm -rf /var/lib/cassandra/*
+  - wget http://apache.mirror.gtcomm.net/cassandra/2.1.7/apache-cassandra-2.1.7-bin.tar.gz && tar -xvzf apache-cassandra-2.1.7-bin.tar.gz && sudo sh apache-cassandra-2.1.7/bin/cassandra
+language: erlang
+notifications:
+  email: false
+otp_release:
+  - 17.4
+  - R16B03-1
+script: "make build-plt dialyze eunit xref"
+sudo: required

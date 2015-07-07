@@ -4,10 +4,12 @@ __Author:__ Louis-Philippe Gauthier.
 
 Non-blocking Erlang Cassandra CQL3 client
 
+[![Build Status](https://travis-ci.org/lpgauth/marina.svg?branch=master)](https://travis-ci.org/lpgauth/marina)
+
 ### Requirements
 
 * Cassandra 2.1 +
-* Erlang 17.0 +
+* Erlang 16.0 +
 
 ### Features
 

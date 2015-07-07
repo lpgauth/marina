@@ -40,4 +40,3 @@
 
 -define(T, fun (Test) -> test(Test) end).
 -define(TEST_TIMEOUT, 10000).
--define(VAR_KEYSPACE, {keyspace, <<"test">>}).

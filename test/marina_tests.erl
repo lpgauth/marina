@@ -6,7 +6,9 @@
 %% runners
 marina_test_() ->
     {setup,
-        fun () -> setup([?VAR_KEYSPACE]) end,
+        fun () -> setup([
+            {keyspace, <<"test">>}
+        ])end,
         fun (_) -> cleanup() end,
     {inparallel, [
         ?T(test_async_execute),
@@ -30,19 +32,28 @@ marina_test_() ->
 
 marina_compression_test_() ->
     {setup,
-        fun () -> setup([{compression, true}, ?VAR_KEYSPACE]) end,
+        fun () -> setup([
+            {compression, true},
+            {keyspace, <<"test">>}
+        ]) end,
         fun (_) -> cleanup() end,
     [?T(test_query)]}.
 
 marina_connection_error_test_() ->
     {setup,
-        fun () -> setup([?VAR_KEYSPACE, {port, 9043}]) end,
+        fun () -> setup([
+            {keyspace, <<"test">>},
+            {port, 9043}
+        ]) end,
         fun (_) -> cleanup() end,
     [?T(test_no_socket)]}.
 
 marina_backlog_test_() ->
     {setup,
-        fun () -> setup([{backlog_size, 1}, ?VAR_KEYSPACE]) end,
+        fun () -> setup([
+            {backlog_size, 1},
+            {keyspace, <<"test">>}
+        ]) end,
         fun (_) -> cleanup() end,
     {inparallel, [
         ?T(test_backlogfull_async),
@@ -53,15 +64,11 @@ marina_backlog_test_() ->
 test_async_execute() ->
     {ok, StatementId} = marina:prepare(?QUERY1, ?TEST_TIMEOUT),
     {ok, Ref} = marina:async_execute(StatementId, ?CONSISTENCY_ONE, [], self()),
-    {X, _} = marina:receive_response(Ref, ?TEST_TIMEOUT),
-
-    ?assertEqual(ok, X).
+    {ok, _} = marina:receive_response(Ref, ?TEST_TIMEOUT).
 
 test_async_prepare() ->
     {ok, Ref} = marina:async_prepare(?QUERY1, self()),
-    {X, _} = marina:receive_response(Ref, ?TEST_TIMEOUT),
-
-    ?assertEqual(ok, X).
+    {ok, _} = marina:receive_response(Ref, ?TEST_TIMEOUT).
 
 test_async_query() ->
     {ok, Ref} = marina:async_query(?QUERY1, ?CONSISTENCY_ONE, [], self()),
@@ -261,6 +268,12 @@ test_tuples() ->
     marina:query(<<"DROP TABLE collect_things;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT).
 
 %% utils
+boostrap() ->
+    marina:query(<<"DROP KEYSPACE test;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"CREATE TABLE test.users (key uuid, column1 text, column2 text, value blob, PRIMARY KEY (key, column1, column2));">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
+    marina:query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT).
+
 cleanup() ->
     error_logger:tty(false),
     application:stop(marina),
@@ -285,17 +298,15 @@ receive_loop(N) ->
 setup(EnvironmentVars) ->
     error_logger:tty(false),
     application:stop(marina),
-    application:load(marina),
 
-    [application:set_env(?APP, K, V) || {K, V} <- EnvironmentVars],
-
-    marina:query(<<"DROP KEYSPACE test;">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
-    marina:query(<<"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
-    marina:query(<<"CREATE TABLE test.users (key uuid, column1 text, column2 text, value blob, PRIMARY KEY (key, column1, column2));">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
-    marina:query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>, ?CONSISTENCY_ONE, [], ?TEST_TIMEOUT),
-
-    error_logger:tty(false),
     marina_app:start(),
+    boostrap(),
+    application:stop(marina),
+
+    application:load(marina),
+    [application:set_env(?APP, K, V) || {K, V} <- EnvironmentVars],
+    marina_app:start(),
+
     error_logger:tty(true).
 
 test(Test) ->

@@ -1,8 +1,8 @@
 before_install:
   - sudo rm -rf /var/lib/cassandra/*
-  - wget http://apache.mirror.gtcomm.net/cassandra/2.1.7/apache-cassandra-2.1.7-bin.tar.gz
-  - tar -xvzf apache-cassandra-2.1.7-bin.tar.gz
-  - sudo sh apache-cassandra-2.1.7/bin/cassandra > /dev/null
+  - wget http://apache.mirror.gtcomm.net/cassandra/2.1.8/apache-cassandra-2.1.8-bin.tar.gz
+  - tar -xvzf apache-cassandra-2.1.8-bin.tar.gz
+  - sudo sh apache-cassandra-2.1.8/bin/cassandra > /dev/null
 cache:
   directories:
     - $HOME/.cache/rebar3

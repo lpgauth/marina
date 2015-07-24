@@ -1,0 +1,8 @@
+[{<<"shackle">>,
+  {git,"https://github.com/lpgauth/shackle.git",
+       {ref,"569d7718f480219b10da8197f7645d6834f3868d"}},
+  0},
+ {<<"lz4">>,
+  {git,"https://github.com/lpgauth/erlang-lz4.git",
+       {ref,"faf5c9e1bb083adb49638cddecfc9069596c43f9"}},
+  0}].

@@ -2,7 +2,8 @@
 -include("marina.hrl").
 
 -export([
-    start/0
+    start/0,
+    stop/0
 ]).
 
 -behaviour(application).
@@ -12,15 +13,24 @@
 ]).
 
 %% public
--spec start() -> ok.
+-spec start() -> {ok, [atom()]}.
 
 start() ->
-    {ok, _} = application:ensure_all_started(?APP),
-    ok.
+    application:ensure_all_started(?APP).
+
+-spec stop() -> ok | {error, {not_started, ?APP}}.
+
+stop() ->
+    application:stop(?APP).
 
 %% application callbacks
+-spec start(application:start_type(), term()) -> {ok, pid()}.
+
 start(_StartType, _StartArgs) ->
     marina_sup:start_link().
 
+-spec stop(term()) -> ok.
+
 stop(_State) ->
+    shackle_pool:stop(?APP),
     ok.

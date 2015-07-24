@@ -96,12 +96,12 @@ frame_flags([_ | T]) ->
     frame_flags(T).
 
 paging(Flags) ->
-    PageSize2 = case ?L(page_size, Flags, undefined) of
+    PageSize2 = case ?LOOKUP(page_size, Flags, undefined) of
         undefined -> [];
         PageSize ->
             marina_types:encode_int(PageSize)
     end,
-    PagingState2 = case ?L(paging_state, Flags, undefined) of
+    PagingState2 = case ?LOOKUP(paging_state, Flags, undefined) of
         undefined -> [];
         PagingState ->
             marina_types:encode_bytes(PagingState)

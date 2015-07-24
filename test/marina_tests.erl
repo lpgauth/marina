@@ -1,33 +1,29 @@
 -module(marina_tests).
 -include("test.hrl").
 
--compile(export_all).
-
 %% runners
 marina_test_() ->
     {setup,
         fun () -> setup([
             {keyspace, <<"test">>}
-        ])end,
+        ]) end,
         fun (_) -> cleanup() end,
     {inparallel, [
-        ?T(test_async_execute),
-        ?T(test_async_prepare),
-        ?T(test_async_query),
-        ?T(test_async_reusable_query),
-        ?T(test_async_reusable_query_invalid_query),
-        ?T(test_counters),
-        ?T(test_execute),
-        ?T(test_paging),
-        ?T(test_query),
-        ?T(test_query_metedata_types),
-        ?T(test_query_no_metadata),
-        ?T(test_reusable_query),
-        ?T(test_reusable_query_invalid_query),
-        ?T(test_schema_changes),
-        ?T(test_timeout_async),
-        ?T(test_timeout_sync),
-        ?T(test_tuples)
+        fun async_execute_subtest/0,
+        fun async_prepare_subtest/0,
+        fun async_query_subtest/0,
+        fun async_reusable_query_subtest/0,
+        fun async_reusable_query_invalid_query_subtest/0,
+        fun counters_subtest/0,
+        fun execute_subtest/0,
+        fun paging_subtest/0,
+        fun query_subtest/0,
+        fun query_metedata_types_subtest/0,
+        fun query_no_metadata_subtest/0,
+        fun reusable_query_subtest/0,
+        fun reusable_query_invalid_query_subtest/0,
+        fun schema_changes_subtest/0,
+        fun tuples_subtest/0
     ]}}.
 
 marina_compression_test_() ->
@@ -37,46 +33,26 @@ marina_compression_test_() ->
             {keyspace, <<"test">>}
         ]) end,
         fun (_) -> cleanup() end,
-    [?T(test_query)]}.
-
-marina_connection_error_test_() ->
-    {setup,
-        fun () -> setup([
-            {keyspace, <<"test">>},
-            {port, 9043}
-        ]) end,
-        fun (_) -> cleanup() end,
-    [?T(test_no_socket)]}.
-
-marina_backlog_test_() ->
-    {setup,
-        fun () -> setup([
-            {backlog_size, 1},
-            {keyspace, <<"test">>}
-        ]) end,
-        fun (_) -> cleanup() end,
-    {inparallel, [
-        ?T(test_backlogfull_async),
-        ?T(test_backlogfull_sync)
-    ]}}.
+        [fun query_subtest/0]
+    }.
 
 %% tests
-test_async_execute() ->
+async_execute_subtest() ->
     {ok, StatementId} = marina:prepare(?QUERY1, ?TIMEOUT),
     {ok, Ref} = marina:async_execute(StatementId, ?CONSISTENCY_ONE, [], self()),
     {ok, _} = marina:receive_response(Ref, ?TIMEOUT).
 
-test_async_prepare() ->
+async_prepare_subtest() ->
     {ok, Ref} = marina:async_prepare(?QUERY1, self()),
     {ok, _} = marina:receive_response(Ref, ?TIMEOUT).
 
-test_async_query() ->
+async_query_subtest() ->
     {ok, Ref} = marina:async_query(?QUERY1, ?CONSISTENCY_ONE, [], self()),
     Response = marina:receive_response(Ref, ?TIMEOUT),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
-test_async_reusable_query() ->
+async_reusable_query_subtest() ->
     {ok, Ref} = marina:async_reusable_query(?QUERY3, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
     Response = marina:receive_response(Ref, ?TIMEOUT),
     {ok, Ref2} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
@@ -86,35 +62,16 @@ test_async_reusable_query() ->
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
-test_async_reusable_query_invalid_query() ->
+async_reusable_query_invalid_query_subtest() ->
     Response = marina:async_reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
 
     ?assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
 
-test_backlogfull_async() ->
-    Responses = [marina:async_query(?QUERY1, ?CONSISTENCY_ONE, [], self()) || _ <- lists:seq(1,100)],
-    ?assert(lists:any(fun
-        ({error, backlog_full}) -> true;
-        (_) -> false
-    end, Responses)).
-
-test_backlogfull_sync() ->
-    Pid = self(),
-    [spawn(fun () ->
-        X = marina:query(?QUERY1, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-             Pid ! {response, X}
-    end) || _ <- lists:seq(1,20)],
-
-    ?assert(lists:any(fun
-        ({error, backlog_full}) -> true;
-        (_) -> false
-    end, receive_loop(20))).
-
-test_counters() ->
-    marina:query(<<"DROP TABLE test.page_view_counts;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"CREATE TABLE test.page_view_counts (counter_value counter, url_name varchar, page_name varchar, PRIMARY KEY (url_name, page_name));">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"UPDATE test.page_view_counts SET counter_value = counter_value + 1 WHERE url_name='adgear.com' AND page_name='home';">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    Response = marina:query(<<"SELECT * FROM test.page_view_counts">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+counters_subtest() ->
+    query(<<"DROP TABLE test.page_view_counts;">>),
+    query(<<"CREATE TABLE test.page_view_counts (counter_value counter, url_name varchar, page_name varchar, PRIMARY KEY (url_name, page_name));">>),
+    query(<<"UPDATE test.page_view_counts SET counter_value = counter_value + 1 WHERE url_name='adgear.com' AND page_name='home';">>),
+    Response = query(<<"SELECT * FROM test.page_view_counts">>),
 
     ?assertEqual({ok,{result,
         {result_metadata,3,
@@ -126,35 +83,33 @@ test_counters() ->
         [[<<"adgear.com">>,<<"home">>,<<0,0,0,0,0,0,0,1>>]]
     }}, Response).
 
-test_execute() ->
+execute_subtest() ->
     {ok, StatementId} = marina:prepare(?QUERY1, ?TIMEOUT),
     Response = marina:execute(StatementId, ?CONSISTENCY_ONE, [], ?TIMEOUT),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
-test_paging() ->
-    marina:query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757e, 'test', 'test2', intAsBlob(0));">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-
+paging_subtest() ->
+    query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757e, 'test', 'test2', intAsBlob(0));">>),
     Query = <<"SELECT * FROM users LIMIT 10;">>,
-    {ok,{result,Metadata,1,Rows}} = marina:query(Query, ?CONSISTENCY_ONE, [{page_size, 1}], ?TIMEOUT),
-    {result_metadata,4,_,PagingState} = Metadata,
+    {ok, {result,Metadata,1,Rows}} = marina:query(Query, ?CONSISTENCY_ONE, [{page_size, 1}], ?TIMEOUT),
+    {result_metadata, 4, _, PagingState} = Metadata,
 
-    {ok,{result,Metadata2,1,Rows2}} = marina:query(Query, ?CONSISTENCY_ONE, [{page_size, 1}, {paging_state, PagingState}], ?TIMEOUT),
-    {result_metadata,4,_,PagingState2} = Metadata2,
+    {ok, {result, Metadata2, 1, Rows2}} = marina:query(Query, ?CONSISTENCY_ONE, [{page_size, 1}, {paging_state, PagingState}], ?TIMEOUT),
+    {result_metadata, 4, _, PagingState2} = Metadata2,
 
     ?assertNotEqual(PagingState, PagingState2),
     ?assertNotEqual(Rows, Rows2).
 
-test_query() ->
-    Response = marina:query(?QUERY1, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-
+query_subtest() ->
+    Response = query(?QUERY1),
     ?assertEqual(?QUERY1_RESULT, Response).
 
-test_query_metedata_types() ->
-    marina:query(<<"DROP TABLE entries;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+query_metedata_types_subtest() ->
+    query(<<"DROP TABLE entries;">>),
     Columns = datatypes_columns(?DATA_TYPES),
     Query = <<"CREATE TABLE entries(",  Columns/binary, " PRIMARY KEY(col1));">>,
-    Response = marina:query(Query, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+    Response = query(Query),
 
     ?assertEqual({ok,{<<"CREATED">>,<<"TABLE">>,{<<"test">>,<<"entries">>}}}, Response),
 
@@ -168,7 +123,7 @@ test_query_metedata_types() ->
 
     ?assertEqual({ok, undefined}, Response2),
 
-    Response3 = marina:query(<<"SELECT * FROM entries LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+    Response3 = query(<<"SELECT * FROM entries LIMIT 1;">>),
 
     ?assertEqual({ok,{result,
         {result_metadata,17,
@@ -194,7 +149,7 @@ test_query_metedata_types() ->
         [[<<"hello">>,null,null,null,null,null,null,null,null,<<0,0,0,0,0,1,134,160>>,<<"blob">>,<<1>>,null,null,null,null,null]]
     }}, Response3).
 
-test_query_no_metadata() ->
+query_no_metadata_subtest() ->
     Response2 = marina:query(?QUERY1, ?CONSISTENCY_ONE, [{skip_metadata, true}], ?TIMEOUT),
 
     ?assertEqual({ok,{result,
@@ -202,29 +157,24 @@ test_query_no_metadata() ->
         [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>, <<"test">>, <<"test2">>, <<0,0,0,0>>]
     ]}}, Response2).
 
-test_no_socket() ->
-    Response = marina:query(?QUERY1, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-
-    ?assertEqual({error, no_socket}, Response).
-
-test_reusable_query() ->
+reusable_query_subtest() ->
     Response = marina:reusable_query(?QUERY1, ?CONSISTENCY_ONE, [], ?TIMEOUT),
     Response = marina:reusable_query(?QUERY1, [], ?CONSISTENCY_ONE, [], ?TIMEOUT),
     Response = marina:reusable_query(?QUERY2, ?QUERY2_VALUES, ?CONSISTENCY_ONE, [], ?TIMEOUT),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
-test_reusable_query_invalid_query() ->
+reusable_query_invalid_query_subtest() ->
     Response = marina:reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
 
     ?assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
 
-test_schema_changes() ->
-    marina:query(<<"DROP KEYSPACE test2;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"CREATE KEYSPACE test2 WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"CREATE TYPE test2.address (street text, city text, zip_code int, phones set<text>);">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"CREATE TABLE test2.users (key uuid, column1 text, column2 frozen<test2.address>, value blob, PRIMARY KEY (key, column1, column2));">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    Response = marina:query(<<"SELECT * FROM test2.users LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+schema_changes_subtest() ->
+    query(<<"DROP KEYSPACE test2;">>),
+    query(<<"CREATE KEYSPACE test2 WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>),
+    query(<<"CREATE TYPE test2.address (street text, city text, zip_code int, phones set<text>);">>),
+    query(<<"CREATE TABLE test2.users (key uuid, column1 text, column2 frozen<test2.address>, value blob, PRIMARY KEY (key, column1, column2));">>),
+    Response = query(<<"SELECT * FROM test2.users LIMIT 1;">>),
 
     ?assertEqual({ok,{result,
     {result_metadata,4,
@@ -239,23 +189,12 @@ test_schema_changes() ->
          {column_spec,<<"test2">>,<<"users">>,<<"value">>,blob}], undefined},
     0,[]}}, Response),
 
-    marina:query(<<"DROP TABLE test2.users;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"DROP KEYSPACE test2;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT).
+    query(<<"DROP TABLE test2.users;">>),
+    query(<<"DROP KEYSPACE test2;">>).
 
-test_timeout_async() ->
-    {ok, Ref} = marina:async_query(?QUERY1, ?CONSISTENCY_ONE, [], self()),
-    Response = marina:receive_response(Ref, 0),
-
-    ?assertEqual({error, timeout}, Response).
-
-test_timeout_sync() ->
-    Response = marina:query(?QUERY1, ?CONSISTENCY_ONE, [], 0),
-
-    ?assertEqual({error, timeout}, Response).
-
-test_tuples() ->
-    marina:query(<<"CREATE TABLE collect_things (k int PRIMARY KEY, v frozen <tuple<int, text, float>>);">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    Response = marina:query(<<"SELECT * FROM test.collect_things;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+tuples_subtest() ->
+    query(<<"CREATE TABLE collect_things (k int PRIMARY KEY, v frozen <tuple<int, text, float>>);">>),
+    Response = query(<<"SELECT * FROM test.collect_things;">>),
 
     ?assertEqual({ok,{result,
         {result_metadata,2,
@@ -265,19 +204,17 @@ test_tuples() ->
             undefined},
     0,[]}}, Response),
 
-    marina:query(<<"DROP TABLE collect_things;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT).
+    query(<<"DROP TABLE collect_things;">>).
 
 %% utils
-boostrap() ->
-    marina:query(<<"DROP KEYSPACE test;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"CREATE TABLE test.users (key uuid, column1 text, column2 text, value blob, PRIMARY KEY (key, column1, column2));">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    marina:query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>, ?CONSISTENCY_ONE, [], ?TIMEOUT).
+bootstrap() ->
+    query(<<"DROP KEYSPACE test;">>),
+    query(<<"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>),
+    query(<<"CREATE TABLE test.users (key uuid, column1 text, column2 text, value blob, PRIMARY KEY (key, column1, column2));">>),
+    query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>).
 
 cleanup() ->
-    error_logger:tty(false),
-    application:stop(marina),
-    error_logger:tty(true).
+    marina_app:stop().
 
 datatypes_columns(Cols) ->
     list_to_binary(datatypes_columns(1, Cols)).
@@ -286,28 +223,22 @@ datatypes_columns(_I, []) ->
     [];
 datatypes_columns(I, [ColumnType|Rest]) ->
     Column = io_lib:format("col~B ~s, ", [I, ColumnType]),
-    [Column | datatypes_columns(I+1, Rest)].
+    [Column | datatypes_columns(I + 1, Rest)].
 
-receive_loop(0) -> [];
-receive_loop(N) ->
-    receive
-        {response, X} ->
-            [X | receive_loop(N - 1)]
-    end.
+query(Query) ->
+    marina:query(Query, ?CONSISTENCY_ONE, [], ?TIMEOUT).
 
-setup(EnvironmentVars) ->
+setup(KeyVals) ->
     error_logger:tty(false),
-    application:stop(marina),
-
     marina_app:start(),
-    boostrap(),
-    application:stop(marina),
-
+    bootstrap(),
+    marina_app:stop(),
     application:load(marina),
-    [application:set_env(?APP, K, V) || {K, V} <- EnvironmentVars],
-    marina_app:start(),
+    set_env(KeyVals),
+    marina_app:start().
 
-    error_logger:tty(true).
-
-test(Test) ->
-    {atom_to_list(Test), ?MODULE, Test}.
+set_env([]) ->
+    ok;
+set_env([{K, V} | T]) ->
+    application:set_env(?APP, K, V),
+    set_env(T).

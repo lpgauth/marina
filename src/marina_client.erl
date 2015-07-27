@@ -7,6 +7,7 @@
     handle_cast/2,
     handle_data/2,
     options/0,
+    process_timings/1,
     terminate/1
 ]).
 
@@ -88,6 +89,11 @@ options() ->
             keyspace = Keyspace
         }}
     ]}.
+
+-spec process_timings([non_neg_integer()]) -> ok.
+
+process_timings(_Timings) ->
+    ok.
 
 -spec terminate(#state {}) -> ok.
 

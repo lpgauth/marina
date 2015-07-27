@@ -8,6 +8,8 @@
     startup/1
 ]).
 
+-define(LOOKUP(Key, List), shackle_utils:lookup(Key, List, undefined)).
+
 %% public
 -spec execute(stream(), [frame_flag()], statement_id(), [value()], consistency(), [flag()]) ->
     iolist().
@@ -96,12 +98,12 @@ frame_flags([_ | T]) ->
     frame_flags(T).
 
 paging(Flags) ->
-    PageSize2 = case ?LOOKUP(page_size, Flags, undefined) of
+    PageSize2 = case ?LOOKUP(page_size, Flags) of
         undefined -> [];
         PageSize ->
             marina_types:encode_int(PageSize)
     end,
-    PagingState2 = case ?LOOKUP(paging_state, Flags, undefined) of
+    PagingState2 = case ?LOOKUP(paging_state, Flags) of
         undefined -> [];
         PagingState ->
             marina_types:encode_bytes(PagingState)

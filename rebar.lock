@@ -1,6 +1,6 @@
 [{<<"shackle">>,
   {git,"https://github.com/lpgauth/shackle.git",
-       {ref,"969889dcfd1c77c3f2f023b9c735770a07fb4203"}},
+       {ref,"7db29628b77c2ee0fad7c0f2d031c6bcd759878a"}},
   0},
  {<<"lz4">>,
   {git,"https://github.com/lpgauth/erlang-lz4.git",

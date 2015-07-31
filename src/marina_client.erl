@@ -7,7 +7,7 @@
     handle_cast/2,
     handle_data/2,
     options/0,
-    process_timings/1,
+    process_timings/2,
     terminate/1
 ]).
 
@@ -90,9 +90,9 @@ options() ->
         }}
     ]}.
 
--spec process_timings([non_neg_integer()]) -> ok.
+-spec process_timings(term(), [non_neg_integer()]) -> ok.
 
-process_timings(_Timings) ->
+process_timings(_Cast, _Timings) ->
     ok.
 
 -spec terminate(#state {}) -> ok.

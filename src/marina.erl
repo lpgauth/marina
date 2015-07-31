@@ -102,10 +102,10 @@ query(Query, ConsistencyLevel, Flags, Timeout) ->
 query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
     call({query, Query, Values, ConsistencyLevel, Flags}, Timeout).
 
--spec receive_response(reference(), non_neg_integer()) -> {ok, term()} | {error, term()}.
+-spec receive_response(term(), non_neg_integer()) -> {ok, term()} | {error, term()}.
 
-receive_response(Ref, Timeout) ->
-    response(shackle:receive_response(?APP, Ref, Timeout)).
+receive_response(RequestId, Timeout) ->
+    response(shackle:receive_response(RequestId, Timeout)).
 
 -spec response({ok, term()} | {error, term()}) ->
     {ok, term()} | {error, term()}.

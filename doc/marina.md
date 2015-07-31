@@ -175,7 +175,7 @@ query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">v
 ### receive_response/2 ###
 
 <pre><code>
-receive_response(Ref::reference(), Timeout::non_neg_integer()) -&gt; {ok, term()} | {error, term()}
+receive_response(RequestId::term(), Timeout::non_neg_integer()) -&gt; {ok, term()} | {error, term()}
 </code></pre>
 <br />
 

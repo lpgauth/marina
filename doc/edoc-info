@@ -1,5 +1,6 @@
 %% encoding: UTF-8
 {application,marina}.
-{modules,[marina,marina_app,marina_backlog,marina_body,marina_buffer,
-          marina_cache,marina_frame,marina_queue,marina_request,marina_server,
-          marina_sup,marina_types,marina_utils]}.
+{packages,[]}.
+{modules,[marina,marina_app,marina_body,marina_buffer,marina_cache,
+          marina_client,marina_frame,marina_request,marina_sup,marina_types,
+          marina_utils]}.

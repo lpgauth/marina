@@ -1,25 +1,22 @@
-% macros
--define(L(Key, Values, Default), marina_utils:lookup(Key, Values, Default)).
-
-% application
+%% macros
 -define(APP, marina).
--define(CONNECT_RETRY_MSG, connect_retry).
--define(SERVER_BASE_NAME, "marina_server_").
+-define(CLIENT, marina_client).
+-define(ETS_TABLE_CACHE, marina_cache).
 
-% defaults
+%% defaults
 -define(DEFAULT_BACKLOG_SIZE, 1024).
 -define(DEFAULT_CONNECT_RETRY, 500).
 -define(DEFAULT_FLAGS, 0).
 -define(DEFAULT_IP, "127.0.0.1").
 -define(DEFAULT_POOL_SIZE, 16).
+-define(DEFAULT_POOL_STRATEGY, random).
 -define(DEFAULT_PORT, 9042).
 -define(DEFAULT_RECONNECT, true).
 -define(DEFAULT_RECV_TIMEOUT, 1000).
--define(DEFAULT_SEND_TIMEOUT, 20).
 -define(DEFAULT_STREAM, 0).
 -define(DEFAULT_TIMEOUT, 1000).
 
-% protocol
+%% protocol
 -define(CQL_VERSION, {<<"CQL_VERSION">>, <<"3.2.0">>}).
 -define(HEADER_SIZE, 9).
 -define(LZ4_COMPRESSION, {<<"COMPRESSION">>, <<"lz4">>}).
@@ -55,7 +52,7 @@
 -define(CONSISTENCY_LOCAL_SERIAL, 16#09).
 -define(CONSISTENCY_LOCAL_ONE, 16#10).
 
-% records
+%% records
 -record(buffer, {
     buffered :: iolist(),
     current  :: non_neg_integer(),
@@ -88,13 +85,13 @@
     rows       = [] :: [[binary()]]
 }).
 
-% types
+%% types
 -type buffer() :: #buffer {}.
 -type column_spec() :: #column_spec {}.
 -type consistency() :: ?CONSISTENCY_ANY | ?CONSISTENCY_ONE | ?CONSISTENCY_TWO |
-?CONSISTENCY_THREE | ?CONSISTENCY_QUORUM | ?CONSISTENCY_ALL |
-?CONSISTENCY_LOCAL_QUORUM | ?CONSISTENCY_EACH_QUORUM | ?CONSISTENCY_SERIAL |
-?CONSISTENCY_LOCAL_SERIAL | ?CONSISTENCY_LOCAL_ONE.
+    ?CONSISTENCY_THREE | ?CONSISTENCY_QUORUM | ?CONSISTENCY_ALL |
+    ?CONSISTENCY_LOCAL_QUORUM | ?CONSISTENCY_EACH_QUORUM | ?CONSISTENCY_SERIAL |
+    ?CONSISTENCY_LOCAL_SERIAL | ?CONSISTENCY_LOCAL_ONE.
 
 -type flag() :: {page_size, pos_integer()} | {paging_state, binary()} |
     {skip_metadata, boolean()} | {values, boolean()}.

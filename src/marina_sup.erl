@@ -17,11 +17,19 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% supervisor callbacks
-init([]) ->
-    marina_backlog:init(),
-    marina_cache:init(),
-    marina_queue:init(),
+-spec init([]) -> {ok, {{one_for_one, 5, 10}, []}}.
 
-    {ok, {{one_for_one, 5, 10},
-        marina_utils:child_specs()
-    }}.
+init([]) ->
+    BacklogSize = application:get_env(?APP, backlog_size, ?DEFAULT_BACKLOG_SIZE),
+    PoolSize = application:get_env(?APP, pool_size, ?DEFAULT_POOL_SIZE),
+    PoolStrategy = application:get_env(?APP, pool_strategy, ?DEFAULT_POOL_STRATEGY),
+
+    ok = shackle_pool:start(?APP, ?CLIENT, [
+        {backlog_size, BacklogSize},
+        {pool_size, PoolSize},
+        {pool_strategy, PoolStrategy}
+    ]),
+
+    marina_cache:init(),
+
+    {ok, {{one_for_one, 5, 10}, []}}.

@@ -102,19 +102,10 @@ query(Query, ConsistencyLevel, Flags, Timeout) ->
 query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
     call({query, Query, Values, ConsistencyLevel, Flags}, Timeout).
 
--spec receive_response(reference(), non_neg_integer()) -> {ok, term()} | {error, term()}.
+-spec receive_response(term(), non_neg_integer()) -> {ok, term()} | {error, term()}.
 
-receive_response(Ref, Timeout) ->
-    Timestamp = os:timestamp(),
-    receive
-        {?APP, Ref, Reply} ->
-            response(Reply);
-        {?APP, _, _} ->
-            Timeout2 = timeout(Timeout, Timestamp),
-            receive_response(Ref, Timeout2)
-    after Timeout ->
-        {error, timeout}
-    end.
+receive_response(RequestId, Timeout) ->
+    response(shackle:receive_response(RequestId, Timeout)).
 
 -spec response({ok, term()} | {error, term()}) ->
     {ok, term()} | {error, term()}.
@@ -139,8 +130,8 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
         {ok, StatementId} ->
             case execute(StatementId, Values, ConsistencyLevel, Flags, Timeout) of
                 {error, {9472, _}} ->
-                    marina_cache:remove(Query),
-                    Timeout3 = marina_utils:timeout(Timestamp, Timeout),
+                    marina_cache:erase(Query),
+                    Timeout3 = shackle_utils:timeout(Timeout, Timestamp),
                     reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout3);
                 Response ->
                     Response
@@ -149,7 +140,7 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
             case prepare(Query, Timeout) of
                 {ok, StatementId} ->
                     marina_cache:put(Query, StatementId),
-                    Timeout2 = marina_utils:timeout(Timestamp, Timeout),
+                    Timeout2 = shackle_utils:timeout(Timeout, Timestamp),
                     execute(StatementId, Values, ConsistencyLevel, Flags, Timeout2);
                 {error, Reason} ->
                     {error, Reason}
@@ -158,29 +149,7 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
 
 %% private
 async_call(Msg, Pid) ->
-    Ref = make_ref(),
-    Server = random_server(),
-    case marina_backlog:check(Server) of
-        true ->
-            Server ! {call, Ref, Pid, Msg},
-            {ok, Ref};
-        false ->
-            {error, backlog_full}
-    end.
+    shackle:cast(?APP, Msg, Pid).
 
 call(Msg, Timeout) ->
-    case async_call(Msg, self()) of
-        {ok, Ref} ->
-            receive_response(Ref, Timeout);
-        {error, Reason} ->
-            {error, Reason}
-    end.
-
-random_server() ->
-    PoolSize = application:get_env(?APP, pool_size, ?DEFAULT_POOL_SIZE),
-    Random = erlang:phash2({os:timestamp(), self()}, PoolSize) + 1,
-    marina_utils:child_name(Random).
-
-timeout(Timeout, Timestamp) ->
-    Diff = timer:now_diff(os:timestamp(), Timestamp) div 1000,
-    Timeout - Diff.
+    response(shackle:call(?APP, Msg, Timeout)).

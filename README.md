@@ -55,6 +55,12 @@ Non-blocking Erlang Cassandra CQL3 client
     <td>number of connections</td>
   </tr>
   <tr>
+    <td>pool_strategy</td>
+    <td>random | round_robin</td>
+    <td>random</td>
+    <td>connection selection strategy</td>
+  </tr>
+  <tr>
     <td>backlog_size</td>
     <td>pos_integer()</td>
     <td>1024</td>

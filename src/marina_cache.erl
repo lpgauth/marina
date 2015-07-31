@@ -2,45 +2,46 @@
 -include("marina.hrl").
 
 -export([
+    erase/1,
     get/1,
     init/0,
-    put/2,
-    remove/1
+    put/2
 ]).
 
--define(CACHE_TABLE_ID, marina_cache).
-
 %% public
+-spec erase(binary()) -> ok | {error, not_found}.
+
+erase(Key) ->
+    try
+        ets:delete(?ETS_TABLE_CACHE, Key),
+        ok
+    catch
+        error:badarg ->
+            {error, not_found}
+    end.
+
 -spec get(binary()) -> {ok, term()} | {error, not_found}.
 
 get(Key) ->
     try
-        Term = ets:lookup_element(?CACHE_TABLE_ID, Key, 2),
+        Term = ets:lookup_element(?ETS_TABLE_CACHE, Key, 2),
         {ok, Term}
     catch
         error:badarg ->
             {error, not_found}
     end.
 
--spec init() -> ?CACHE_TABLE_ID.
+-spec init() -> ?ETS_TABLE_CACHE.
 
 init() ->
-    ets:new(?CACHE_TABLE_ID, [
+    ets:new(?ETS_TABLE_CACHE, [
         named_table,
         public,
         {read_concurrency, true}
     ]).
 
--spec put(binary(), term()) -> true.
+-spec put(binary(), term()) -> ok.
 
 put(Key, Value) ->
-    ets:insert(?CACHE_TABLE_ID, {Key, Value}).
-
--spec remove(binary()) -> true | {error, not_found}.
-
-remove(Key) ->
-    try ets:delete(?CACHE_TABLE_ID, Key)
-    catch
-        error:badarg ->
-            {error, not_found}
-    end.
+    ets:insert(?ETS_TABLE_CACHE, {Key, Value}),
+    ok.

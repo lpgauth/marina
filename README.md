@@ -139,8 +139,8 @@ Shell got {marina,#Ref<0.0.0.124>,
 ## Tests
 
 ```makefile
+make dialyzer
 make eunit
-make build-plt && make dialyze
 make xref
 ```
 

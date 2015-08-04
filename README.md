@@ -8,18 +8,17 @@ Non-blocking Erlang Cassandra CQL3 client
 
 ### Requirements
 
-* Cassandra 2.1 +
+* Cassandra 2.1.* +
 * Erlang 16.0 +
 
 ### Features
 
-* Native protocol v3
-* CQL spec 3.2.0
-* Performance optimized
-* Request pipelining
 * Backpressure via backlog (OOM protection)
-* Prepared statement cache
 * Compression support (lz4)
+* CQL spec 3.2.0
+* Fast pool implementation (random | round_robin)
+* Performance optimized
+* Prepared statement cache
 
 ### Environment variables
 
@@ -77,6 +76,18 @@ Non-blocking Erlang Cassandra CQL3 client
     <td>boolean()</td>
     <td>true</td>
     <td>reconnect closed connections</td>
+  </tr>
+  <tr>
+    <td>reconnect_time_max</td>
+    <td>boolean()</td>
+    <td>true</td>
+    <td>reconnect maximum time</td>
+  </tr>
+  <tr>
+    <td>reconnect_time_min</td>
+    <td>boolean()</td>
+    <td>true</td>
+    <td>reconnect minimum time</td>
   </tr>
 </table>
 

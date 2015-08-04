@@ -4,10 +4,10 @@
 -behavior(shackle_client).
 -export([
     after_connect/2,
-    handle_cast/2,
     handle_data/2,
+    handle_request/2,
+    handle_timing/2,
     options/0,
-    process_timings/2,
     terminate/1
 ]).
 
@@ -31,10 +31,24 @@ after_connect(Socket, #state {frame_flags = FrameFlags} = State) ->
             {error, Reason, State}
     end.
 
--spec handle_cast(term(), #state {}) ->
+-spec handle_data(binary(), #state {}) ->
+    {ok, [{pos_integer(), term()}], #state {}}.
+
+handle_data(Data, #state {
+        buffer = Buffer
+    } = State) ->
+
+    {Frames, Buffer2} = marina_buffer:decode(Data, Buffer),
+    Replies = [{Frame#frame.stream, {ok, Frame}} || Frame <- Frames],
+
+    {ok, Replies, State#state {
+        buffer = Buffer2
+    }}.
+
+-spec handle_request(term(), #state {}) ->
     {ok, pos_integer(), iodata(), #state {}}.
 
-handle_cast(Request, #state {
+handle_request(Request, #state {
         frame_flags = FrameFlags,
         requests = Requests
     } = State) ->
@@ -53,19 +67,10 @@ handle_cast(Request, #state {
         requests = Requests + 1
     }}.
 
--spec handle_data(binary(), #state {}) ->
-    {ok, [{pos_integer(), term()}], #state {}}.
+-spec handle_timing(term(), [non_neg_integer()]) -> ok.
 
-handle_data(Data, #state {
-        buffer = Buffer
-    } = State) ->
-
-    {Frames, Buffer2} = marina_buffer:decode(Data, Buffer),
-    Replies = [{Frame#frame.stream, {ok, Frame}} || Frame <- Frames],
-
-    {ok, Replies, State#state {
-        buffer = Buffer2
-    }}.
+handle_timing(_Cast, _Timings) ->
+    ok.
 
 -spec options() -> {ok, [
     {ip, inet:ip_address() | inet:hostname()} |
@@ -76,24 +81,23 @@ handle_data(Data, #state {
 
 options() ->
     Ip = application:get_env(?APP, ip, ?DEFAULT_IP),
+    Keyspace = application:get_env(?APP, keyspace, undefined),
     Port = application:get_env(?APP, port, ?DEFAULT_PORT),
     Reconnect = application:get_env(?APP, reconnect, ?DEFAULT_RECONNECT),
-    Keyspace = application:get_env(?APP, keyspace, undefined),
+    ReconnectTimeMax = application:get_env(?APP, reconnect_time_max, ?DEFAULT_RECONNECT),
+    ReconnectTimeMin = application:get_env(?APP, reconnect_time_min, ?DEFAULT_RECONNECT),
 
     {ok, [
         {ip, Ip},
         {port, Port},
         {reconnect, Reconnect},
+        {reconnect_time_max, ReconnectTimeMax},
+        {reconnect_time_min, ReconnectTimeMin},
         {state, #state {
             frame_flags = frame_flags(),
             keyspace = Keyspace
         }}
     ]}.
-
--spec process_timings(term(), [non_neg_integer()]) -> ok.
-
-process_timings(_Cast, _Timings) ->
-    ok.
 
 -spec terminate(#state {}) -> ok.
 

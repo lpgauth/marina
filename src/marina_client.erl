@@ -84,8 +84,8 @@ options() ->
     Keyspace = application:get_env(?APP, keyspace, undefined),
     Port = application:get_env(?APP, port, ?DEFAULT_PORT),
     Reconnect = application:get_env(?APP, reconnect, ?DEFAULT_RECONNECT),
-    ReconnectTimeMax = application:get_env(?APP, reconnect_time_max, ?DEFAULT_RECONNECT),
-    ReconnectTimeMin = application:get_env(?APP, reconnect_time_min, ?DEFAULT_RECONNECT),
+    ReconnectTimeMax = application:get_env(?APP, reconnect_time_max, ?DEFAULT_RECONNECT_MAX),
+    ReconnectTimeMin = application:get_env(?APP, reconnect_time_min, ?DEFAULT_RECONNECT_MIN),
 
     {ok, [
         {ip, Ip},

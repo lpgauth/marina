@@ -30,16 +30,22 @@ Non-blocking Erlang Cassandra CQL3 client
     <th>Description</th>
   </theader>
   <tr>
+    <td>backlog_size</td>
+    <td>pos_integer()</td>
+    <td>1024</td>
+    <td>maximum number of concurrent requests per connection</td>
+  </tr>
+  <tr>
+    <td>compression</td>
+    <td>boolean()</td>
+    <td>false</td>
+    <td>enable lz4 compression</td>
+  </tr>
+  <tr>
     <td>ip</td>
     <td>list()</td>
     <td>"127.0.0.1"</td>
     <td>server ip</td>
-  </tr>
-  <tr>
-    <td>port</td>
-    <td>pos_integer()</td>
-    <td>9042</td>
-    <td>server port</td>
   </tr>
   <tr>
     <td>keyspace</td>
@@ -60,16 +66,10 @@ Non-blocking Erlang Cassandra CQL3 client
     <td>connection selection strategy</td>
   </tr>
   <tr>
-    <td>backlog_size</td>
+    <td>port</td>
     <td>pos_integer()</td>
-    <td>1024</td>
-    <td>maximum number of concurrent requests per connection</td>
-  </tr>
-  <tr>
-    <td>compression</td>
-    <td>boolean()</td>
-    <td>false</td>
-    <td>enable lz4 compression</td>
+    <td>9042</td>
+    <td>server port</td>
   </tr>
   <tr>
     <td>reconnect</td>

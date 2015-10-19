@@ -1,4 +1,3 @@
-PROJECT=marina
 REBAR=./rebar3
 
 all: compile

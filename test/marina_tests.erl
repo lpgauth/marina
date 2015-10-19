@@ -63,9 +63,7 @@ async_reusable_query_subtest() ->
     ?assertEqual(?QUERY1_RESULT, Response).
 
 async_reusable_query_invalid_query_subtest() ->
-    Response = marina:async_reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
-
-    ?assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
+    {error, {8704, _}} = marina:async_reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT).
 
 counters_subtest() ->
     query(<<"DROP TABLE test.page_view_counts;">>),
@@ -106,12 +104,11 @@ query_subtest() ->
     ?assertEqual(?QUERY1_RESULT, Response).
 
 query_metedata_types_subtest() ->
-    query(<<"DROP TABLE entries;">>),
+    query(<<"DROP TABLE types;">>),
     Columns = datatypes_columns(?DATA_TYPES),
-    Query = <<"CREATE TABLE entries(",  Columns/binary, " PRIMARY KEY(col1));">>,
+    Query = <<"CREATE TABLE types (",  Columns/binary, " PRIMARY KEY(col1));">>,
     Response = query(Query),
-
-    ?assertEqual({ok,{<<"CREATED">>,<<"TABLE">>,{<<"test">>,<<"entries">>}}}, Response),
+    ?assertEqual({ok,{<<"CREATED">>,<<"TABLE">>,{<<"test">>,<<"types">>}}}, Response),
 
     Values = [
         <<"hello">>,
@@ -119,31 +116,31 @@ query_metedata_types_subtest() ->
         <<"blob">>,
         marina_types:encode_boolean(true)
     ] ,
-    Response2 = marina:query(<<"INSERT INTO entries (col1, col2, col3, col4) VALUES (?, ?, ?, ?)">>, Values, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+    Response2 = marina:query(<<"INSERT INTO types (col1, col2, col3, col4) VALUES (?, ?, ?, ?)">>, Values, ?CONSISTENCY_ONE, [], ?TIMEOUT),
 
     ?assertEqual({ok, undefined}, Response2),
 
-    Response3 = query(<<"SELECT * FROM entries LIMIT 1;">>),
+    Response3 = query(<<"SELECT * FROM types LIMIT 1;">>),
 
     ?assertEqual({ok,{result,
         {result_metadata,17,
-            [{column_spec,<<"test">>,<<"entries">>,<<"col1">>,ascii},
-             {column_spec,<<"test">>,<<"entries">>,<<"col10">>,uid},
-             {column_spec,<<"test">>,<<"entries">>,<<"col11">>,varchar},
-             {column_spec,<<"test">>,<<"entries">>,<<"col12">>,varint},
-             {column_spec,<<"test">>,<<"entries">>,<<"col13">>,timeuuid},
-             {column_spec,<<"test">>,<<"entries">>,<<"col14">>,inet},
-             {column_spec,<<"test">>,<<"entries">>,<<"col15">>,{list,varchar}},
-             {column_spec,<<"test">>,<<"entries">>,<<"col16">>,{map,varchar,varchar}},
-             {column_spec,<<"test">>,<<"entries">>,<<"col17">>,{set,varchar}},
-             {column_spec,<<"test">>,<<"entries">>,<<"col2">>,bigint},
-             {column_spec,<<"test">>,<<"entries">>,<<"col3">>,blob},
-             {column_spec,<<"test">>,<<"entries">>,<<"col4">>,boolean},
-             {column_spec,<<"test">>,<<"entries">>,<<"col5">>,decimal},
-             {column_spec,<<"test">>,<<"entries">>,<<"col6">>,double},
-             {column_spec,<<"test">>,<<"entries">>,<<"col7">>,float},
-             {column_spec,<<"test">>,<<"entries">>,<<"col8">>,int},
-             {column_spec,<<"test">>,<<"entries">>,<<"col9">>,timestamp}],
+            [{column_spec,<<"test">>,<<"types">>,<<"col1">>,ascii},
+             {column_spec,<<"test">>,<<"types">>,<<"col10">>,uid},
+             {column_spec,<<"test">>,<<"types">>,<<"col11">>,varchar},
+             {column_spec,<<"test">>,<<"types">>,<<"col12">>,varint},
+             {column_spec,<<"test">>,<<"types">>,<<"col13">>,timeuuid},
+             {column_spec,<<"test">>,<<"types">>,<<"col14">>,inet},
+             {column_spec,<<"test">>,<<"types">>,<<"col15">>,{list,varchar}},
+             {column_spec,<<"test">>,<<"types">>,<<"col16">>,{map,varchar,varchar}},
+             {column_spec,<<"test">>,<<"types">>,<<"col17">>,{set,varchar}},
+             {column_spec,<<"test">>,<<"types">>,<<"col2">>,bigint},
+             {column_spec,<<"test">>,<<"types">>,<<"col3">>,blob},
+             {column_spec,<<"test">>,<<"types">>,<<"col4">>,boolean},
+             {column_spec,<<"test">>,<<"types">>,<<"col5">>,decimal},
+             {column_spec,<<"test">>,<<"types">>,<<"col6">>,double},
+             {column_spec,<<"test">>,<<"types">>,<<"col7">>,float},
+             {column_spec,<<"test">>,<<"types">>,<<"col8">>,int},
+             {column_spec,<<"test">>,<<"types">>,<<"col9">>,timestamp}],
             undefined},
         1,
         [[<<"hello">>,null,null,null,null,null,null,null,null,<<0,0,0,0,0,1,134,160>>,<<"blob">>,<<1>>,null,null,null,null,null]]
@@ -165,9 +162,7 @@ reusable_query_subtest() ->
     ?assertEqual(?QUERY1_RESULT, Response).
 
 reusable_query_invalid_query_subtest() ->
-    Response = marina:reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-
-    ?assertEqual({error, {8704, <<"unconfigured columnfamily user">>}}, Response).
+    {error, {8704, _}} = marina:reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT).
 
 schema_changes_subtest() ->
     query(<<"DROP KEYSPACE test2;">>),
@@ -209,9 +204,9 @@ tuples_subtest() ->
 %% utils
 bootstrap() ->
     query(<<"DROP KEYSPACE test;">>),
-    query(<<"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>),
-    query(<<"CREATE TABLE test.users (key uuid, column1 text, column2 text, value blob, PRIMARY KEY (key, column1, column2));">>),
-    query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>).
+    {ok, _} = query(<<"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>),
+    {ok, _} = query(<<"CREATE TABLE test.users (key uuid, column1 text, column2 text, value blob, PRIMARY KEY (key, column1, column2));">>),
+    {ok, _} = query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>).
 
 cleanup() ->
     marina_app:stop().

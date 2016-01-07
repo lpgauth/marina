@@ -144,7 +144,7 @@ Shell got {marina,#Ref<0.0.0.124>,
 
 ## TODO
 
-* batched queries
+* batch queries
 * token aware load balancing
 
 ## Tests

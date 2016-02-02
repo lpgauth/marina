@@ -99,7 +99,9 @@ decode_columns_metadata(Bin, ColumnsCount, false) ->
 
 decode_columns_metadata(Rest, 0, _GlobalTableSpec, Acc) ->
     {lists:reverse(Acc), Rest};
-decode_columns_metadata(Bin, Count, {undefined, undefined} = GlobalTableSpec, Acc) ->
+decode_columns_metadata(Bin, Count, {undefined, undefined} = GlobalTableSpec,
+    Acc) ->
+
     {Keyspace, Bin2} = marina_types:decode_string(Bin),
     {Table, Bin3} = marina_types:decode_string(Bin2),
     {Name, Bin4} = marina_types:decode_string(Bin3),
@@ -110,8 +112,11 @@ decode_columns_metadata(Bin, Count, {undefined, undefined} = GlobalTableSpec, Ac
         name = Name,
         type = Type
     },
-    decode_columns_metadata(Bin5, Count - 1, GlobalTableSpec, [ColumnSpec | Acc]);
-decode_columns_metadata(Bin, Count, {Keyspace, Table} = GlobalTableSpec, Acc) ->
+    decode_columns_metadata(Bin5, Count - 1, GlobalTableSpec,
+        [ColumnSpec | Acc]);
+decode_columns_metadata(Bin, Count, {Keyspace, Table} = GlobalTableSpec,
+    Acc) ->
+
     {Name, Bin2} = marina_types:decode_string(Bin),
     {Type, Bin3} = decode_type(Bin2),
     ColumnSpec = #column_spec {
@@ -120,7 +125,8 @@ decode_columns_metadata(Bin, Count, {Keyspace, Table} = GlobalTableSpec, Acc) ->
         name = Name,
         type = Type
     },
-    decode_columns_metadata(Bin3, Count - 1, GlobalTableSpec, [ColumnSpec | Acc]).
+    decode_columns_metadata(Bin3, Count - 1, GlobalTableSpec,
+        [ColumnSpec | Acc]).
 
 decode_elements(Bin, N) ->
     decode_elements(Bin, N, []).
@@ -153,7 +159,9 @@ decode_result_paging_state(Bin, true) ->
 decode_result_paging_state(Rest, false) ->
     {undefined, Rest}.
 
-decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer, Rest/binary>>) ->
+decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer,
+    Rest/binary>>) ->
+
     {GlobalTableSpec, HasMorePages, NoMetaData} = decode_result_flags(Flags),
     {PagingState, Rest2} = decode_result_paging_state(Rest, HasMorePages),
     {Columns, Rest3} = case NoMetaData of

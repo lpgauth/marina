@@ -18,15 +18,19 @@
     requests    = 0
 }).
 
+-type state() :: #state {}.
+
 %% shackle_server callbacks
 -spec options() -> {ok, shackle:client_options()}.
 
 options() ->
-    Ip = application:get_env(?APP, ip, ?DEFAULT_IP),
-    Port = application:get_env(?APP, port, ?DEFAULT_PORT),
-    Reconnect = application:get_env(?APP, reconnect, ?DEFAULT_RECONNECT),
-    ReconnectTimeMax = application:get_env(?APP, reconnect_time_max, ?DEFAULT_RECONNECT_MAX),
-    ReconnectTimeMin = application:get_env(?APP, reconnect_time_min, ?DEFAULT_RECONNECT_MIN),
+    Ip = marina_utils:get_env(ip, ?DEFAULT_IP),
+    Port = marina_utils:get_env(port, ?DEFAULT_PORT),
+    Reconnect = marina_utils:get_env(reconnect, ?DEFAULT_RECONNECT),
+    ReconnectTimeMax = marina_utils:get_env(reconnect_time_max,
+        ?DEFAULT_RECONNECT_MAX),
+    ReconnectTimeMin = marina_utils:get_env(reconnect_time_min,
+        ?DEFAULT_RECONNECT_MIN),
 
     {ok, [
         {ip, Ip},
@@ -42,18 +46,18 @@ options() ->
         ]}
     ]}.
 
--spec init() -> {ok, #state {}}.
+-spec init() -> {ok, state()}.
 
 init() ->
-    Keyspace = application:get_env(?APP, keyspace, undefined),
+    Keyspace = marina_utils:get_env(keyspace, undefined),
 
     {ok, #state {
         frame_flags = frame_flags(),
         keyspace = Keyspace
     }}.
 
--spec setup(inet:socket(), #state {}) -> {ok, #state {}} |
-    {error, atom(), #state {}}.
+-spec setup(inet:socket(), state()) -> {ok, state()} |
+    {error, atom(), state()}.
 
 setup(Socket, #state {frame_flags = FrameFlags} = State) ->
     Msg = marina_request:startup(FrameFlags),
@@ -64,8 +68,8 @@ setup(Socket, #state {frame_flags = FrameFlags} = State) ->
             {error, Reason, State}
     end.
 
--spec handle_request(term(), #state {}) ->
-    {ok, pos_integer(), iodata(), #state {}}.
+-spec handle_request(term(), state()) ->
+    {ok, pos_integer(), iodata(), state()}.
 
 handle_request(Request, #state {
         frame_flags = FrameFlags,
@@ -75,19 +79,21 @@ handle_request(Request, #state {
     RequestId = Requests rem ?MAX_STREAM_ID,
     Data = case Request of
         {execute, StatementId, Values, ConsistencyLevel, Flags} ->
-            marina_request:execute(RequestId, FrameFlags, StatementId, Values, ConsistencyLevel, Flags);
+            marina_request:execute(RequestId, FrameFlags, StatementId, Values,
+                ConsistencyLevel, Flags);
         {prepare, Query} ->
             marina_request:prepare(RequestId, FrameFlags, Query);
         {query, Query, Values, ConsistencyLevel, Flags} ->
-            marina_request:query(RequestId, FrameFlags, Query, Values, ConsistencyLevel, Flags)
+            marina_request:query(RequestId, FrameFlags, Query, Values,
+                ConsistencyLevel, Flags)
     end,
 
     {ok, RequestId, Data, State#state {
         requests = Requests + 1
     }}.
 
--spec handle_data(binary(), #state {}) ->
-    {ok, [{pos_integer(), term()}], #state {}}.
+-spec handle_data(binary(), state()) ->
+    {ok, [{pos_integer(), term()}], state()}.
 
 handle_data(Data, #state {
         buffer = Buffer
@@ -100,7 +106,7 @@ handle_data(Data, #state {
         buffer = Buffer2
     }}.
 
--spec terminate(#state {}) -> ok.
+-spec terminate(state()) -> ok.
 
 terminate(_State) ->
     ok.

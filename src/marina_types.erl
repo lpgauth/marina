@@ -29,7 +29,7 @@
 %% public
 -spec decode_bytes(binary()) -> {null, binary()} | {binary(), binary()}.
 
-decode_bytes(<<255,255,255,255, Rest/binary>>) ->
+decode_bytes(<<255, 255, 255, 255, Rest/binary>>) ->
     {null, Rest};
 decode_bytes(Bin) ->
     {Pos, Rest} = decode_int(Bin),
@@ -48,8 +48,7 @@ decode_long(<<Value:64, Rest/binary>>) ->
 -spec decode_long_string(binary()) -> {binary(), binary()}.
 
 decode_long_string(Bin) ->
-    {Pos, Rest} = decode_int(Bin),
-    split_binary(Rest, Pos).
+    decode_bytes(Bin).
 
 -spec decode_short(binary()) -> {integer(), binary()}.
 
@@ -58,7 +57,7 @@ decode_short(<<Value:16, Rest/binary>>) ->
 
 -spec decode_short_bytes(binary()) -> {binary(), binary()}.
 
-decode_short_bytes(<<255,255, Rest/binary>>) ->
+decode_short_bytes(<<255, 255, Rest/binary>>) ->
     {null, Rest};
 decode_short_bytes(Bin) ->
     {Pos, Rest} = decode_short(Bin),
@@ -67,8 +66,7 @@ decode_short_bytes(Bin) ->
 -spec decode_string(binary()) -> {binary(), binary()}.
 
 decode_string(Bin) ->
-    {Pos, Rest} = decode_short(Bin),
-    split_binary(Rest, Pos).
+    decode_short_bytes(Bin).
 
 -spec decode_string_list(binary()) -> {[binary()], binary()}.
 
@@ -101,7 +99,7 @@ encode_boolean(true) -> <<1>>.
 -spec encode_bytes(binary()) -> binary().
 
 encode_bytes(null) ->
-    <<255,255,255,255>>;
+    <<255, 255, 255, 255>>;
 encode_bytes(Value) ->
     <<(encode_int(size(Value)))/binary, Value/binary>>.
 
@@ -127,7 +125,7 @@ encode_short(Value) ->
 -spec encode_short_bytes(binary()) -> binary().
 
 encode_short_bytes(null) ->
-    <<255,255>>;
+    <<255, 255>>;
 encode_short_bytes(Value) ->
     <<(encode_short(size(Value)))/binary, Value/binary>>.
 
@@ -173,12 +171,13 @@ decode_string_multimap(Bin, Length, Acc) ->
     {Values, Rest2} = decode_string_list(Rest),
     decode_string_multimap(Rest2, Length - 1, [{Key, Values} | Acc]).
 
-encode_string_multimap([], Acc) ->
-    iolist_to_binary([encode_short(length(Acc)), lists:reverse(Acc)]);
-encode_string_multimap([{Key, Values} | Rest], Acc) ->
-    encode_string_multimap(Rest, [[encode_string(Key), encode_string_list(Values)] | Acc]).
-
 encode_string_map([], Acc) ->
     iolist_to_binary([encode_short(length(Acc)), lists:reverse(Acc)]);
 encode_string_map([{Key, Value} | Rest], Acc) ->
     encode_string_map(Rest, [[encode_string(Key), encode_string(Value)] | Acc]).
+
+encode_string_multimap([], Acc) ->
+    encode_string_map([], Acc);
+encode_string_multimap([{Key, Values} | Rest], Acc) ->
+    encode_string_multimap(Rest, [[encode_string(Key),
+    encode_string_list(Values)] | Acc]).

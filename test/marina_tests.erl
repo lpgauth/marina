@@ -53,32 +53,43 @@ async_query_subtest() ->
     ?assertEqual(?QUERY1_RESULT, Response).
 
 async_reusable_query_subtest() ->
-    {ok, Ref} = marina:async_reusable_query(?QUERY3, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
+    {ok, Ref} = marina:async_reusable_query(?QUERY3, ?CONSISTENCY_ONE, [],
+        self(), ?TIMEOUT),
     Response = marina:receive_response(Ref, ?TIMEOUT),
-    {ok, Ref2} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
+    {ok, Ref2} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES,
+        ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
     Response = marina:receive_response(Ref2, ?TIMEOUT),
-    {ok, Ref3} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
+    {ok, Ref3} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES,
+        ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
     Response = marina:receive_response(Ref3, ?TIMEOUT),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
 async_reusable_query_invalid_query_subtest() ->
-    {error, {8704, _}} = marina:async_reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], self(), ?TIMEOUT).
+    Query = <<"SELECT * FROM user LIMIT 1;">>,
+    {error, {8704, _}} = marina:async_reusable_query(Query, ?CONSISTENCY_ONE,
+        [], self(), ?TIMEOUT).
 
 counters_subtest() ->
     query(<<"DROP TABLE test.page_view_counts;">>),
-    query(<<"CREATE TABLE test.page_view_counts (counter_value counter, url_name varchar, page_name varchar, PRIMARY KEY (url_name, page_name));">>),
-    query(<<"UPDATE test.page_view_counts SET counter_value = counter_value + 1 WHERE url_name='adgear.com' AND page_name='home';">>),
+    query(<<"CREATE TABLE test.page_view_counts (counter_value counter,
+        url_name varchar, page_name varchar,
+        PRIMARY KEY (url_name, page_name));">>),
+    query(<<"UPDATE test.page_view_counts SET counter_value = counter_value + 1
+        WHERE url_name='adgear.com' AND page_name='home';">>),
     Response = query(<<"SELECT * FROM test.page_view_counts">>),
 
-    ?assertEqual({ok,{result,
-        {result_metadata,3,
-            [{column_spec,<<"test">>,<<"page_view_counts">>,<<"url_name">>,varchar},
-             {column_spec,<<"test">>,<<"page_view_counts">>,<<"page_name">>,varchar},
-             {column_spec,<<"test">>,<<"page_view_counts">>,<<"counter_value">>,counter}],
+    ?assertEqual({ok, {result,
+        {result_metadata, 3,
+            [{column_spec, <<"test">>, <<"page_view_counts">>, <<"url_name">>,
+                varchar},
+             {column_spec, <<"test">>, <<"page_view_counts">>, <<"page_name">>,
+                 varchar},
+             {column_spec, <<"test">>, <<"page_view_counts">>,
+                 <<"counter_value">>, counter}],
             undefined},
         1,
-        [[<<"adgear.com">>,<<"home">>,<<0,0,0,0,0,0,0,1>>]]
+        [[<<"adgear.com">>, <<"home">>, <<0, 0, 0, 0, 0, 0, 0, 1>>]]
     }}, Response).
 
 execute_subtest() ->
@@ -88,12 +99,16 @@ execute_subtest() ->
     ?assertEqual(?QUERY1_RESULT, Response).
 
 paging_subtest() ->
-    query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757e, 'test', 'test2', intAsBlob(0));">>),
+    query(<<"INSERT INTO test.users (key, column1, column2, value) values
+        (99492dfe-d94a-11e4-af39-58f44110757e, 'test', 'test2',
+        intAsBlob(0));">>),
     Query = <<"SELECT * FROM users LIMIT 10;">>,
-    {ok, {result,Metadata,1,Rows}} = marina:query(Query, ?CONSISTENCY_ONE, [{page_size, 1}], ?TIMEOUT),
+    {ok, {result, Metadata, 1, Rows}} = marina:query(Query, ?CONSISTENCY_ONE,
+        [{page_size, 1}], ?TIMEOUT),
     {result_metadata, 4, _, PagingState} = Metadata,
 
-    {ok, {result, Metadata2, 1, Rows2}} = marina:query(Query, ?CONSISTENCY_ONE, [{page_size, 1}, {paging_state, PagingState}], ?TIMEOUT),
+    {ok, {result, Metadata2, 1, Rows2}} = marina:query(Query, ?CONSISTENCY_ONE,
+        [{page_size, 1}, {paging_state, PagingState}], ?TIMEOUT),
     {result_metadata, 4, _, PagingState2} = Metadata2,
 
     ?assertNotEqual(PagingState, PagingState2),
@@ -108,7 +123,8 @@ query_metedata_types_subtest() ->
     Columns = datatypes_columns(?DATA_TYPES),
     Query = <<"CREATE TABLE types (",  Columns/binary, " PRIMARY KEY(col1));">>,
     Response = query(Query),
-    ?assertEqual({ok,{<<"CREATED">>,<<"TABLE">>,{<<"test">>,<<"types">>}}}, Response),
+    ?assertEqual({ok, {<<"CREATED">>, <<"TABLE">>, {<<"test">>, <<"types">>}}},
+        Response),
 
     Values = [
         <<"hello">>,
@@ -116,97 +132,119 @@ query_metedata_types_subtest() ->
         <<"blob">>,
         marina_types:encode_boolean(true)
     ] ,
-    Response2 = marina:query(<<"INSERT INTO types (col1, col2, col3, col4) VALUES (?, ?, ?, ?)">>, Values, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+    Response2 = marina:query(<<"INSERT INTO types (col1, col2, col3, col4)
+        VALUES (?, ?, ?, ?)">>, Values, ?CONSISTENCY_ONE, [], ?TIMEOUT),
 
     ?assertEqual({ok, undefined}, Response2),
 
     Response3 = query(<<"SELECT * FROM types LIMIT 1;">>),
 
-    ?assertEqual({ok,{result,
-        {result_metadata,17,
-            [{column_spec,<<"test">>,<<"types">>,<<"col1">>,ascii},
-             {column_spec,<<"test">>,<<"types">>,<<"col10">>,uid},
-             {column_spec,<<"test">>,<<"types">>,<<"col11">>,varchar},
-             {column_spec,<<"test">>,<<"types">>,<<"col12">>,varint},
-             {column_spec,<<"test">>,<<"types">>,<<"col13">>,timeuuid},
-             {column_spec,<<"test">>,<<"types">>,<<"col14">>,inet},
-             {column_spec,<<"test">>,<<"types">>,<<"col15">>,{list,varchar}},
-             {column_spec,<<"test">>,<<"types">>,<<"col16">>,{map,varchar,varchar}},
-             {column_spec,<<"test">>,<<"types">>,<<"col17">>,{set,varchar}},
-             {column_spec,<<"test">>,<<"types">>,<<"col2">>,bigint},
-             {column_spec,<<"test">>,<<"types">>,<<"col3">>,blob},
-             {column_spec,<<"test">>,<<"types">>,<<"col4">>,boolean},
-             {column_spec,<<"test">>,<<"types">>,<<"col5">>,decimal},
-             {column_spec,<<"test">>,<<"types">>,<<"col6">>,double},
-             {column_spec,<<"test">>,<<"types">>,<<"col7">>,float},
-             {column_spec,<<"test">>,<<"types">>,<<"col8">>,int},
-             {column_spec,<<"test">>,<<"types">>,<<"col9">>,timestamp}],
+    ?assertEqual({ok, {result,
+        {result_metadata, 17,
+            [{column_spec, <<"test">>, <<"types">>, <<"col1">>, ascii},
+             {column_spec, <<"test">>, <<"types">>, <<"col10">>, uid},
+             {column_spec, <<"test">>, <<"types">>, <<"col11">>, varchar},
+             {column_spec, <<"test">>, <<"types">>, <<"col12">>, varint},
+             {column_spec, <<"test">>, <<"types">>, <<"col13">>, timeuuid},
+             {column_spec, <<"test">>, <<"types">>, <<"col14">>, inet},
+             {column_spec, <<"test">>, <<"types">>, <<"col15">>,
+                 {list, varchar}},
+             {column_spec, <<"test">>, <<"types">>, <<"col16">>,
+                 {map, varchar, varchar}},
+             {column_spec, <<"test">>, <<"types">>, <<"col17">>,
+                 {set, varchar}},
+             {column_spec, <<"test">>, <<"types">>, <<"col2">>, bigint},
+             {column_spec, <<"test">>, <<"types">>, <<"col3">>, blob},
+             {column_spec, <<"test">>, <<"types">>, <<"col4">>, boolean},
+             {column_spec, <<"test">>, <<"types">>, <<"col5">>, decimal},
+             {column_spec, <<"test">>, <<"types">>, <<"col6">>, double},
+             {column_spec, <<"test">>, <<"types">>, <<"col7">>, float},
+             {column_spec, <<"test">>, <<"types">>, <<"col8">>, int},
+             {column_spec, <<"test">>, <<"types">>, <<"col9">>, timestamp}],
             undefined},
         1,
-        [[<<"hello">>,null,null,null,null,null,null,null,null,<<0,0,0,0,0,1,134,160>>,<<"blob">>,<<1>>,null,null,null,null,null]]
+        [[<<"hello">>, null, null, null, null, null, null, null, null,
+            <<0, 0, 0, 0, 0, 1, 134, 160>>, <<"blob">>, <<1>>, null, null,
+            null, null, null]]
     }}, Response3).
 
 query_no_metadata_subtest() ->
-    Response2 = marina:query(?QUERY1, ?CONSISTENCY_ONE, [{skip_metadata, true}], ?TIMEOUT),
+    Response2 = marina:query(?QUERY1, ?CONSISTENCY_ONE,
+        [{skip_metadata, true}], ?TIMEOUT),
 
-    ?assertEqual({ok,{result,
+    ?assertEqual({ok, {result,
     {result_metadata, 4, [], undefined}, 1, [
-        [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>, <<"test">>, <<"test2">>, <<0,0,0,0>>]
+        [<<153, 73, 45, 254, 217, 74, 17, 228, 175, 57, 88, 244, 65, 16, 117,
+            125>>, <<"test">>, <<"test2">>, <<0, 0, 0, 0>>]
     ]}}, Response2).
 
 reusable_query_subtest() ->
     Response = marina:reusable_query(?QUERY1, ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    Response = marina:reusable_query(?QUERY1, [], ?CONSISTENCY_ONE, [], ?TIMEOUT),
-    Response = marina:reusable_query(?QUERY2, ?QUERY2_VALUES, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+    Response = marina:reusable_query(?QUERY1, [], ?CONSISTENCY_ONE, [],
+        ?TIMEOUT),
+    Response = marina:reusable_query(?QUERY2, ?QUERY2_VALUES, ?CONSISTENCY_ONE,
+        [], ?TIMEOUT),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
 reusable_query_invalid_query_subtest() ->
-    {error, {8704, _}} = marina:reusable_query(<<"SELECT * FROM user LIMIT 1;">>, ?CONSISTENCY_ONE, [], ?TIMEOUT).
+    Query = <<"SELECT * FROM user LIMIT 1;">>,
+    {error, {8704, _}} = marina:reusable_query(Query, ?CONSISTENCY_ONE, [],
+        ?TIMEOUT).
 
 schema_changes_subtest() ->
     query(<<"DROP KEYSPACE test2;">>),
-    query(<<"CREATE KEYSPACE test2 WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>),
-    query(<<"CREATE TYPE test2.address (street text, city text, zip_code int, phones set<text>);">>),
-    query(<<"CREATE TABLE test2.users (key uuid, column1 text, column2 frozen<test2.address>, value blob, PRIMARY KEY (key, column1, column2));">>),
+    query(<<"CREATE KEYSPACE test2 WITH REPLICATION =
+        {'class':'SimpleStrategy', 'replication_factor':1};">>),
+    query(<<"CREATE TYPE test2.address (street text, city text, zip_code int,
+        phones set<text>);">>),
+    query(<<"CREATE TABLE test2.users (key uuid, column1 text,
+        column2 frozen<test2.address>, value blob, PRIMARY KEY
+        (key, column1, column2));">>),
     Response = query(<<"SELECT * FROM test2.users LIMIT 1;">>),
 
-    ?assertEqual({ok,{result,
-    {result_metadata,4,
-        [{column_spec,<<"test2">>,<<"users">>,<<"key">>,uid},
-         {column_spec,<<"test2">>,<<"users">>,<<"column1">>,varchar},
-         {column_spec,<<"test2">>,<<"users">>,<<"column2">>,
-             {udt,<<"test2">>,<<"address">>,
-                 [{<<"street">>,varchar},
-                  {<<"city">>,varchar},
-                  {<<"zip_code">>,int},
-                  {<<"phones">>,{set,varchar}}]}},
-         {column_spec,<<"test2">>,<<"users">>,<<"value">>,blob}], undefined},
-    0,[]}}, Response),
+    ?assertEqual({ok, {result,
+    {result_metadata, 4,
+        [{column_spec, <<"test2">>, <<"users">>, <<"key">>, uid},
+         {column_spec, <<"test2">>, <<"users">>, <<"column1">>, varchar},
+         {column_spec, <<"test2">>, <<"users">>, <<"column2">>,
+             {udt, <<"test2">>, <<"address">>,
+                 [{<<"street">>, varchar},
+                  {<<"city">>, varchar},
+                  {<<"zip_code">>, int},
+                  {<<"phones">>, {set, varchar}}]}},
+         {column_spec, <<"test2">>, <<"users">>, <<"value">>, blob}],
+             undefined},
+    0, []}}, Response),
 
     query(<<"DROP TABLE test2.users;">>),
     query(<<"DROP KEYSPACE test2;">>).
 
 tuples_subtest() ->
-    query(<<"CREATE TABLE collect_things (k int PRIMARY KEY, v frozen <tuple<int, text, float>>);">>),
+    query(<<"CREATE TABLE collect_things (k int PRIMARY KEY,
+        v frozen <tuple<int, text, float>>);">>),
     Response = query(<<"SELECT * FROM test.collect_things;">>),
 
-    ?assertEqual({ok,{result,
-        {result_metadata,2,
-            [{column_spec,<<"test">>,<<"collect_things">>,<<"k">>,int},
-             {column_spec,<<"test">>,<<"collect_things">>,<<"v">>,
-                 {tuple,[int,varchar,float]}}],
+    ?assertEqual({ok, {result,
+        {result_metadata, 2,
+            [{column_spec, <<"test">>, <<"collect_things">>, <<"k">>, int},
+             {column_spec, <<"test">>, <<"collect_things">>, <<"v">>,
+                 {tuple, [int, varchar, float]}}],
             undefined},
-    0,[]}}, Response),
+    0, []}}, Response),
 
     query(<<"DROP TABLE collect_things;">>).
 
 %% utils
 bootstrap() ->
     query(<<"DROP KEYSPACE test;">>),
-    {ok, _} = query(<<"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1};">>),
-    {ok, _} = query(<<"CREATE TABLE test.users (key uuid, column1 text, column2 text, value blob, PRIMARY KEY (key, column1, column2));">>),
-    {ok, _} = query(<<"INSERT INTO test.users (key, column1, column2, value) values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2', intAsBlob(0))">>).
+    {ok, _} = query(<<"CREATE KEYSPACE test WITH REPLICATION =
+        {'class':'SimpleStrategy', 'replication_factor':1};">>),
+    {ok, _} = query(<<"CREATE TABLE test.users (key uuid, column1 text,
+        column2 text, value blob, PRIMARY KEY (key, column1, column2));">>),
+    {ok, _} = query(<<"INSERT INTO test.users (key, column1, column2, value)
+        values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2',
+        intAsBlob(0))">>).
 
 cleanup() ->
     marina_app:stop().

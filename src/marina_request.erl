@@ -11,8 +11,8 @@
 -define(LOOKUP(Key, List), shackle_utils:lookup(Key, List, undefined)).
 
 %% public
--spec execute(stream(), [frame_flag()], statement_id(), [value()], consistency(), [flag()]) ->
-    iolist().
+-spec execute(stream(), [frame_flag()], statement_id(), [value()],
+    consistency(), [flag()]) -> iolist().
 
 execute(Stream, FrameFlags, StatementId, Values, ConsistencyLevel, Flags) ->
     {Flags2, Values2} = flags_and_values(Flags, Values),
@@ -37,7 +37,8 @@ prepare(Stream, FrameFlags, Query) ->
         body = [marina_types:encode_long_string(Query)]
     }).
 
--spec query(stream(), [frame_flag()], query(), [value()], consistency(), [flag()]) -> iolist().
+-spec query(stream(), [frame_flag()], query(), [value()], consistency(),
+    [flag()]) -> iolist().
 
 query(Stream, FrameFlags, Query, Values, ConsistencyLevel, Flags) ->
     {Flags2, Values2} = flags_and_values(Flags, Values),

@@ -52,7 +52,7 @@
 -define(CONSISTENCY_EACH_QUORUM, 16#07).
 -define(CONSISTENCY_SERIAL, 16#08).
 -define(CONSISTENCY_LOCAL_SERIAL, 16#09).
--define(CONSISTENCY_LOCAL_ONE, 16#10).
+-define(CONSISTENCY_LOCAL_ONE, 16#0A).
 
 %% records
 -record(buffer, {

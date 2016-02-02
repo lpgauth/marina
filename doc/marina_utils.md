@@ -9,12 +9,21 @@
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#pack-1">pack/1</a></td><td></td></tr><tr><td valign="top"><a href="#unpack-1">unpack/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_env-2">get_env/2</a></td><td></td></tr><tr><td valign="top"><a href="#pack-1">pack/1</a></td><td></td></tr><tr><td valign="top"><a href="#unpack-1">unpack/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
+
+<a name="get_env-2"></a>
+
+### get_env/2 ###
+
+<pre><code>
+get_env(Key::term(), Default::term()) -&gt; term()
+</code></pre>
+<br />
 
 <a name="pack-1"></a>
 

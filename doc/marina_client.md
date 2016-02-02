@@ -19,42 +19,52 @@
 frame_flag() = {compression, boolean()}
 </code></pre>
 
+
+
+
+### <a name="type-state">state()</a> ###
+
+
+<pre><code>
+state() = #state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}
+</code></pre>
+
 <a name="index"></a>
 
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#after_connect-2">after_connect/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_data-2">handle_data/2</a></td><td></td></tr><tr><td valign="top"><a href="#options-0">options/0</a></td><td></td></tr><tr><td valign="top"><a href="#process_timings-2">process_timings/2</a></td><td></td></tr><tr><td valign="top"><a href="#terminate-1">terminate/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#handle_data-2">handle_data/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_request-2">handle_request/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-0">init/0</a></td><td></td></tr><tr><td valign="top"><a href="#options-0">options/0</a></td><td></td></tr><tr><td valign="top"><a href="#setup-2">setup/2</a></td><td></td></tr><tr><td valign="top"><a href="#terminate-1">terminate/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
 
-<a name="after_connect-2"></a>
-
-### after_connect/2 ###
-
-<pre><code>
-after_connect(Socket::<a href="inet.md#type-socket">inet:socket()</a>, State::#state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}) -&gt; {ok, #state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}} | {error, atom(), #state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}}
-</code></pre>
-<br />
-
-<a name="handle_cast-2"></a>
-
-### handle_cast/2 ###
-
-<pre><code>
-handle_cast(Request::term(), State::#state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}) -&gt; {ok, pos_integer(), iodata(), #state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}}
-</code></pre>
-<br />
-
 <a name="handle_data-2"></a>
 
 ### handle_data/2 ###
 
 <pre><code>
-handle_data(Data::binary(), State::#state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}) -&gt; {ok, [{pos_integer(), term()}], #state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}}
+handle_data(Data::binary(), State::<a href="#type-state">state()</a>) -&gt; {ok, [{pos_integer(), term()}], <a href="#type-state">state()</a>}
+</code></pre>
+<br />
+
+<a name="handle_request-2"></a>
+
+### handle_request/2 ###
+
+<pre><code>
+handle_request(Request::term(), State::<a href="#type-state">state()</a>) -&gt; {ok, pos_integer(), iodata(), <a href="#type-state">state()</a>}
+</code></pre>
+<br />
+
+<a name="init-0"></a>
+
+### init/0 ###
+
+<pre><code>
+init() -&gt; {ok, <a href="#type-state">state()</a>}
 </code></pre>
 <br />
 
@@ -63,16 +73,16 @@ handle_data(Data::binary(), State::#state{buffer = any(), frame_flags = [<a href
 ### options/0 ###
 
 <pre><code>
-options() -&gt; {ok, [{ip, <a href="inet.md#type-ip_address">inet:ip_address()</a> | <a href="inet.md#type-hostname">inet:hostname()</a>} | {port, <a href="inet.md#type-port_number">inet:port_number()</a>} | {reconnect, boolean()} | {state, #state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}}]}
+options() -&gt; {ok, <a href="/Users/lpgauth/Git/marina/_build/default/lib/shackle/doc/shackle.md#type-client_options">shackle:client_options()</a>}
 </code></pre>
 <br />
 
-<a name="process_timings-2"></a>
+<a name="setup-2"></a>
 
-### process_timings/2 ###
+### setup/2 ###
 
 <pre><code>
-process_timings(Cast::term(), Timings::[non_neg_integer()]) -&gt; ok
+setup(Socket::<a href="inet.md#type-socket">inet:socket()</a>, State::<a href="#type-state">state()</a>) -&gt; {ok, <a href="#type-state">state()</a>} | {error, atom(), <a href="#type-state">state()</a>}
 </code></pre>
 <br />
 
@@ -81,7 +91,7 @@ process_timings(Cast::term(), Timings::[non_neg_integer()]) -&gt; ok
 ### terminate/1 ###
 
 <pre><code>
-terminate(State::#state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}) -&gt; ok
+terminate(State::<a href="#type-state">state()</a>) -&gt; ok
 </code></pre>
 <br />
 

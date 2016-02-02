@@ -151,6 +151,7 @@ Shell got {marina,#Ref<0.0.0.124>,
 
 ```makefile
 make dialyzer
+make elvis
 make eunit
 make xref
 ```

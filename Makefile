@@ -12,6 +12,10 @@ compile:
 	@echo "Running rebar3 compile..."
 	@$(REBAR) as compile compile
 
+coveralls:
+	@echo "Running rebar3 coveralls send..."
+	@$(REBAR) as test coveralls send
+
 dialyzer:
 	@echo "Running rebar3 dialyze..."
 	@$(REBAR) dialyzer
@@ -38,10 +42,12 @@ profile:
 	@_build/test/lib/fprofx/erlgrindx -p fprofx.analysis
 	@$(CACHEGRIND) fprofx.cgrind
 
-test: dialyzer elvis eunit xref
+test:  elvis xref eunit dialyzer
+
+travis:  elvis xref eunit dialyzer coveralls
 
 xref:
 	@echo "Running rebar3 xref..."
 	@$(REBAR) xref
 
-.PHONY: edoc test xref
+.PHONY: clean compile coveralls dialyzer edoc elvis eunit profile test xref

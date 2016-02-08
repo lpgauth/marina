@@ -1,6 +1,9 @@
 -module(marina_client).
 -include("marina.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 -behavior(shackle_client).
 -export([
     options/0,

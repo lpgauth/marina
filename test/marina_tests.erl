@@ -259,7 +259,7 @@ datatypes_columns(I, [ColumnType|Rest]) ->
     [Column | datatypes_columns(I + 1, Rest)].
 
 query(Query) ->
-    marina:query(Query, ?CONSISTENCY_ONE, [], ?TIMEOUT).
+    marina:query(Query, ?CONSISTENCY_LOCAL_ONE, [], ?TIMEOUT).
 
 setup(KeyVals) ->
     error_logger:tty(false),

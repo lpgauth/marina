@@ -1,6 +1,9 @@
 -module(marina_request).
 -include("marina.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 -export([
     execute/6,
     prepare/3,

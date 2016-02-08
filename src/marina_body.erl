@@ -1,6 +1,9 @@
 -module(marina_body).
 -include("marina.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 -export([
     decode/1
 ]).

@@ -1,6 +1,9 @@
 -module(marina_types).
 -include("marina.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 -export([
     decode_bytes/1,
     decode_int/1,
@@ -33,7 +36,8 @@ decode_bytes(<<255, 255, 255, 255, Rest/binary>>) ->
     {null, Rest};
 decode_bytes(Bin) ->
     {Pos, Rest} = decode_int(Bin),
-    split_binary(Rest, Pos).
+    <<Value:Pos/binary, Rest2/binary>> = Rest,
+    {Value, Rest2}.
 
 -spec decode_int(binary()) -> {integer(), binary()}.
 
@@ -61,7 +65,8 @@ decode_short_bytes(<<255, 255, Rest/binary>>) ->
     {null, Rest};
 decode_short_bytes(Bin) ->
     {Pos, Rest} = decode_short(Bin),
-    split_binary(Rest, Pos).
+    <<Value:Pos/binary, Rest2/binary>> = Rest,
+    {Value, Rest2}.
 
 -spec decode_string(binary()) -> {binary(), binary()}.
 
@@ -88,8 +93,8 @@ decode_string_multimap(Bin) ->
 
 -spec decode_uuid(binary()) -> {binary(), binary()}.
 
-decode_uuid(Bin) ->
-    split_binary(Bin, 16).
+decode_uuid(<<Value:16/binary, Rest/binary>>) ->
+    {Value, Rest}.
 
 -spec encode_boolean(boolean()) -> binary().
 

@@ -1,14 +1,13 @@
 # marina
 
-__Author:__ Louis-Philippe Gauthier.
-
-Non-blocking Erlang Cassandra CQL3 client
+Non-blocking Erlang Cassandra CQL client
 
 [![Build Status](https://travis-ci.org/lpgauth/marina.svg?branch=master)](https://travis-ci.org/lpgauth/marina)
+[![Coverage Status](https://coveralls.io/repos/github/lpgauth/marina/badge.svg?branch=master)](https://coveralls.io/github/lpgauth/marina?branch=master)
 
 ### Requirements
 
-* Cassandra 2.1.* +
+* Cassandra 2.1 +
 * Erlang 16.0 +
 
 ### Features

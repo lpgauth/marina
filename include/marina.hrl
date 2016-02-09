@@ -1,6 +1,7 @@
 %% macros
 -define(APP, marina).
 -define(CLIENT, marina_client).
+-define(GET_ENV(Key, Default), application:get_env(?APP, Key, Default)).
 -define(ETS_TABLE_CACHE, marina_cache).
 
 %% defaults

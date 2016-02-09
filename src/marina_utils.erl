@@ -2,17 +2,11 @@
 -include("marina.hrl").
 
 -export([
-    get_env/2,
     pack/1,
     unpack/1
 ]).
 
 %% public
--spec get_env(term(), term()) -> term().
-
-get_env(Key, Default) ->
-    application:get_env(?APP, Key, Default).
-
 -spec pack(binary() | iolist()) -> {ok, binary()} | {error, term()}.
 
 pack(Iolist) when is_list(Iolist) ->

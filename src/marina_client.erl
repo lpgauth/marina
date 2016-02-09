@@ -15,10 +15,10 @@
 ]).
 
 -record(state, {
-    buffer      = marina_buffer:new(),
-    frame_flags = [] :: [frame_flag()],
-    keyspace    = undefined,
-    requests    = 0
+    buffer      = marina_buffer:new() :: buffer(),
+    frame_flags = []                  :: [frame_flag()],
+    keyspace    = undefined           :: binary() | undefined,
+    requests    = 0                   :: non_neg_integer()
 }).
 
 -type state() :: #state {}.
@@ -27,12 +27,12 @@
 -spec options() -> {ok, shackle:client_options()}.
 
 options() ->
-    Ip = marina_utils:get_env(ip, ?DEFAULT_IP),
-    Port = marina_utils:get_env(port, ?DEFAULT_PORT),
-    Reconnect = marina_utils:get_env(reconnect, ?DEFAULT_RECONNECT),
-    ReconnectTimeMax = marina_utils:get_env(reconnect_time_max,
+    Ip = ?GET_ENV(ip, ?DEFAULT_IP),
+    Port = ?GET_ENV(port, ?DEFAULT_PORT),
+    Reconnect = ?GET_ENV(reconnect, ?DEFAULT_RECONNECT),
+    ReconnectTimeMax = ?GET_ENV(reconnect_time_max,
         ?DEFAULT_RECONNECT_MAX),
-    ReconnectTimeMin = marina_utils:get_env(reconnect_time_min,
+    ReconnectTimeMin = ?GET_ENV(reconnect_time_min,
         ?DEFAULT_RECONNECT_MIN),
 
     {ok, [
@@ -52,7 +52,7 @@ options() ->
 -spec init() -> {ok, state()}.
 
 init() ->
-    Keyspace = marina_utils:get_env(keyspace, undefined),
+    Keyspace = ?GET_ENV(keyspace, undefined),
 
     {ok, #state {
         frame_flags = frame_flags(),
@@ -116,10 +116,11 @@ terminate(_State) ->
 
 %% private
 frame_flags() ->
-    Compression = application:get_env(?APP, compression, false),
-    case Compression of
-        true -> [{compression, true}];
-        _ -> []
+    case ?GET_ENV(compression, false) of
+        true ->
+            [{compression, true}];
+        _ ->
+            []
     end.
 
 set_keyspace(_Socket, #state {keyspace = undefined} = State) ->

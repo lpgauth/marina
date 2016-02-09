@@ -20,9 +20,9 @@ start_link() ->
 -spec init([]) -> {ok, {{one_for_one, 5, 10}, []}}.
 
 init([]) ->
-    BacklogSize = marina_utils:get_env(backlog_size, ?DEFAULT_BACKLOG_SIZE),
-    PoolSize = marina_utils:get_env(pool_size, ?DEFAULT_POOL_SIZE),
-    PoolStrategy = marina_utils:get_env(pool_strategy, ?DEFAULT_POOL_STRATEGY),
+    BacklogSize = ?GET_ENV(backlog_size, ?DEFAULT_BACKLOG_SIZE),
+    PoolSize = ?GET_ENV(pool_size, ?DEFAULT_POOL_SIZE),
+    PoolStrategy = ?GET_ENV(pool_strategy, ?DEFAULT_POOL_STRATEGY),
 
     ok = shackle_pool:start(?APP, ?CLIENT, [
         {backlog_size, BacklogSize},

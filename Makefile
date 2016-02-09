@@ -1,28 +1,28 @@
 CACHEGRIND=qcachegrind
 ELVIS=./bin/elvis
-REBAR=./bin/rebar3
+REBAR3=./bin/rebar3
 
 all: compile
 
 clean:
 	@echo "Running rebar3 clean..."
-	@$(REBAR) clean -a
+	@$(REBAR3) clean -a
 
 compile:
 	@echo "Running rebar3 compile..."
-	@$(REBAR) as compile compile
+	@$(REBAR3) as compile compile
 
 coveralls:
 	@echo "Running rebar3 coveralls send..."
-	@$(REBAR) as test coveralls send
+	@$(REBAR3) as test coveralls send
 
 dialyzer:
 	@echo "Running rebar3 dialyze..."
-	@$(REBAR) dialyzer
+	@$(REBAR3) dialyzer
 
 edoc:
 	@echo "Running rebar3 edoc..."
-	@$(REBAR) as edoc edoc
+	@$(REBAR3) as edoc edoc
 
 elvis:
 	@echo "Running elvis rock..."
@@ -30,11 +30,11 @@ elvis:
 
 eunit:
 	@echo "Running rebar3 eunit..."
-	@$(REBAR) do eunit -cv, cover -v
+	@$(REBAR3) do eunit -cv, cover -v
 
 profile:
 	@echo "Profiling..."
-	@$(REBAR) as test compile
+	@$(REBAR3) as test compile
 	@erl -noshell \
 	     -pa _build/test/lib/*/ebin \
 		 -eval 'marina_profile:fprofx()' \
@@ -48,6 +48,6 @@ travis:  elvis xref eunit dialyzer coveralls
 
 xref:
 	@echo "Running rebar3 xref..."
-	@$(REBAR) xref
+	@$(REBAR3) xref
 
 .PHONY: clean compile coveralls dialyzer edoc elvis eunit profile test xref

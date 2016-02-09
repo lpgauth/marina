@@ -19,6 +19,10 @@ Non-blocking Erlang Cassandra CQL client
 * Performance optimized
 * Prepared statement cache
 
+## API
+<a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md#index" class="module">Function Index</a>
+
+
 ### Environment variables
 
 <table width="100%">
@@ -90,9 +94,6 @@ Non-blocking Erlang Cassandra CQL client
   </tr>
 </table>
 
-## API
-<a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md#index" class="module">Function Index</a>
-
 ## Examples
 
 ```erlang
@@ -160,7 +161,7 @@ make xref
 ```license
 The MIT License (MIT)
 
-Copyright (c) 2015 Louis-Philippe Gauthier
+Copyright (c) 2015-2016 Louis-Philippe Gauthier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

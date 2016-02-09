@@ -111,7 +111,7 @@ decode_string_multimap(Bin::binary()) -&gt; {[{binary(), [binary()]}], binary()}
 ### decode_uuid/1 ###
 
 <pre><code>
-decode_uuid(Bin::binary()) -&gt; {binary(), binary()}
+decode_uuid(X1::binary()) -&gt; {binary(), binary()}
 </code></pre>
 <br />
 

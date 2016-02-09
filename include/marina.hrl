@@ -90,13 +90,24 @@
 %% types
 -type buffer() :: #buffer {}.
 -type column_spec() :: #column_spec {}.
--type consistency() :: ?CONSISTENCY_ANY | ?CONSISTENCY_ONE | ?CONSISTENCY_TWO |
-    ?CONSISTENCY_THREE | ?CONSISTENCY_QUORUM | ?CONSISTENCY_ALL |
-    ?CONSISTENCY_LOCAL_QUORUM | ?CONSISTENCY_EACH_QUORUM | ?CONSISTENCY_SERIAL |
-    ?CONSISTENCY_LOCAL_SERIAL | ?CONSISTENCY_LOCAL_ONE.
+-type consistency() ::
+    ?CONSISTENCY_ANY |
+    ?CONSISTENCY_ONE |
+    ?CONSISTENCY_TWO |
+    ?CONSISTENCY_THREE |
+    ?CONSISTENCY_QUORUM |
+    ?CONSISTENCY_ALL |
+    ?CONSISTENCY_LOCAL_QUORUM |
+    ?CONSISTENCY_EACH_QUORUM |
+    ?CONSISTENCY_SERIAL |
+    ?CONSISTENCY_LOCAL_SERIAL |
+    ?CONSISTENCY_LOCAL_ONE.
 
--type flag() :: {page_size, pos_integer()} | {paging_state, binary()} |
-    {skip_metadata, boolean()} | {values, boolean()}.
+-type flag() ::
+    {page_size, pos_integer()} |
+    {paging_state, binary()} |
+    {skip_metadata, boolean()} |
+    {values, boolean()}.
 
 -type frame() :: #frame {}.
 -type frame_flag() :: {compression, boolean()}.

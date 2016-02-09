@@ -1,16 +1,16 @@
 # marina
 
-Non-blocking Erlang Cassandra CQL client
+High Performance Erlang Cassandra CQL Client
 
 [![Build Status](https://travis-ci.org/lpgauth/marina.svg?branch=master)](https://travis-ci.org/lpgauth/marina)
 [![Coverage Status](https://coveralls.io/repos/github/lpgauth/marina/badge.svg?branch=master)](https://coveralls.io/github/lpgauth/marina?branch=master)
 
-### Requirements
+#### Requirements
 
 * Cassandra 2.1 +
 * Erlang 16.0 +
 
-### Features
+#### Features
 
 * Backpressure via backlog (OOM protection)
 * Compression support (lz4)
@@ -18,12 +18,13 @@ Non-blocking Erlang Cassandra CQL client
 * Fast pool implementation (random | round_robin)
 * Performance optimized
 * Prepared statement cache
+* Request pipelining
 
 ## API
 <a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md#index" class="module">Function Index</a>
 
 
-### Environment variables
+#### Environment variables
 
 <table width="100%">
   <theader>

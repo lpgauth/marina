@@ -6,7 +6,6 @@
 
 -behavior(shackle_client).
 -export([
-    options/0,
     init/0,
     setup/2,
     handle_request/2,
@@ -24,31 +23,6 @@
 -type state() :: #state {}.
 
 %% shackle_server callbacks
--spec options() -> {ok, shackle:client_options()}.
-
-options() ->
-    Ip = ?GET_ENV(ip, ?DEFAULT_IP),
-    Port = ?GET_ENV(port, ?DEFAULT_PORT),
-    Reconnect = ?GET_ENV(reconnect, ?DEFAULT_RECONNECT),
-    ReconnectTimeMax = ?GET_ENV(reconnect_time_max,
-        ?DEFAULT_RECONNECT_MAX),
-    ReconnectTimeMin = ?GET_ENV(reconnect_time_min,
-        ?DEFAULT_RECONNECT_MIN),
-
-    {ok, [
-        {ip, Ip},
-        {port, Port},
-        {reconnect, Reconnect},
-        {reconnect_time_max, ReconnectTimeMax},
-        {reconnect_time_min, ReconnectTimeMin},
-        {socket_options, [
-            binary,
-            {packet, raw},
-            {send_timeout, 50},
-            {send_timeout_close, true}
-        ]}
-    ]}.
-
 -spec init() -> {ok, state()}.
 
 init() ->

@@ -136,7 +136,7 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
             case Execute of
                 {error, {9472, _}} ->
                     marina_cache:erase(Query),
-                    Timeout3 = shackle_utils:timeout(Timeout, Timestamp),
+                    Timeout3 = marina_utils:timeout(Timeout, Timestamp),
                     reusable_query(Query, Values, ConsistencyLevel, Flags,
                         Timeout3);
                 Response ->
@@ -146,7 +146,7 @@ reusable_query(Query, Values, ConsistencyLevel, Flags, Timeout) ->
             case prepare(Query, Timeout) of
                 {ok, StatementId} ->
                     marina_cache:put(Query, StatementId),
-                    Timeout2 = shackle_utils:timeout(Timeout, Timestamp),
+                    Timeout2 = marina_utils:timeout(Timeout, Timestamp),
                     execute(StatementId, Values, ConsistencyLevel, Flags,
                         Timeout2);
                 {error, Reason} ->

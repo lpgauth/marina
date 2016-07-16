@@ -9,7 +9,7 @@ before_install:
   - wget https://archive.apache.org/dist/cassandra/2.2.4/apache-cassandra-2.2.4-bin.tar.gz
   - tar -xzf apache-cassandra-2.2.4-bin.tar.gz
   - sudo sh apache-cassandra-2.2.4/bin/cassandra > /dev/null
-  - for i in {1..10}; do cqlsh -e "DESCRIBE keyspaces;" && break || sleep 2; done
+  - for i in {1..10}; do cqlsh -e "DESCRIBE keyspaces;" && break || sleep 5; done
 cache:
   directories:
     - $HOME/.cache/rebar3

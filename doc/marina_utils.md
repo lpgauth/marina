@@ -9,21 +9,12 @@
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_env-2">get_env/2</a></td><td></td></tr><tr><td valign="top"><a href="#pack-1">pack/1</a></td><td></td></tr><tr><td valign="top"><a href="#unpack-1">unpack/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#pack-1">pack/1</a></td><td></td></tr><tr><td valign="top"><a href="#timeout-2">timeout/2</a></td><td></td></tr><tr><td valign="top"><a href="#unpack-1">unpack/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
-
-<a name="get_env-2"></a>
-
-### get_env/2 ###
-
-<pre><code>
-get_env(Key::term(), Default::term()) -&gt; term()
-</code></pre>
-<br />
 
 <a name="pack-1"></a>
 
@@ -31,6 +22,15 @@ get_env(Key::term(), Default::term()) -&gt; term()
 
 <pre><code>
 pack(Iolist::binary() | iolist()) -&gt; {ok, binary()} | {error, term()}
+</code></pre>
+<br />
+
+<a name="timeout-2"></a>
+
+### timeout/2 ###
+
+<pre><code>
+timeout(Timeout::pos_integer(), Timestamp::<a href="erlang.md#type-timestamp">erlang:timestamp()</a>) -&gt; integer()
 </code></pre>
 <br />
 

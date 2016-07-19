@@ -16,7 +16,7 @@
 
 
 <pre><code>
-buffer() = #buffer{buffered = undefined | iolist(), current = undefined | non_neg_integer(), pending = non_neg_integer() | undefined}
+buffer() = #buffer{buffered = iolist(), current = non_neg_integer(), pending = non_neg_integer() | undefined}
 </code></pre>
 
 
@@ -26,7 +26,7 @@ buffer() = #buffer{buffered = undefined | iolist(), current = undefined | non_ne
 
 
 <pre><code>
-frame() = #frame{flags = undefined | 0 | 1, stream = undefined | integer(), opcode = undefined | non_neg_integer(), body = undefined | iolist() | binary()}
+frame() = #frame{flags = 0 | 1, stream = integer(), opcode = non_neg_integer(), body = iolist() | binary()}
 </code></pre>
 
 <a name="index"></a>

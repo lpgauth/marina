@@ -12,6 +12,16 @@
 
 
 
+### <a name="type-buffer">buffer()</a> ###
+
+
+<pre><code>
+buffer() = #buffer{buffered = iolist(), current = non_neg_integer(), pending = non_neg_integer() | undefined}
+</code></pre>
+
+
+
+
 ### <a name="type-frame_flag">frame_flag()</a> ###
 
 
@@ -26,7 +36,7 @@ frame_flag() = {compression, boolean()}
 
 
 <pre><code>
-state() = #state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = any(), requests = any()}
+state() = #state{buffer = <a href="#type-buffer">buffer()</a>, frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = binary() | undefined, requests = non_neg_integer()}
 </code></pre>
 
 <a name="index"></a>
@@ -34,7 +44,7 @@ state() = #state{buffer = any(), frame_flags = [<a href="#type-frame_flag">frame
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#handle_data-2">handle_data/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_request-2">handle_request/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-0">init/0</a></td><td></td></tr><tr><td valign="top"><a href="#options-0">options/0</a></td><td></td></tr><tr><td valign="top"><a href="#setup-2">setup/2</a></td><td></td></tr><tr><td valign="top"><a href="#terminate-1">terminate/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#handle_data-2">handle_data/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_request-2">handle_request/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-0">init/0</a></td><td></td></tr><tr><td valign="top"><a href="#setup-2">setup/2</a></td><td></td></tr><tr><td valign="top"><a href="#terminate-1">terminate/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -65,15 +75,6 @@ handle_request(Request::term(), State::<a href="#type-state">state()</a>) -&gt; 
 
 <pre><code>
 init() -&gt; {ok, <a href="#type-state">state()</a>}
-</code></pre>
-<br />
-
-<a name="options-0"></a>
-
-### options/0 ###
-
-<pre><code>
-options() -&gt; {ok, <a href="/Users/lpgauth/Git/marina/_build/default/lib/shackle/doc/shackle.md#type-client_options">shackle:client_options()</a>}
 </code></pre>
 <br />
 

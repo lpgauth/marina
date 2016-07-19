@@ -3,7 +3,8 @@
 
 -export([
     pack/1,
-    unpack/1
+    unpack/1,
+    timeout/2
 ]).
 
 %% public
@@ -23,3 +24,10 @@ pack(Binary) ->
 
 unpack(<<Size:32/unsigned-integer, Binary/binary>>) ->
     lz4:uncompress(Binary, Size).
+
+-spec timeout(pos_integer(), erlang:timestamp()) ->
+    integer().
+
+timeout(Timeout, Timestamp) ->
+    Diff = timer:now_diff(os:timestamp(), Timestamp) div 1000,
+    Timeout - Diff.

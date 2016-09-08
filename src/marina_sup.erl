@@ -37,12 +37,7 @@ init([]) ->
         {reconnect, Reconnect},
         {reconnect_time_max, ReconnectTimeMax},
         {reconnect_time_min, ReconnectTimeMin},
-        {socket_options, [
-            binary,
-            {packet, raw},
-            {send_timeout, 50},
-            {send_timeout_close, true}
-        ]}
+        {socket_options, ?DEFAULT_SOCKET_OPTIONS}
     ], [
         {backlog_size, BacklogSize},
         {pool_size, PoolSize},

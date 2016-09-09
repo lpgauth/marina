@@ -19,6 +19,7 @@
 -define(DEFAULT_SOCKET_OPTIONS, [
     binary,
     {buffer, 65535},
+    {nodelay, true},
     {packet, raw},
     {send_timeout, 50},
     {send_timeout_close, true}

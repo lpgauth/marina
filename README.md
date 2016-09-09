@@ -93,6 +93,19 @@ High Performance Erlang Cassandra CQL Client
     <td>none</td>
     <td>reconnect minimum time</td>
   </tr>
+  <tr>
+    <td>socket_options</td>
+    <td>[gen_tcp:connect_option()]</td>
+    <td>
+        [binary,
+        {buffer, 65535},
+        {nodelay, true},
+        {packet, raw},
+        {send_timeout, 50},
+        {send_timeout_close, true}]
+    </td>
+    <td>options passed to the socket</td>
+  </tr>
 </table>
 
 ## Examples

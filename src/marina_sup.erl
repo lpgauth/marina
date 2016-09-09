@@ -30,6 +30,7 @@ init([]) ->
         ?DEFAULT_RECONNECT_MAX),
     ReconnectTimeMin = ?GET_ENV(reconnect_time_min,
         ?DEFAULT_RECONNECT_MIN),
+    SocketOptions = ?GET_ENV(socket_options, ?DEFAULT_SOCKET_OPTIONS),
 
     ok = shackle_pool:start(?APP, ?CLIENT, [
         {ip, Ip},
@@ -37,12 +38,7 @@ init([]) ->
         {reconnect, Reconnect},
         {reconnect_time_max, ReconnectTimeMax},
         {reconnect_time_min, ReconnectTimeMin},
-        {socket_options, [
-            binary,
-            {packet, raw},
-            {send_timeout, 50},
-            {send_timeout_close, true}
-        ]}
+        {socket_options, SocketOptions}
     ], [
         {backlog_size, BacklogSize},
         {pool_size, PoolSize},

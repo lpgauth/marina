@@ -16,6 +16,14 @@
 -define(DEFAULT_RECONNECT_MAX, 120000).
 -define(DEFAULT_RECONNECT_MIN, none).
 -define(DEFAULT_RECV_TIMEOUT, 1000).
+-define(DEFAULT_SOCKET_OPTIONS, [
+    binary,
+    {buffer, 65535},
+    {nodelay, true},
+    {packet, raw},
+    {send_timeout, 50},
+    {send_timeout_close, true}
+]).
 -define(DEFAULT_STREAM, 0).
 -define(DEFAULT_TIMEOUT, 1000).
 

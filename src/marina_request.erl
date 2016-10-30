@@ -11,49 +11,55 @@
     startup/1
 ]).
 
--define(LOOKUP(Key, List), shackle_utils:lookup(Key, List, undefined)).
-
 %% public
 -spec execute(stream(), [frame_flag()], statement_id(), [value()],
     consistency(), [flag()]) -> iolist().
 
 execute(Stream, FrameFlags, StatementId, Values, ConsistencyLevel, Flags) ->
+    FrameFlags2 = frame_flags(FrameFlags),
     {Flags2, Values2} = flags_and_values(Flags, Values),
     {PageSize, PagingState} = paging(Flags),
+    Body2 = encode_body(FrameFlags2,
+        [marina_types:encode_short_bytes(StatementId),
+        marina_types:encode_short(ConsistencyLevel),
+        Flags2, Values2, PageSize, PagingState]),
 
     marina_frame:encode(#frame {
         stream = Stream,
         opcode = ?OP_EXECUTE,
-        flags = frame_flags(FrameFlags),
-        body = [marina_types:encode_short_bytes(StatementId),
-            marina_types:encode_short(ConsistencyLevel),
-            Flags2, Values2, PageSize, PagingState]
+        flags = FrameFlags2,
+        body = Body2
     }).
 
 -spec prepare(stream(), [frame_flag()], query()) -> iolist().
 
 prepare(Stream, FrameFlags, Query) ->
+    FrameFlags2 = frame_flags(FrameFlags),
+    Body2 = encode_body(FrameFlags2, [marina_types:encode_long_string(Query)]),
+
     marina_frame:encode(#frame {
         stream = Stream,
         opcode = ?OP_PREPARE,
-        flags = frame_flags(FrameFlags),
-        body = [marina_types:encode_long_string(Query)]
+        flags = FrameFlags2,
+        body = Body2
     }).
 
 -spec query(stream(), [frame_flag()], query(), [value()], consistency(),
     [flag()]) -> iolist().
 
 query(Stream, FrameFlags, Query, Values, ConsistencyLevel, Flags) ->
+    FrameFlags2 = frame_flags(FrameFlags),
     {Flags2, Values2} = flags_and_values(Flags, Values),
     {PageSize, PagingState} = paging(Flags),
+    Body2 = encode_body(FrameFlags2, [marina_types:encode_long_string(Query),
+        marina_types:encode_short(ConsistencyLevel), Flags2, Values2, PageSize,
+        PagingState]),
 
     marina_frame:encode(#frame {
         stream = Stream,
         opcode = ?OP_QUERY,
-        flags = frame_flags(FrameFlags),
-        body = [marina_types:encode_long_string(Query),
-            marina_types:encode_short(ConsistencyLevel), Flags2,
-            Values2, PageSize, PagingState]
+        flags = FrameFlags2,
+        body = Body2
     }).
 
 -spec startup([frame_flag()]) -> iolist().
@@ -61,9 +67,12 @@ query(Stream, FrameFlags, Query, Values, ConsistencyLevel, Flags) ->
 startup(FrameFlags) ->
     FrameFlags2 = frame_flags(FrameFlags),
     Body = case FrameFlags2 of
-        1 -> [?CQL_VERSION, ?LZ4_COMPRESSION];
-        0 -> [?CQL_VERSION]
+        1 ->
+            [?CQL_VERSION, ?LZ4_COMPRESSION];
+        0 ->
+            [?CQL_VERSION]
     end,
+
     marina_frame:encode(#frame {
         stream = ?DEFAULT_STREAM,
         opcode = ?OP_STARTUP,
@@ -72,6 +81,12 @@ startup(FrameFlags) ->
     }).
 
 %% private
+encode_body(0, Body) ->
+    Body;
+encode_body(1, Body) ->
+    {ok, Body2} = marina_utils:pack(Body),
+    Body2.
+
 flags([]) ->
     0;
 flags([{values, true} | T]) ->

@@ -3,6 +3,7 @@
 -define(CLIENT, marina_client).
 -define(GET_ENV(Key, Default), application:get_env(?APP, Key, Default)).
 -define(ETS_TABLE_CACHE, marina_cache).
+-define(LOOKUP(Key, List), shackle_utils:lookup(Key, List, undefined)).
 
 %% defaults
 -define(DEFAULT_BACKLOG_SIZE, 1024).

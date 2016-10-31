@@ -34,10 +34,8 @@
 
 decode_bytes(<<255, 255, 255, 255, Rest/binary>>) ->
     {null, Rest};
-decode_bytes(Bin) ->
-    {Pos, Rest} = decode_int(Bin),
-    <<Value:Pos/binary, Rest2/binary>> = Rest,
-    {Value, Rest2}.
+decode_bytes(<<Pos:32, Value:Pos/binary, Rest/binary>>) ->
+    {Value, Rest}.
 
 -spec decode_int(binary()) -> {integer(), binary()}.
 
@@ -63,10 +61,8 @@ decode_short(<<Value:16, Rest/binary>>) ->
 
 decode_short_bytes(<<255, 255, Rest/binary>>) ->
     {null, Rest};
-decode_short_bytes(Bin) ->
-    {Pos, Rest} = decode_short(Bin),
-    <<Value:Pos/binary, Rest2/binary>> = Rest,
-    {Value, Rest2}.
+decode_short_bytes(<<Pos:16, Value:Pos/binary, Rest/binary>>) ->
+    {Value, Rest}.
 
 -spec decode_string(binary()) -> {binary(), binary()}.
 
@@ -75,20 +71,17 @@ decode_string(Bin) ->
 
 -spec decode_string_list(binary()) -> {[binary()], binary()}.
 
-decode_string_list(Bin) ->
-    {Length, Rest} = decode_short(Bin),
+decode_string_list(<<Length:16, Rest/binary>>) ->
     decode_string_list(Rest, Length, []).
 
 -spec decode_string_map(binary()) -> {[{binary(), binary()}], binary()}.
 
-decode_string_map(Bin) ->
-    {Length, Rest} = decode_short(Bin),
+decode_string_map(<<Length:16, Rest/binary>>) ->
     decode_string_map(Rest, Length, []).
 
 -spec decode_string_multimap(binary()) -> {[{binary(), [binary()]}], binary()}.
 
-decode_string_multimap(Bin) ->
-    {Length, Rest} = decode_short(Bin),
+decode_string_multimap(<<Length:16, Rest/binary>>) ->
     decode_string_multimap(Rest, Length, []).
 
 -spec decode_uuid(binary()) -> {binary(), binary()}.
@@ -158,21 +151,19 @@ encode_string_multimap(KeyValues) ->
 %% private
 decode_string_list(Bin, 0, Acc) ->
     {lists:reverse(Acc), Bin};
-decode_string_list(Bin, Length, Acc) ->
-    {String, Rest} = decode_string(Bin),
+decode_string_list(<<Pos:16, String:Pos/binary, Rest/binary>>, Length, Acc) ->
     decode_string_list(Rest, Length - 1, [String | Acc]).
 
 decode_string_map(Bin, 0, Acc) ->
     {lists:reverse(Acc), Bin};
-decode_string_map(Bin, Length, Acc) ->
-    {Key, Rest} = decode_string(Bin),
-    {Value, Rest2} = decode_string(Rest),
-    decode_string_map(Rest2, Length - 1, [{Key, Value} | Acc]).
+decode_string_map(<<Pos:16, Key:Pos/binary, Pos2:16, Value:Pos2/binary,
+    Rest/binary>>, Length, Acc) ->
+
+    decode_string_map(Rest, Length - 1, [{Key, Value} | Acc]).
 
 decode_string_multimap(Bin, 0, Acc) ->
     {lists:reverse(Acc), Bin};
-decode_string_multimap(Bin, Length, Acc) ->
-    {Key, Rest} = decode_string(Bin),
+decode_string_multimap(<<Pos:16, Key:Pos/binary, Rest/binary>>, Length, Acc) ->
     {Values, Rest2} = decode_string_list(Rest),
     decode_string_multimap(Rest2, Length - 1, [{Key, Values} | Acc]).
 

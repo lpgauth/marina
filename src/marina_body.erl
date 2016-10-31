@@ -11,27 +11,22 @@
 %% public
 -spec decode(frame()) -> {ok, term()} | {error, atom()}.
 
-decode(#frame {opcode = ?OP_READY}) ->
-    {ok, undefined};
-decode(#frame {
-        opcode = ?OP_ERROR,
-        body = Body
-    }) ->
+decode(#frame {flags = 0, body = Body, opcode = Opcode}) ->
+    decode(Opcode, Body);
+decode(#frame {flags = 1, body = Body, opcode = Opcode}) ->
+    {ok, Body2} = marina_utils:unpack(Body),
+    decode(Opcode, Body2).
 
+%% private
+decode(?OP_READY, _) ->
+    {ok, undefined};
+decode(?OP_ERROR, Body) ->
     {Code, Rest} = marina_types:decode_int(Body),
     {Msg, _Rest2} = marina_types:decode_string(Rest),
     {error, {Code, Msg}};
-decode(#frame {
-        opcode = ?OP_RESULT,
-        body = <<1:32/integer>>
-    }) ->
-
+decode(?OP_RESULT, <<1:32/integer>>) ->
     {ok, undefined};
-decode(#frame {
-        opcode = ?OP_RESULT,
-        body = <<2:32/integer, Rest/binary>>
-    }) ->
-
+decode(?OP_RESULT, <<2:32/integer, Rest/binary>>) ->
     {Metadata, Rest2} = decode_result_metadata(Rest),
     {RowsCount, Rest3} = marina_types:decode_int(Rest2),
     ColumnsCount = Metadata#result_metadata.columns_count,
@@ -42,28 +37,15 @@ decode(#frame {
         rows_count = RowsCount,
         rows = Rows
     }};
-decode(#frame {
-        opcode = ?OP_RESULT,
-        body = <<3:32/integer, Rest/binary>>
-    }) ->
-
+decode(?OP_RESULT, <<3:32/integer, Rest/binary>>) ->
     {Keyspace, <<>>} = marina_types:decode_string(Rest),
     {ok, Keyspace};
-decode(#frame {
-        opcode = ?OP_RESULT,
-        body = <<4:32/integer, Rest/binary>>
-    }) ->
-
+decode(?OP_RESULT, <<4:32/integer, Rest/binary>>) ->
     {Id, Rest2} = marina_types:decode_short_bytes(Rest),
     {_Metadata, Rest3} = decode_result_metadata(Rest2),
     {_ResultMetadata, <<>>} = decode_result_metadata(Rest3),
-
     {ok, Id};
-decode(#frame {
-        opcode = ?OP_RESULT,
-        body = <<5:32/integer, Rest/binary>>
-    }) ->
-
+decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
     {ChangeType, Rest2} = marina_types:decode_string(Rest),
     {Target, Rest3} = marina_types:decode_string(Rest2),
 
@@ -83,7 +65,6 @@ decode(#frame {
 
     {ok, {ChangeType, Target, Options}}.
 
-%% private
 decode_columns(Bin, Count) ->
     decode_columns(Bin, Count, []).
 

@@ -238,6 +238,7 @@ tuples_subtest() ->
 %% utils
 bootstrap() ->
     query(<<"DROP KEYSPACE test;">>),
+    timer:sleep(250),
     {ok, _} = query(<<"CREATE KEYSPACE test WITH REPLICATION =
         {'class':'SimpleStrategy', 'replication_factor':1};">>),
     {ok, _} = query(<<"CREATE TABLE test.users (key uuid, column1 text,

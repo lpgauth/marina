@@ -1,5 +1,5 @@
 -module(marina).
--include("marina.hrl").
+-include("marina_internal.hrl").
 
 -export([
     async_execute/4,

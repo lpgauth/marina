@@ -1,5 +1,5 @@
 -module(marina_cache).
--include("marina.hrl").
+-include("marina_internal.hrl").
 
 -export([
     erase/1,

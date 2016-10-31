@@ -1,5 +1,5 @@
 -module(marina_utils).
--include("marina.hrl").
+-include("marina_internal.hrl").
 
 -export([
     pack/1,

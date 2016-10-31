@@ -1,5 +1,5 @@
 -module(marina_sup).
--include("marina.hrl").
+-include("marina_internal.hrl").
 
 -export([
     start_link/0

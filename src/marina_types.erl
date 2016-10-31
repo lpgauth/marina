@@ -1,5 +1,5 @@
 -module(marina_types).
--include("marina.hrl").
+-include("marina_internal.hrl").
 
 -compile(inline).
 -compile({inline_size, 512}).

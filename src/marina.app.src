@@ -1,6 +1,6 @@
 {application, marina, [
   {description, "cassandra client"},
-  {vsn, "0.2.15"},
+  {vsn, "0.2.16"},
   {registered, []},
   {applications, [
     kernel,

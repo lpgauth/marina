@@ -1,5 +1,5 @@
 -include_lib("eunit/include/eunit.hrl").
--include_lib("marina/include/marina.hrl").
+-include_lib("marina/include/marina_internal.hrl").
 
 -define(DATA_TYPES, [
     ascii,

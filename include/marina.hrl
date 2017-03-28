@@ -66,6 +66,7 @@
     {skip_metadata, boolean()} |
     {values, boolean()}.
 
+-type error() :: {error, term()}.
 -type frame() :: #frame {}.
 -type frame_flag() :: {compression, boolean()}.
 -type query() :: binary().

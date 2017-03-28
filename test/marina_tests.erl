@@ -39,29 +39,30 @@ marina_compression_test_() ->
 %% tests
 async_execute_subtest() ->
     {ok, StatementId} = marina:prepare(?QUERY1, ?TIMEOUT),
-    {ok, Ref} = marina:async_execute(StatementId, ?CONSISTENCY_ONE, [], self()),
-    {ok, _} = marina:receive_response(Ref, ?TIMEOUT).
+    {ok, Ref} = marina:async_execute(StatementId, [], ?CONSISTENCY_ONE,
+        [], self()),
+    {ok, _} = marina:receive_response(Ref).
 
 async_prepare_subtest() ->
     {ok, Ref} = marina:async_prepare(?QUERY1, self()),
-    {ok, _} = marina:receive_response(Ref, ?TIMEOUT).
+    {ok, _} = marina:receive_response(Ref).
 
 async_query_subtest() ->
-    {ok, Ref} = marina:async_query(?QUERY1, ?CONSISTENCY_ONE, [], self()),
-    Response = marina:receive_response(Ref, ?TIMEOUT),
+    {ok, Ref} = marina:async_query(?QUERY1, [], ?CONSISTENCY_ONE, [], self()),
+    Response = marina:receive_response(Ref),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
 async_reusable_query_subtest() ->
-    {ok, Ref} = marina:async_reusable_query(?QUERY3, ?CONSISTENCY_ONE, [],
+    {ok, Ref} = marina:async_reusable_query(?QUERY3, [], ?CONSISTENCY_ONE, [],
         self(), ?TIMEOUT),
-    Response = marina:receive_response(Ref, ?TIMEOUT),
+    Response = marina:receive_response(Ref),
     {ok, Ref2} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES,
         ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
-    Response = marina:receive_response(Ref2, ?TIMEOUT),
+    Response = marina:receive_response(Ref2),
     {ok, Ref3} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES,
         ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
-    Response = marina:receive_response(Ref3, ?TIMEOUT),
+    Response = marina:receive_response(Ref3),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
@@ -94,7 +95,7 @@ counters_subtest() ->
 
 execute_subtest() ->
     {ok, StatementId} = marina:prepare(?QUERY1, ?TIMEOUT),
-    Response = marina:execute(StatementId, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+    Response = marina:execute(StatementId, [], ?CONSISTENCY_ONE, [], ?TIMEOUT),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
@@ -103,12 +104,13 @@ paging_subtest() ->
         (99492dfe-d94a-11e4-af39-58f44110757e, 'test', 'test2',
         intAsBlob(0));">>),
     Query = <<"SELECT * FROM users LIMIT 10;">>,
-    {ok, {result, Metadata, 1, Rows}} = marina:query(Query, ?CONSISTENCY_ONE,
-        [{page_size, 1}], ?TIMEOUT),
+    {ok, {result, Metadata, 1, Rows}} = marina:query(Query, [],
+        ?CONSISTENCY_ONE, [{page_size, 1}], ?TIMEOUT),
     {result_metadata, 4, _, PagingState} = Metadata,
 
-    {ok, {result, Metadata2, 1, Rows2}} = marina:query(Query, ?CONSISTENCY_ONE,
-        [{page_size, 1}, {paging_state, PagingState}], ?TIMEOUT),
+    {ok, {result, Metadata2, 1, Rows2}} = marina:query(Query, [],
+        ?CONSISTENCY_ONE, [{page_size, 1}, {paging_state, PagingState}],
+        ?TIMEOUT),
     {result_metadata, 4, _, PagingState2} = Metadata2,
 
     ?assertNotEqual(PagingState, PagingState2),
@@ -169,7 +171,7 @@ query_metedata_types_subtest() ->
     }}, Response3).
 
 query_no_metadata_subtest() ->
-    Response2 = marina:query(?QUERY1, ?CONSISTENCY_ONE,
+    Response2 = marina:query(?QUERY1, [], ?CONSISTENCY_ONE,
         [{skip_metadata, true}], ?TIMEOUT),
 
     ?assertEqual({ok, {result,
@@ -179,7 +181,8 @@ query_no_metadata_subtest() ->
     ]}}, Response2).
 
 reusable_query_subtest() ->
-    Response = marina:reusable_query(?QUERY1, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+    Response = marina:reusable_query(?QUERY1, [], ?CONSISTENCY_ONE,
+        [], ?TIMEOUT),
     Response = marina:reusable_query(?QUERY1, [], ?CONSISTENCY_ONE, [],
         ?TIMEOUT),
     Response = marina:reusable_query(?QUERY2, ?QUERY2_VALUES, ?CONSISTENCY_ONE,
@@ -189,7 +192,7 @@ reusable_query_subtest() ->
 
 reusable_query_invalid_query_subtest() ->
     Query = <<"SELECT * FROM user LIMIT 1;">>,
-    {error, {8704, _}} = marina:reusable_query(Query, ?CONSISTENCY_ONE, [],
+    {error, {8704, _}} = marina:reusable_query(Query, [], ?CONSISTENCY_ONE, [],
         ?TIMEOUT).
 
 schema_changes_subtest() ->
@@ -260,7 +263,7 @@ datatypes_columns(I, [ColumnType|Rest]) ->
     [Column | datatypes_columns(I + 1, Rest)].
 
 query(Query) ->
-    marina:query(Query, ?CONSISTENCY_LOCAL_ONE, [], ?TIMEOUT).
+    marina:query(Query, [], ?CONSISTENCY_LOCAL_ONE, [], ?TIMEOUT).
 
 setup(KeyVals) ->
     error_logger:tty(false),

@@ -21,7 +21,7 @@
 ### decode_bytes/1 ###
 
 <pre><code>
-decode_bytes(Bin::binary()) -&gt; {null, binary()} | {binary(), binary()}
+decode_bytes(X1::binary()) -&gt; {null, binary()} | {binary(), binary()}
 </code></pre>
 <br />
 
@@ -66,7 +66,7 @@ decode_short(X1::binary()) -&gt; {integer(), binary()}
 ### decode_short_bytes/1 ###
 
 <pre><code>
-decode_short_bytes(Bin::binary()) -&gt; {binary(), binary()}
+decode_short_bytes(X1::binary()) -&gt; {binary(), binary()}
 </code></pre>
 <br />
 
@@ -84,7 +84,7 @@ decode_string(Bin::binary()) -&gt; {binary(), binary()}
 ### decode_string_list/1 ###
 
 <pre><code>
-decode_string_list(Bin::binary()) -&gt; {[binary()], binary()}
+decode_string_list(X1::binary()) -&gt; {[binary()], binary()}
 </code></pre>
 <br />
 
@@ -93,7 +93,7 @@ decode_string_list(Bin::binary()) -&gt; {[binary()], binary()}
 ### decode_string_map/1 ###
 
 <pre><code>
-decode_string_map(Bin::binary()) -&gt; {[{binary(), binary()}], binary()}
+decode_string_map(X1::binary()) -&gt; {[{binary(), binary()}], binary()}
 </code></pre>
 <br />
 
@@ -102,7 +102,7 @@ decode_string_map(Bin::binary()) -&gt; {[{binary(), binary()}], binary()}
 ### decode_string_multimap/1 ###
 
 <pre><code>
-decode_string_multimap(Bin::binary()) -&gt; {[{binary(), [binary()]}], binary()}
+decode_string_multimap(X1::binary()) -&gt; {[{binary(), [binary()]}], binary()}
 </code></pre>
 <br />
 

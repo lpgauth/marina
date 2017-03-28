@@ -27,6 +27,5 @@ notifications:
 otp_release:
   - 19.2
   - 18.3
-  - 17.5
 script: "make travis"
 sudo: required

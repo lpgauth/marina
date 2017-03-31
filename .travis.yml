@@ -4,11 +4,15 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - gcc-5
+      - oracle-java8-installer
 before_install:
+  - sudo update-java-alternatives -s java-8-oracle
+  - export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+  - java -version
   - sudo rm -rf /var/lib/cassandra/*
-  - wget https://archive.apache.org/dist/cassandra/2.2.4/apache-cassandra-2.2.4-bin.tar.gz
-  - tar -xzf apache-cassandra-2.2.4-bin.tar.gz
-  - sudo sh apache-cassandra-2.2.4/bin/cassandra > /dev/null
+  - wget https://archive.apache.org/dist/cassandra/3.10/apache-cassandra-3.10-bin.tar.gz
+  - tar -xzf apache-cassandra-3.10-bin.tar.gz
+  - sudo sh apache-cassandra-3.10/bin/cassandra -R
   - for i in {1..10}; do cqlsh -e "DESCRIBE keyspaces;" && break || sleep 5; done
 cache:
   directories:
@@ -21,7 +25,7 @@ language: erlang
 notifications:
   email: false
 otp_release:
-  - 18.2.1
-  - 17.5
+  - 19.2
+  - 18.3
 script: "make travis"
 sudo: required

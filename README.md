@@ -12,13 +12,11 @@ High Performance Erlang Cassandra CQL Client
 
 #### Features
 
-* Backpressure via backlog (OOM protection)
 * Compression support (lz4)
 * CQL spec 3.2.0
 * Fast pool implementation (random | round_robin)
 * Performance optimized
 * Prepared statement cache
-* Request pipelining
 
 ## API
 <a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md#index" class="module">Function Index</a>
@@ -114,7 +112,7 @@ High Performance Erlang Cassandra CQL Client
 1> marina_app:start().
 ok
 
-2> marina:query(<<"SELECT * FROM test.users LIMIT 1;">>, ?CONSISTENCY_ONE, [], 1000).
+2> marina:query(<<"SELECT * FROM test.users LIMIT 1;">>, [], ?CONSISTENCY_ONE, [], 1000).
 {ok,{result,{result_metadata,4,
     [{column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
      {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
@@ -175,7 +173,7 @@ make xref
 ```license
 The MIT License (MIT)
 
-Copyright (c) 2015-2016 Louis-Philippe Gauthier
+Copyright (c) 2015-2017 Louis-Philippe Gauthier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -4,7 +4,6 @@
 -define(APP, marina).
 -define(CLIENT, marina_client).
 -define(GET_ENV(Key, Default), application:get_env(?APP, Key, Default)).
--define(ETS_TABLE_CACHE, marina_cache).
 -define(LOOKUP(Key, List), shackle_utils:lookup(Key, List, undefined)).
 
 %% defaults
@@ -53,3 +52,7 @@
 -define(OP_AUTH_CHALLENGE, 16#0E).
 -define(OP_AUTH_RESPONSE, 16#0F).
 -define(OP_AUTH_SUCCESS, 16#10).
+
+%% ETS tables
+-define(ETS_TABLE_CACHE, marina_cache).
+-define(ETS_TABLE_POOL, marina_pool).

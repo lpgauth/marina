@@ -87,8 +87,8 @@ High Performance Erlang Cassandra CQL Client
   </tr>
   <tr>
     <td>reconnect_time_min</td>
-    <td>none | pos_integer()</td>
-    <td>none</td>
+    <td>pos_integer()</td>
+    <td>1500</td>
     <td>reconnect minimum time</td>
   </tr>
   <tr>

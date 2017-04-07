@@ -37,4 +37,4 @@
     65, 16, 117, 125>>]).
 -define(QUERY3, <<"SELECT * FROM users WHERE key =
     99492dfe-d94a-11e4-af39-58f44110757d;">>).
--define(TIMEOUT, 1000).
+-define(TIMEOUT, 5000).

@@ -5,7 +5,8 @@
   {applications, [
     kernel,
     stdlib,
-    shackle
+    shackle,
+    foil
   ]},
   {mod, {marina_app, []}},
   {env, []}

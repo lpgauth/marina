@@ -2,29 +2,29 @@
 -include("marina_internal.hrl").
 
 -export([
-    erase/1,
-    get/1,
+    erase/2,
+    get/2,
     init/0,
-    put/2
+    put/3
 ]).
 
 %% public
--spec erase(binary()) -> ok | {error, not_found}.
+-spec erase(atom(), binary()) -> ok | {error, not_found}.
 
-erase(Key) ->
+erase(Pool, Key) ->
     try
-        ets:delete(?ETS_TABLE_CACHE, Key),
+        ets:delete(?ETS_TABLE_CACHE, {Pool, Key}),
         ok
     catch
         error:badarg ->
             {error, not_found}
     end.
 
--spec get(binary()) -> {ok, term()} | {error, not_found}.
+-spec get(atom(), binary()) -> {ok, term()} | {error, not_found}.
 
-get(Key) ->
+get(Pool, Key) ->
     try
-        Term = ets:lookup_element(?ETS_TABLE_CACHE, Key, 2),
+        Term = ets:lookup_element(?ETS_TABLE_CACHE, {Pool, Key}, 2),
         {ok, Term}
     catch
         error:badarg ->
@@ -40,8 +40,8 @@ init() ->
         {read_concurrency, true}
     ]).
 
--spec put(binary(), term()) -> ok.
+-spec put(atom(), binary(), term()) -> ok.
 
-put(Key, Value) ->
-    ets:insert(?ETS_TABLE_CACHE, {Key, Value}),
+put(Pool, Key, Value) ->
+    ets:insert(?ETS_TABLE_CACHE, {Pool, Key, Value}),
     ok.

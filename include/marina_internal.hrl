@@ -8,7 +8,9 @@
 
 %% defaults
 -define(DEFAULT_BACKLOG_SIZE, 1024).
+-define(DEFAULT_BOOTSTRAP_IPS, [?GET_ENV(ip, ?DEFAULT_IP)]).
 -define(DEFAULT_CONNECT_RETRY, 500).
+-define(DEFAULT_DATACENTER, undefined).
 -define(DEFAULT_FLAGS, 0).
 -define(DEFAULT_IP, "127.0.0.1").
 -define(DEFAULT_POOL_SIZE, 16).
@@ -55,4 +57,3 @@
 
 %% ETS tables
 -define(ETS_TABLE_CACHE, marina_cache).
--define(ETS_TABLE_POOL, marina_pool).

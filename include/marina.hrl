@@ -47,7 +47,7 @@
 %% types
 -type buffer() :: #buffer {}.
 -type column_spec() :: #column_spec {}.
--type consistency() ::
+-type cl() ::
     ?CONSISTENCY_ANY |
     ?CONSISTENCY_ONE |
     ?CONSISTENCY_TWO |

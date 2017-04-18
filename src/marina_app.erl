@@ -8,6 +8,7 @@
 
 -behaviour(application).
 -export([
+    prep_stop/1,
     start/2,
     stop/1
 ]).
@@ -24,6 +25,12 @@ stop() ->
     application:stop(?APP).
 
 %% application callbacks
+-spec prep_stop(term()) -> term().
+
+prep_stop(State) ->
+    marina_pool:stop(),
+    State.
+
 -spec start(application:start_type(), term()) -> {ok, pid()}.
 
 start(_StartType, _StartArgs) ->
@@ -32,5 +39,4 @@ start(_StartType, _StartArgs) ->
 -spec stop(term()) -> ok.
 
 stop(_State) ->
-    shackle_pool:stop(?APP),
     ok.

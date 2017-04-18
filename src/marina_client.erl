@@ -38,7 +38,7 @@ init() ->
 
 setup(Socket, #state {frame_flags = FrameFlags} = State) ->
     Msg = marina_request:startup(FrameFlags),
-    case sync_msg(Socket, Msg) of
+    case marina_utils:sync_msg(Socket, Msg) of
         {ok, undefined} ->
             set_keyspace(Socket, State);
         {error, Reason} ->
@@ -106,23 +106,9 @@ set_keyspace(Socket, #state {
 
     Query = <<"USE \"", Keyspace/binary, "\"">>,
     Msg = marina_request:query(0, FrameFlags, Query, [], ?CONSISTENCY_ONE, []),
-    case sync_msg(Socket, Msg) of
+    case marina_utils:sync_msg(Socket, Msg) of
         {ok, Keyspace} ->
             {ok, State};
         {error, Reason} ->
             {error, Reason, State}
-    end.
-
-sync_msg(Socket, Msg) ->
-    case gen_tcp:send(Socket, Msg) of
-        ok ->
-            case gen_tcp:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT) of
-                {ok, Msg2} ->
-                    {_Rest, [Frame | _]} = marina_frame:decode(Msg2),
-                    marina_body:decode(Frame);
-                {error, Reason} ->
-                    {error, Reason}
-            end;
-        {error, Reason} ->
-            {error, Reason}
     end.

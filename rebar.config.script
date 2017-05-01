@@ -4,9 +4,9 @@ Config = case erlang:function_exported(rebar3, main, 1) of
     false ->
         [{deps, [
             {lz4, ".*",
-              {git, "https://github.com/lpgauth/erlang-lz4.git", {branch, "rebar3"}}},
+              {git, "https://github.com/szktty/erlang-lz4.git", {tag, "0.2.4"}}},
             {shackle, ".*",
-              {git, "https://github.com/lpgauth/shackle.git", {tag, "0.5.0"}}}
+              {git, "https://github.com/lpgauth/shackle.git", {tag, "0.5.1"}}}
         ]} | lists:keydelete(deps, 1, CONFIG)]
 end,
 

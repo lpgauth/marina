@@ -1,10 +1,12 @@
+{"1.1.0",
 [{<<"granderl">>,{pkg,<<"granderl">>,<<"0.1.5">>},1},
- {<<"lz4">>,
-  {git,"https://github.com/lpgauth/erlang-lz4.git",
-       {ref,"faf5c9e1bb083adb49638cddecfc9069596c43f9"}},
-  0},
+ {<<"lz4">>,{pkg,<<"lz4">>,<<"0.2.4-a">>},0},
  {<<"metal">>,{pkg,<<"metal">>,<<"0.1.0">>},1},
- {<<"shackle">>,
-  {git,"https://github.com/lpgauth/shackle.git",
-       {ref,"facf9ef2307f07b124309e6df28c480887acf588"}},
-  0}].
+ {<<"shackle">>,{pkg,<<"shackle">>,<<"0.5.1">>},0}]}.
+[
+{pkg_hash,[
+ {<<"granderl">>, <<"F20077A68BD80B8D8783BD15A052813C6483771DEC1A5B837D307CBE92F14122">>},
+ {<<"lz4">>, <<"D46A8AA7BD7AB0A9877F127CEBD95A24B8491066D0D2135D757C1601E87AC53E">>},
+ {<<"metal">>, <<"168E0AB553E3B8144547E353085CEDAA43C8769E0B7E43C0146C99C2C33507AC">>},
+ {<<"shackle">>, <<"D32906B49BDF030127558778F2E5CEE9D7F10C55DD40E25DA51381EADA719CBF">>}]}
+].

@@ -1,12 +1,11 @@
 {application, marina, [
-  {description, "cassandra client"},
-  {vsn, "0.2.16"},
-  {registered, []},
-  {applications, [
-    kernel,
-    stdlib,
-    shackle
-  ]},
+  {applications, [kernel, stdlib, shackle]},
+  {description, "High-Performance Erlang Cassandra CQL Client"},
+  {env, []},
+  {licenses, ["MIT"]},
+  {links, [{"GitHub", "https://github.com/lpgauth/marina"}]},
+  {maintainers, ["Louis-Philippe Gauthier"]},
   {mod, {marina_app, []}},
-  {env, []}
+  {registered, []},
+  {vsn, "0.2.16"}
 ]}.

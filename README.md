@@ -1,18 +1,18 @@
 # marina
 
-High Performance Erlang Cassandra CQL Client
+High-Performance Erlang Cassandra CQL Client
 
 [![Build Status](https://travis-ci.org/lpgauth/marina.svg?branch=master)](https://travis-ci.org/lpgauth/marina)
 [![Coverage Status](https://coveralls.io/repos/github/lpgauth/marina/badge.svg?branch=master)](https://coveralls.io/github/lpgauth/marina?branch=master)
 
 #### Requirements
 
-* Cassandra 2.1 +
-* Erlang 16.0 +
+* Cassandra 2.1+
+* Erlang 16.0+
 
 #### Features
 
-* Compression support (lz4)
+* Compression support (LZ4)
 * CQL spec 3.2.0
 * Fast pool implementation (random | round_robin)
 * Performance optimized
@@ -156,8 +156,8 @@ Shell got {marina,#Ref<0.0.0.124>,
 
 ## TODO
 
-* batch queries
-* token aware load balancing
+* Batch queries
+* Token-aware load balancing
 
 ## Tests
 

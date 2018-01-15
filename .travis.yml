@@ -25,7 +25,8 @@ language: erlang
 notifications:
   email: false
 otp_release:
-  - 19.2
+  - 20.1
+  - 19.3
   - 18.3
 script: "make travis"
 sudo: required

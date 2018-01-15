@@ -4,12 +4,13 @@
 -define(APP, marina).
 -define(CLIENT, marina_client).
 -define(GET_ENV(Key, Default), application:get_env(?APP, Key, Default)).
--define(ETS_TABLE_CACHE, marina_cache).
 -define(LOOKUP(Key, List), shackle_utils:lookup(Key, List, undefined)).
 
 %% defaults
 -define(DEFAULT_BACKLOG_SIZE, 1024).
+-define(DEFAULT_BOOTSTRAP_IPS, [?GET_ENV(ip, ?DEFAULT_IP)]).
 -define(DEFAULT_CONNECT_RETRY, 500).
+-define(DEFAULT_DATACENTER, undefined).
 -define(DEFAULT_FLAGS, 0).
 -define(DEFAULT_IP, "127.0.0.1").
 -define(DEFAULT_POOL_SIZE, 16).
@@ -53,3 +54,6 @@
 -define(OP_AUTH_CHALLENGE, 16#0E).
 -define(OP_AUTH_RESPONSE, 16#0F).
 -define(OP_AUTH_SUCCESS, 16#10).
+
+%% ETS tables
+-define(ETS_TABLE_CACHE, marina_cache).

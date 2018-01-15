@@ -26,7 +26,7 @@ fprofx() ->
     fprofx:trace([start, {procs, new}, {tracer, Tracer}]),
 
     Self = self(),
-    Query = <<"SELECT * FROM rtb.users WHERE key = ?;">>,
+    Query = <<"SELECT * FROM test.users WHERE key = ?;">>,
     Uid = <<153, 73, 45, 254, 217, 74, 17, 228, 175, 57, 88,
         244, 65, 16, 117, 125>>,
     Opts = [{skip_metadata, true}],
@@ -34,7 +34,7 @@ fprofx() ->
     marina_app:start(),
 
     [spawn(fun () ->
-        [marina:reusable_query(Query, [Uid], ?CONSISTENCY_LOCAL_ONE,
+        [{ok, _} = marina:reusable_query(Query, [Uid], ?CONSISTENCY_LOCAL_ONE,
             Opts, ?TIMEOUT) || _ <- lists:seq(1, ?N)],
         Self ! exit
     end) || _ <- lists:seq(1, ?P)],
@@ -49,7 +49,7 @@ fprofx() ->
 
 %% private
 setup() ->
-    [marina:query(Query, ?CONSISTENCY_LOCAL_ONE, [], ?TIMEOUT) || Query <- [
+    [marina:query(Query, [], ?CONSISTENCY_LOCAL_ONE, [], ?TIMEOUT) || Query <- [
         <<"DROP KEYSPACE test;">>,
         <<"CREATE KEYSPACE test WITH REPLICATION =
             {'class':'SimpleStrategy', 'replication_factor':1};">>,
@@ -57,6 +57,21 @@ setup() ->
             column2 text, value blob, PRIMARY KEY (key, column1, column2));">>,
         <<"INSERT INTO test.users (key, column1, column2, value)
             values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2',
+            intAsBlob(0))">>,
+        <<"INSERT INTO test.users (key, column1, column2, value)
+            values (99492dfe-d94a-11e4-af39-58f44110757d, 'test2', 'test3',
+            intAsBlob(0))">>,
+        <<"INSERT INTO test.users (key, column1, column2, value)
+            values (99492dfe-d94a-11e4-af39-58f44110757d, 'test3', 'test4',
+            intAsBlob(0))">>,
+        <<"INSERT INTO test.users (key, column1, column2, value)
+            values (99492dfe-d94a-11e4-af39-58f44110757d, 'test4', 'test5',
+            intAsBlob(0))">>,
+        <<"INSERT INTO test.users (key, column1, column2, value)
+            values (99492dfe-d94a-11e4-af39-58f44110757d, 'test5', 'test6',
+            intAsBlob(0))">>,
+        <<"INSERT INTO test.users (key, column1, column2, value)
+            values (99492dfe-d94a-11e4-af39-58f44110757d, 'test6', 'test7',
             intAsBlob(0))">>
     ]].
 

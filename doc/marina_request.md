@@ -12,11 +12,11 @@
 
 
 
-### <a name="type-consistency">consistency()</a> ###
+### <a name="type-cl">cl()</a> ###
 
 
 <pre><code>
-consistency() = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+cl() = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
 </code></pre>
 
 
@@ -96,7 +96,7 @@ value() = binary()
 ### execute/6 ###
 
 <pre><code>
-execute(Stream::<a href="#type-stream">stream()</a>, FrameFlags::[<a href="#type-frame_flag">frame_flag()</a>], StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>]) -&gt; iolist()
+execute(Stream::<a href="#type-stream">stream()</a>, FrameFlags::[<a href="#type-frame_flag">frame_flag()</a>], StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-cl">cl()</a>, Flags::[<a href="#type-flag">flag()</a>]) -&gt; iolist()
 </code></pre>
 <br />
 
@@ -114,7 +114,7 @@ prepare(Stream::<a href="#type-stream">stream()</a>, FrameFlags::[<a href="#type
 ### query/6 ###
 
 <pre><code>
-query(Stream::<a href="#type-stream">stream()</a>, FrameFlags::[<a href="#type-frame_flag">frame_flag()</a>], Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>]) -&gt; iolist()
+query(Stream::<a href="#type-stream">stream()</a>, FrameFlags::[<a href="#type-frame_flag">frame_flag()</a>], Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-cl">cl()</a>, Flags::[<a href="#type-flag">flag()</a>]) -&gt; iolist()
 </code></pre>
 <br />
 

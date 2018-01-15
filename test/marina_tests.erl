@@ -5,17 +5,15 @@
 marina_test_() ->
     {setup,
         fun () -> setup([
-            {keyspace, <<"test">>}
+            {keyspace, <<"test">>},
+            {pool_size, 1}
         ]) end,
         fun (_) -> cleanup() end,
     {inparallel, [
-        fun async_execute_subtest/0,
-        fun async_prepare_subtest/0,
         fun async_query_subtest/0,
         fun async_reusable_query_subtest/0,
         fun async_reusable_query_invalid_query_subtest/0,
         fun counters_subtest/0,
-        fun execute_subtest/0,
         fun paging_subtest/0,
         fun query_subtest/0,
         fun query_metedata_types_subtest/0,
@@ -37,16 +35,6 @@ marina_compression_test_() ->
     }.
 
 %% tests
-async_execute_subtest() ->
-    {ok, StatementId} = marina:prepare(?QUERY1, ?TIMEOUT),
-    {ok, Ref} = marina:async_execute(StatementId, [], ?CONSISTENCY_ONE,
-        [], self()),
-    {ok, _} = marina:receive_response(Ref).
-
-async_prepare_subtest() ->
-    {ok, Ref} = marina:async_prepare(?QUERY1, self()),
-    {ok, _} = marina:receive_response(Ref).
-
 async_query_subtest() ->
     {ok, Ref} = marina:async_query(?QUERY1, [], ?CONSISTENCY_ONE, [], self()),
     Response = marina:receive_response(Ref),
@@ -92,12 +80,6 @@ counters_subtest() ->
         1,
         [[<<"adgear.com">>, <<"home">>, <<0, 0, 0, 0, 0, 0, 0, 1>>]]
     }}, Response).
-
-execute_subtest() ->
-    {ok, StatementId} = marina:prepare(?QUERY1, ?TIMEOUT),
-    Response = marina:execute(StatementId, [], ?CONSISTENCY_ONE, [], ?TIMEOUT),
-
-    ?assertEqual(?QUERY1_RESULT, Response).
 
 paging_subtest() ->
     query(<<"INSERT INTO test.users (key, column1, column2, value) values

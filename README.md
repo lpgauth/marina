@@ -21,7 +21,6 @@ High-Performance Erlang Cassandra CQL Client
 ## API
 <a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md#index" class="module">Function Index</a>
 
-
 #### Environment variables
 
 <table width="100%">
@@ -38,13 +37,25 @@ High-Performance Erlang Cassandra CQL Client
     <td>maximum number of concurrent requests per connection</td>
   </tr>
   <tr>
+    <td>bootstrap_ips</td>
+    <td>[list()]</td>
+    <td>["5.5.5.5", "5.5.5.6"]</td>
+    <td>ips used to bootstrap the pool</td>
+  </tr>
+  <tr>
     <td>compression</td>
     <td>boolean()</td>
     <td>false</td>
     <td>enable lz4 compression</td>
   </tr>
   <tr>
-    <td>ip</td>
+    <td>datacenter</td>
+    <td>binary()</td>
+    <td><<"MYDC">></td>
+    <td>filter peers to a specific data center</td>
+  </tr>
+  <tr>
+    <td>ip (deprecated)</td>
     <td>list()</td>
     <td>"127.0.0.1"</td>
     <td>server ip</td>
@@ -106,52 +117,57 @@ High-Performance Erlang Cassandra CQL Client
   </tr>
 </table>
 
+## Pool
+
+The pool is bootstraped by querying the `system.peers` table. If `bootstrap_ips` is provided, `marina` will try each ip until it can connect and retrieve the peers. For backward compatibility, `ip` will be used if `bootstrap_ips` is not provided. You can filter the lists of connected peers with `filter_dc`.
+
 ## Examples
 
 ```erlang
 1> marina_app:start().
-ok
+
+{ok,[granderl,metal,foil,shackle,marina]}
 
 2> marina:query(<<"SELECT * FROM test.users LIMIT 1;">>, [], ?CONSISTENCY_ONE, [], 1000).
+
 {ok,{result,{result_metadata,4,
-    [{column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
-     {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
-     {column_spec,<<"test">>,<<"users">>,<<"column2">>,varchar},
-     {column_spec,<<"test">>,<<"users">>,<<"value">>,blob}]},
-    1,
-    [[<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>,
-      <<"test">>,
-      <<"test2">>,
-      <<0,0,0,0>>]]
-}}
+                             [{column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
+                              {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
+                              {column_spec,<<"test">>,<<"users">>,<<"column2">>,varchar},
+                              {column_spec,<<"test">>,<<"users">>,<<"value">>,blob}],
+                             undefined},
+            1,
+            [[<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,
+                125>>,
+              <<"test">>,<<"test2">>,
+              <<0,0,0,0>>]]}}
 
 3> marina:query(<<"SELECT * FROM test.users WHERE key = ?;">>,
 [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>], ?CONSISTENCY_ONE,
 [{skip_metadata, true}], 1000).
 
-{ok,{result,{result_metadata,4,[]},
-    1,
-    [[<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>,
-      <<"test">>,
-      <<"test2">>,
-      <<0,0,0,0>>]]
-}}
+{ok,{result,{result_metadata,4,[],undefined},
+            1,
+            [[<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,
+                125>>,
+              <<"test">>,<<"test2">>,
+              <<0,0,0,0>>]]}}
 
-4> marina:async_reusable_query(<<"SELECT * FROM test.users WHERE key = ?;">>,
+4> {ok, Ref} = marina:async_reusable_query(<<"SELECT * FROM test.users WHERE key = ?;">>,
 [<<207,85,107,110,157,137,17,226,167,153,120,43,203,102,219,173>>],
 ?CONSISTENCY_ONE, [],self(),500).
 
-{ok,#Ref<0.0.0.124>}
+{ok,{'marina_00000000-0000-0000-0000-000000000000_2',#Ref<0.584071807.1659371522.17616>}}
 
-5> flush().
-Shell got {marina,#Ref<0.0.0.124>,
-    {ok,{frame,0,0,8,
-        <<0,0,0,2,0,0,0,1,0,0,0,4,0,3,82,84,66,0,5,117,
-        115,101,114,115,0,3,107,101,121,0,12,0,7,99,
-        111,108,117,109,110,49,0,13,0,7,99,111,108,
-        117,109,110,50,0,13,0,5,118,97,108,117,101,0,
-        3,0,0,0,0>>
-    }}}
+5> marina:receive_response(Ref).
+
+{ok,{result,{result_metadata,4,
+                             [{column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
+                              {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
+                              {column_spec,<<"test">>,<<"users">>,<<"column2">>,varchar},
+                              {column_spec,<<"test">>,<<"users">>,<<"value">>,blob}],
+                             undefined},
+            0,[]}}
 ```
 
 ## TODO

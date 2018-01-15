@@ -13,7 +13,7 @@
 
 %% public
 -spec execute(stream(), [frame_flag()], statement_id(), [value()],
-    consistency(), [flag()]) -> iolist().
+    cl(), [flag()]) -> iolist().
 
 execute(Stream, FrameFlags, StatementId, Values, ConsistencyLevel, Flags) ->
     FrameFlags2 = frame_flags(FrameFlags),
@@ -44,7 +44,7 @@ prepare(Stream, FrameFlags, Query) ->
         body = Body2
     }).
 
--spec query(stream(), [frame_flag()], query(), [value()], consistency(),
+-spec query(stream(), [frame_flag()], query(), [value()], cl(),
     [flag()]) -> iolist().
 
 query(Stream, FrameFlags, Query, Values, ConsistencyLevel, Flags) ->

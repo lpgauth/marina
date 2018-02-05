@@ -8,7 +8,8 @@
     execute/6,
     prepare/3,
     query/6,
-    startup/1
+    startup/1,
+    auth_response/3
 ]).
 
 %% public
@@ -78,6 +79,18 @@ startup(FrameFlags) ->
         opcode = ?OP_STARTUP,
         flags = FrameFlags2,
         body = [marina_types:encode_string_map(Body)]
+    }).
+
+-spec auth_response(binary(), binary(), [frame_flag()]) -> iolist().
+
+auth_response(Username, Password, FrameFlags) ->
+    FrameFlags2 = frame_flags(FrameFlags),
+    Body = <<0, Username/binary, 0, Password/binary>>,
+    marina_frame:encode(#frame {
+        stream = ?DEFAULT_STREAM,
+        opcode = ?OP_AUTH_RESPONSE,
+        flags = FrameFlags2,
+        body = [marina_types:encode_bytes(Body)]
     }).
 
 %% private

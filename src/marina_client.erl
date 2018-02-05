@@ -20,6 +20,10 @@
     requests    = 0                   :: non_neg_integer()
 }).
 
+%% the encoding is as follows: 0x0047 is string length followed by string
+%% see marina_types:decode_string/1 for its decoding example.
+-define(SASL_PASSWORD_AUTH, <<0, 47, "org.apache.cassandra.auth.PasswordAuthenticator">>).
+
 -type state() :: #state {}.
 
 %% shackle_server callbacks
@@ -39,6 +43,22 @@ init() ->
 setup(Socket, #state {frame_flags = FrameFlags} = State) ->
     Msg = marina_request:startup(FrameFlags),
     case sync_msg(Socket, Msg) of
+        {ok, {authenticate, AuthReqBody}} ->
+            Username = ?GET_ENV(username, undefined),
+            Password = ?GET_ENV(password, undefined),
+            case {is_binary(Username), is_binary(Password), AuthReqBody} of
+                {true, true, ?SASL_PASSWORD_AUTH} ->
+                    AuthResp = marina_request:auth_response(
+                                 Username, Password, FrameFlags),
+                    case sync_msg(Socket, AuthResp) of
+                        {ok, {authenticate_success, Body2}} ->
+                            set_keyspace(Socket, State);
+                        AuthE ->
+                            {error, {auth_failure, AuthE}, State}
+                    end;
+                _ ->
+                    {error, {missing_auth, AuthReqBody}, State}
+            end;
         {ok, undefined} ->
             set_keyspace(Socket, State);
         {error, Reason} ->

@@ -18,6 +18,12 @@ decode(#frame {flags = 1, body = Body, opcode = Opcode}) ->
     decode(Opcode, Body2).
 
 %% private
+decode(?OP_AUTHENTICATE, Body) ->
+    {ok, {authenticate, Body}};
+decode(?OP_AUTH_CHALLENGE, Body) ->
+    {ok, {authenticate_challenge, Body}};
+decode(?OP_AUTH_SUCCESS, Body) ->
+    {ok, {authenticate_success, Body}};
 decode(?OP_READY, _) ->
     {ok, undefined};
 decode(?OP_ERROR, Body) ->

@@ -47,7 +47,7 @@
 %% types
 -type buffer() :: #buffer {}.
 -type column_spec() :: #column_spec {}.
--type consistency() ::
+-type consistency_level() ::
     ?CONSISTENCY_ANY |
     ?CONSISTENCY_ONE |
     ?CONSISTENCY_TWO |
@@ -60,18 +60,24 @@
     ?CONSISTENCY_LOCAL_SERIAL |
     ?CONSISTENCY_LOCAL_ONE.
 
--type flag() ::
-    {page_size, pos_integer()} |
-    {paging_state, binary()} |
-    {skip_metadata, boolean()} |
-    {values, boolean()}.
-
 -type error() :: {error, term()}.
 -type frame() :: #frame {}.
--type frame_flag() :: {compression, boolean()}.
+-type frame_flag() :: 0..1.
 -type query() :: binary().
+-type query_opts() :: #{
+    consistency_level => consistency_level(),
+    page_size => pos_integer(),
+    paging_state => binary(),
+    pid => pid(),
+    routing_key => binary(),
+    skip_metadata => boolean(),
+    timeout => pos_integer(),
+    values => values()
+}.
+
 -type result() :: #result {}.
 -type result_metadata() :: #result_metadata {}.
 -type statement_id() :: binary().
 -type stream() :: 0..32768.
 -type value() :: binary().
+-type values() :: [value()].

@@ -9,6 +9,7 @@
     decode_int/1,
     decode_long/1,
     decode_long_string/1,
+    decode_long_string_set/1,
     decode_short/1,
     decode_short_bytes/1,
     decode_string/1,
@@ -51,6 +52,11 @@ decode_long(<<Value:64, Rest/binary>>) ->
 
 decode_long_string(Bin) ->
     decode_bytes(Bin).
+
+-spec decode_long_string_set(binary()) -> {[binary()], binary()}.
+
+decode_long_string_set(<<Length:32, Rest/binary>>) ->
+    decode_long_string_set(Rest, Length, []).
 
 -spec decode_short(binary()) -> {integer(), binary()}.
 
@@ -149,6 +155,12 @@ encode_string_multimap(KeyValues) ->
     encode_string_multimap(KeyValues, []).
 
 %% private
+decode_long_string_set(Bin, 0, Acc) ->
+    {lists:reverse(Acc), Bin};
+decode_long_string_set(Bin, Length, Acc) ->
+    {String, Rest} = decode_bytes(Bin),
+    decode_long_string_set(Rest, Length - 1, [String | Acc]).
+
 decode_string_list(Bin, 0, Acc) ->
     {lists:reverse(Acc), Bin};
 decode_string_list(<<Pos:16, String:Pos/binary, Rest/binary>>, Length, Acc) ->

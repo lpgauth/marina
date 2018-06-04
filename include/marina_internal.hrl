@@ -2,16 +2,20 @@
 
 %% macros
 -define(APP, marina).
+-define(CHILD(M), {M, {M, start_link, []}, permanent, 5000, worker, [M]}).
 -define(CLIENT, marina_client).
 -define(GET_ENV(Key, Default), application:get_env(?APP, Key, Default)).
--define(ETS_TABLE_CACHE, marina_cache).
 -define(LOOKUP(Key, List), shackle_utils:lookup(Key, List, undefined)).
 
 %% defaults
 -define(DEFAULT_BACKLOG_SIZE, 1024).
+-define(DEFAULT_BOOTSTRAP_IPS, [?GET_ENV(ip, ?DEFAULT_IP)]).
 -define(DEFAULT_CONNECT_RETRY, 500).
--define(DEFAULT_FLAGS, 0).
+-define(DEFAULT_CONSISTENCY_LEVEL, ?CONSISTENCY_ONE).
+-define(DEFAULT_DATACENTER, undefined).
+-define(DEFAULT_FLAGS, []).
 -define(DEFAULT_IP, "127.0.0.1").
+-define(DEFAULT_PID, self()).
 -define(DEFAULT_POOL_SIZE, 16).
 -define(DEFAULT_POOL_STRATEGY, random).
 -define(DEFAULT_PORT, 9042).
@@ -19,6 +23,7 @@
 -define(DEFAULT_RECONNECT_MAX, 120000).
 -define(DEFAULT_RECONNECT_MIN, 1500).
 -define(DEFAULT_RECV_TIMEOUT, 1000).
+-define(DEFAULT_ROUTING_KEY, undefined).
 -define(DEFAULT_SOCKET_OPTIONS, [
     binary,
     {buffer, 65535},
@@ -27,6 +32,7 @@
     {send_timeout, 50},
     {send_timeout_close, true}
 ]).
+-define(DEFAULT_STRATEGY, token_aware).
 -define(DEFAULT_STREAM, 0).
 -define(DEFAULT_TIMEOUT, 1000).
 
@@ -53,3 +59,10 @@
 -define(OP_AUTH_CHALLENGE, 16#0E).
 -define(OP_AUTH_RESPONSE, 16#0F).
 -define(OP_AUTH_SUCCESS, 16#10).
+
+%% ETS tables
+-define(ETS_TABLE_CACHE, marina_cache).
+
+%% queries
+-define(LOCAL_QUERY, <<"select rpc_address, data_center, tokens from system.local;">>).
+-define(PEERS_QUERY, <<"select rpc_address, data_center, tokens from system.peers;">>).

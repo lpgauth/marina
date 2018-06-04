@@ -5,17 +5,15 @@
 marina_test_() ->
     {setup,
         fun () -> setup([
-            {keyspace, <<"test">>}
+            {keyspace, <<"test">>},
+            {pool_size, 1}
         ]) end,
         fun (_) -> cleanup() end,
     {inparallel, [
-        fun async_execute_subtest/0,
-        fun async_prepare_subtest/0,
         fun async_query_subtest/0,
         fun async_reusable_query_subtest/0,
         fun async_reusable_query_invalid_query_subtest/0,
         fun counters_subtest/0,
-        fun execute_subtest/0,
         fun paging_subtest/0,
         fun query_subtest/0,
         fun query_metedata_types_subtest/0,
@@ -37,39 +35,27 @@ marina_compression_test_() ->
     }.
 
 %% tests
-async_execute_subtest() ->
-    {ok, StatementId} = marina:prepare(?QUERY1, ?TIMEOUT),
-    {ok, Ref} = marina:async_execute(StatementId, [], ?CONSISTENCY_ONE,
-        [], self()),
-    {ok, _} = marina:receive_response(Ref).
-
-async_prepare_subtest() ->
-    {ok, Ref} = marina:async_prepare(?QUERY1, self()),
-    {ok, _} = marina:receive_response(Ref).
-
 async_query_subtest() ->
-    {ok, Ref} = marina:async_query(?QUERY1, [], ?CONSISTENCY_ONE, [], self()),
+    {ok, Ref} = marina:async_query(?QUERY1, #{}),
     Response = marina:receive_response(Ref),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
 async_reusable_query_subtest() ->
-    {ok, Ref} = marina:async_reusable_query(?QUERY3, [], ?CONSISTENCY_ONE, [],
-        self(), ?TIMEOUT),
+    {ok, Ref} = marina:async_reusable_query(?QUERY3, #{}),
     Response = marina:receive_response(Ref),
-    {ok, Ref2} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES,
-        ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
+    {ok, Ref2} = marina:async_reusable_query(?QUERY2,
+        #{values => ?QUERY2_VALUES}),
     Response = marina:receive_response(Ref2),
-    {ok, Ref3} = marina:async_reusable_query(?QUERY2, ?QUERY2_VALUES,
-        ?CONSISTENCY_ONE, [], self(), ?TIMEOUT),
+    {ok, Ref3} = marina:async_reusable_query(?QUERY2,
+        #{values => ?QUERY2_VALUES}),
     Response = marina:receive_response(Ref3),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
 async_reusable_query_invalid_query_subtest() ->
     Query = <<"SELECT * FROM user LIMIT 1;">>,
-    {error, {8704, _}} = marina:async_reusable_query(Query, ?CONSISTENCY_ONE,
-        [], self(), ?TIMEOUT).
+    {error, {8704, _}} = marina:async_reusable_query(Query, #{}).
 
 counters_subtest() ->
     query(<<"DROP TABLE test.page_view_counts;">>),
@@ -93,24 +79,17 @@ counters_subtest() ->
         [[<<"adgear.com">>, <<"home">>, <<0, 0, 0, 0, 0, 0, 0, 1>>]]
     }}, Response).
 
-execute_subtest() ->
-    {ok, StatementId} = marina:prepare(?QUERY1, ?TIMEOUT),
-    Response = marina:execute(StatementId, [], ?CONSISTENCY_ONE, [], ?TIMEOUT),
-
-    ?assertEqual(?QUERY1_RESULT, Response).
-
 paging_subtest() ->
     query(<<"INSERT INTO test.users (key, column1, column2, value) values
         (99492dfe-d94a-11e4-af39-58f44110757e, 'test', 'test2',
         intAsBlob(0));">>),
     Query = <<"SELECT * FROM users LIMIT 10;">>,
-    {ok, {result, Metadata, 1, Rows}} = marina:query(Query, [],
-        ?CONSISTENCY_ONE, [{page_size, 1}], ?TIMEOUT),
+    {ok, {result, Metadata, 1, Rows}} = marina:query(Query,
+        #{page_size => 1}),
     {result_metadata, 4, _, PagingState} = Metadata,
 
-    {ok, {result, Metadata2, 1, Rows2}} = marina:query(Query, [],
-        ?CONSISTENCY_ONE, [{page_size, 1}, {paging_state, PagingState}],
-        ?TIMEOUT),
+    {ok, {result, Metadata2, 1, Rows2}} = marina:query(Query,
+         #{page_size => 1, paging_state => PagingState}),
     {result_metadata, 4, _, PagingState2} = Metadata2,
 
     ?assertNotEqual(PagingState, PagingState2),
@@ -135,7 +114,7 @@ query_metedata_types_subtest() ->
         marina_types:encode_boolean(true)
     ] ,
     Response2 = marina:query(<<"INSERT INTO types (col1, col2, col3, col4)
-        VALUES (?, ?, ?, ?)">>, Values, ?CONSISTENCY_ONE, [], ?TIMEOUT),
+        VALUES (?, ?, ?, ?)">>, #{values => Values}),
 
     ?assertEqual({ok, undefined}, Response2),
 
@@ -171,8 +150,7 @@ query_metedata_types_subtest() ->
     }}, Response3).
 
 query_no_metadata_subtest() ->
-    Response2 = marina:query(?QUERY1, [], ?CONSISTENCY_ONE,
-        [{skip_metadata, true}], ?TIMEOUT),
+    Response2 = marina:query(?QUERY1, #{skip_metadata => true}),
 
     ?assertEqual({ok, {result,
     {result_metadata, 4, [], undefined}, 1, [
@@ -181,19 +159,15 @@ query_no_metadata_subtest() ->
     ]}}, Response2).
 
 reusable_query_subtest() ->
-    Response = marina:reusable_query(?QUERY1, [], ?CONSISTENCY_ONE,
-        [], ?TIMEOUT),
-    Response = marina:reusable_query(?QUERY1, [], ?CONSISTENCY_ONE, [],
-        ?TIMEOUT),
-    Response = marina:reusable_query(?QUERY2, ?QUERY2_VALUES, ?CONSISTENCY_ONE,
-        [], ?TIMEOUT),
+    Response = marina:reusable_query(?QUERY1, #{}),
+    Response = marina:reusable_query(?QUERY1, #{}),
+    Response = marina:reusable_query(?QUERY2, #{values => ?QUERY2_VALUES}),
 
     ?assertEqual(?QUERY1_RESULT, Response).
 
 reusable_query_invalid_query_subtest() ->
     Query = <<"SELECT * FROM user LIMIT 1;">>,
-    {error, {8704, _}} = marina:reusable_query(Query, [], ?CONSISTENCY_ONE, [],
-        ?TIMEOUT).
+    {error, {8704, _}} = marina:reusable_query(Query, #{}).
 
 schema_changes_subtest() ->
     query(<<"DROP KEYSPACE test2;">>),
@@ -240,6 +214,7 @@ tuples_subtest() ->
 
 %% utils
 bootstrap() ->
+    timer:sleep(500),
     query(<<"DROP KEYSPACE test;">>),
     timer:sleep(250),
     {ok, _} = query(<<"CREATE KEYSPACE test WITH REPLICATION =
@@ -263,7 +238,10 @@ datatypes_columns(I, [ColumnType|Rest]) ->
     [Column | datatypes_columns(I + 1, Rest)].
 
 query(Query) ->
-    marina:query(Query, [], ?CONSISTENCY_LOCAL_ONE, [], ?TIMEOUT).
+    marina:query(Query, #{
+        consistency_level => ?CONSISTENCY_LOCAL_ONE,
+        timeout => ?TIMEOUT
+    }).
 
 setup(KeyVals) ->
     error_logger:tty(false),
@@ -272,7 +250,8 @@ setup(KeyVals) ->
     marina_app:stop(),
     application:load(marina),
     set_env(KeyVals),
-    marina_app:start().
+    marina_app:start(),
+    timer:sleep(500).
 
 set_env([]) ->
     ok;

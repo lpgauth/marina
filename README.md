@@ -40,12 +40,6 @@ High-Performance Erlang Cassandra CQL Client
     <td>enable lz4 compression</td>
   </tr>
   <tr>
-    <td>datacenter</td>
-    <td>binary()</td>
-    <td><<"my_datacenter">></td>
-    <td>filter nodes to a specific data center</td>
-  </tr>
-  <tr>
     <td>keyspace</td>
     <td>undefined | binary()</td>
     <td>undefined</td>
@@ -91,7 +85,7 @@ High-Performance Erlang Cassandra CQL Client
 
 ### Bootstraping
 
-The pool is bootstraped by querying the `system.peers` table. `marina` will try each ip from `boostrap_ips` until it can connect and retrieve the list of peers. For backward compatibility, `ip` will be used if `bootstrap_ips` is not provided. You can filter the lists of peers using the `datacenter` filter.
+The pool is bootstraped by querying the `system.peers` table. `marina` will try each ip from `boostrap_ips` until it can connect and retrieve the list of peers. For backward compatibility, `ip` will be used if `bootstrap_ips` is not provided.
 
 ## API
 <a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md#index" class="module">Function Index</a>

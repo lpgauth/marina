@@ -12,7 +12,6 @@
 -define(DEFAULT_BOOTSTRAP_IPS, [?GET_ENV(ip, ?DEFAULT_IP)]).
 -define(DEFAULT_CONNECT_RETRY, 500).
 -define(DEFAULT_CONSISTENCY_LEVEL, ?CONSISTENCY_ONE).
--define(DEFAULT_DATACENTER, undefined).
 -define(DEFAULT_FLAGS, []).
 -define(DEFAULT_IP, "127.0.0.1").
 -define(DEFAULT_PID, self()).

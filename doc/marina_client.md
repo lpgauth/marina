@@ -26,7 +26,7 @@ buffer() = #buffer{buffered = iolist(), current = non_neg_integer(), pending = n
 
 
 <pre><code>
-frame_flag() = {compression, boolean()}
+frame_flag() = 0..1
 </code></pre>
 
 
@@ -36,7 +36,7 @@ frame_flag() = {compression, boolean()}
 
 
 <pre><code>
-state() = #state{buffer = <a href="#type-buffer">buffer()</a>, frame_flags = [<a href="#type-frame_flag">frame_flag()</a>], keyspace = binary() | undefined, requests = non_neg_integer()}
+state() = #state{buffer = <a href="#type-buffer">buffer()</a>, frame_flags = <a href="#type-frame_flag">frame_flag()</a>, keyspace = binary() | undefined, requests = non_neg_integer()}
 </code></pre>
 
 <a name="index"></a>
@@ -65,7 +65,7 @@ handle_data(Data::binary(), State::<a href="#type-state">state()</a>) -&gt; {ok,
 ### handle_request/2 ###
 
 <pre><code>
-handle_request(Request::term(), State::<a href="#type-state">state()</a>) -&gt; {ok, pos_integer(), iodata(), <a href="#type-state">state()</a>}
+handle_request(X1::term(), State::<a href="#type-state">state()</a>) -&gt; {ok, pos_integer(), iodata(), <a href="#type-state">state()</a>}
 </code></pre>
 <br />
 

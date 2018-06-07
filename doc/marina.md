@@ -12,11 +12,11 @@
 
 
 
-### <a name="type-consistency">consistency()</a> ###
+### <a name="type-consistency_level">consistency_level()</a> ###
 
 
 <pre><code>
-consistency() = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+consistency_level() = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
 </code></pre>
 
 
@@ -32,16 +32,6 @@ error() = {error, term()}
 
 
 
-### <a name="type-flag">flag()</a> ###
-
-
-<pre><code>
-flag() = {page_size, pos_integer()} | {paging_state, binary()} | {skip_metadata, boolean()} | {values, boolean()}
-</code></pre>
-
-
-
-
 ### <a name="type-query">query()</a> ###
 
 
@@ -52,11 +42,11 @@ query() = binary()
 
 
 
-### <a name="type-statement_id">statement_id()</a> ###
+### <a name="type-query_opts">query_opts()</a> ###
 
 
 <pre><code>
-statement_id() = binary()
+query_opts() = #{consistency_level =&gt; <a href="#type-consistency_level">consistency_level()</a>, page_size =&gt; pos_integer(), paging_state =&gt; binary(), pid =&gt; pid(), routing_key =&gt; binary(), skip_metadata =&gt; boolean(), timeout =&gt; pos_integer(), values =&gt; <a href="#type-values">values()</a>}
 </code></pre>
 
 
@@ -69,114 +59,52 @@ statement_id() = binary()
 value() = binary()
 </code></pre>
 
+
+
+
+### <a name="type-values">values()</a> ###
+
+
+<pre><code>
+values() = [<a href="#type-value">value()</a>]
+</code></pre>
+
 <a name="index"></a>
 
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_execute-5">async_execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#async_execute-6">async_execute/6</a></td><td></td></tr><tr><td valign="top"><a href="#async_prepare-2">async_prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#async_prepare-3">async_prepare/3</a></td><td></td></tr><tr><td valign="top"><a href="#async_query-5">async_query/5</a></td><td></td></tr><tr><td valign="top"><a href="#async_query-6">async_query/6</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-5">async_reusable_query/5</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-6">async_reusable_query/6</a></td><td></td></tr><tr><td valign="top"><a href="#execute-5">execute/5</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-2">prepare/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-5">query/5</a></td><td></td></tr><tr><td valign="top"><a href="#receive_response-1">receive_response/1</a></td><td></td></tr><tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-5">reusable_query/5</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_query-2">async_query/2</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-2">async_reusable_query/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-2">query/2</a></td><td></td></tr><tr><td valign="top"><a href="#receive_response-1">receive_response/1</a></td><td></td></tr><tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-2">reusable_query/2</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
 
-<a name="async_execute-5"></a>
+<a name="async_query-2"></a>
 
-### async_execute/5 ###
+### async_query/2 ###
 
 <pre><code>
-async_execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid()) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
+async_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
 </code></pre>
 <br />
 
-<a name="async_execute-6"></a>
+<a name="async_reusable_query-2"></a>
 
-### async_execute/6 ###
+### async_reusable_query/2 ###
 
 <pre><code>
-async_execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid(), Timeout::timeout()) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
+async_reusable_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
 </code></pre>
 <br />
 
-<a name="async_prepare-2"></a>
+<a name="query-2"></a>
 
-### async_prepare/2 ###
-
-<pre><code>
-async_prepare(Query::<a href="#type-query">query()</a>, Pid::pid()) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
-</code></pre>
-<br />
-
-<a name="async_prepare-3"></a>
-
-### async_prepare/3 ###
+### query/2 ###
 
 <pre><code>
-async_prepare(Query::<a href="#type-query">query()</a>, Pid::pid(), Timeout::timeout()) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
-</code></pre>
-<br />
-
-<a name="async_query-5"></a>
-
-### async_query/5 ###
-
-<pre><code>
-async_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid()) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
-</code></pre>
-<br />
-
-<a name="async_query-6"></a>
-
-### async_query/6 ###
-
-<pre><code>
-async_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid(), Timeout::timeout()) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
-</code></pre>
-<br />
-
-<a name="async_reusable_query-5"></a>
-
-### async_reusable_query/5 ###
-
-<pre><code>
-async_reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid()) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
-</code></pre>
-<br />
-
-<a name="async_reusable_query-6"></a>
-
-### async_reusable_query/6 ###
-
-<pre><code>
-async_reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Pid::pid(), Timeout::timeout()) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
-</code></pre>
-<br />
-
-<a name="execute-5"></a>
-
-### execute/5 ###
-
-<pre><code>
-execute(StatementId::<a href="#type-statement_id">statement_id()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | <a href="#type-error">error()</a>
-</code></pre>
-<br />
-
-<a name="prepare-2"></a>
-
-### prepare/2 ###
-
-<pre><code>
-prepare(Query::<a href="#type-query">query()</a>, Timeout::timeout()) -&gt; {ok, term()} | <a href="#type-error">error()</a>
-</code></pre>
-<br />
-
-<a name="query-5"></a>
-
-### query/5 ###
-
-<pre><code>
-query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | <a href="#type-error">error()</a>
+query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, term()} | <a href="#type-error">error()</a>
 </code></pre>
 <br />
 
@@ -198,12 +126,12 @@ response(X1::{ok, term()} | <a href="#type-error">error()</a>) -&gt; {ok, term()
 </code></pre>
 <br />
 
-<a name="reusable_query-5"></a>
+<a name="reusable_query-2"></a>
 
-### reusable_query/5 ###
+### reusable_query/2 ###
 
 <pre><code>
-reusable_query(Query::<a href="#type-query">query()</a>, Values::[<a href="#type-value">value()</a>], ConsistencyLevel::<a href="#type-consistency">consistency()</a>, Flags::[<a href="#type-flag">flag()</a>], Timeout::timeout()) -&gt; {ok, term()} | <a href="#type-error">error()</a>
+reusable_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, term()} | <a href="#type-error">error()</a>
 </code></pre>
 <br />
 

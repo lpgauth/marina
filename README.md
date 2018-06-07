@@ -97,7 +97,8 @@ The pool is bootstraped by querying the `system.peers` table. `marina` will try 
 
 {ok,[granderl,metal,shackle,foil,marina]}
 
-2> marina:query(<<"SELECT * FROM test.users LIMIT 1;">>, [], #{timeout => 1000}).
+2> marina:query(<<"SELECT * FROM test.users LIMIT 1;">>, #{timeout => 1000}).
+
 {ok,{result,{result_metadata,4,
     [{column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
      {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
@@ -111,8 +112,8 @@ The pool is bootstraped by querying the `system.peers` table. `marina` will try 
 }}
 
 3> marina:query(<<"SELECT * FROM test.users WHERE key = ?;">>,
-[<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>],
-#{flags => [{skip_metadata, true}], timeout => 1000}).
+    #{values => [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>],
+    skip_metadata => true, timeout => 1000}).
 
 {ok,{result,{result_metadata,4,[],undefined},
     1,
@@ -122,7 +123,7 @@ The pool is bootstraped by querying the `system.peers` table. `marina` will try 
       <<0,0,0,0>>]]}}
 
 4> {ok, Ref} = marina:async_reusable_query(<<"SELECT * FROM test.users WHERE key = ?;">>,
-[<<207,85,107,110,157,137,17,226,167,153,120,43,203,102,219,173>>], #{}).
+    #{values => [<<207,85,107,110,157,137,17,226,167,153,120,43,203,102,219,173>>]}).
 
 {ok,{'marina_df74df08-e5bc-42e8-af61-c24dfeda6f2c_5',#Ref<0.1577389904.1118830594.250171>}}
 
@@ -136,8 +137,6 @@ The pool is bootstraped by querying the `system.peers` table. `marina` will try 
         undefined},
             0,[]}}
 ```
-
-
 
 ## Tests
 

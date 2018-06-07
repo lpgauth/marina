@@ -38,7 +38,6 @@ start_link() ->
 
 init(_Name, _Parent, undefined) ->
     BootstrapIps = ?GET_ENV(bootstrap_ips, ?DEFAULT_BOOTSTRAP_IPS),
-    Datacenter = ?GET_ENV(datacenter, ?DEFAULT_DATACENTER),
     Port = ?GET_ENV(port, ?DEFAULT_PORT),
     Strategy = ?GET_ENV(strategy, ?DEFAULT_STRATEGY),
 
@@ -46,29 +45,20 @@ init(_Name, _Parent, undefined) ->
 
     {ok, #state {
         bootstrap_ips = BootstrapIps,
-        datacenter = Datacenter,
         port = Port,
         strategy = Strategy
     }}.
-
-    % handle_msg(?MSG_BOOTSTRAP, #state {
-    %     bootstrap_ips = BootstrapIps,
-    %     datacenter = Datacenter,
-    %     port = Port,
-    %     strategy = Strategy
-    % }).
 
 -spec handle_msg(term(), state()) ->
     {ok, state()}.
 
 handle_msg(?MSG_BOOTSTRAP, #state {
         bootstrap_ips = BootstrapIps,
-        datacenter = Datacenter,
         port = Port,
         strategy = Strategy
     } = State) ->
 
-    case nodes(BootstrapIps, Port, Datacenter) of
+    case nodes(BootstrapIps, Port) of
         {ok, Nodes} ->
             marina_pool:start(Strategy, Nodes),
             {ok, State#state {
@@ -98,21 +88,21 @@ filter_datacenter([[RpcAddress, Datacenter, Tokens] | T], Datacenter) ->
 filter_datacenter([_ | T], Datacenter) ->
     filter_datacenter(T, Datacenter).
 
-nodes([], _Port, _Datacenter) ->
+nodes([], _Port) ->
     {error, bootstrap_failed};
-nodes([Ip | T], Port, Datacenter) ->
+nodes([Ip | T], Port) ->
     case peers(Ip, Port) of
-        {ok, Rows} ->
+        {ok, Rows, Datacenter} ->
             case filter_datacenter(Rows, Datacenter) of
                 [] ->
-                    nodes(T, Port, Datacenter);
+                    nodes(T, Port);
                 Nodes ->
                     {ok, Nodes}
             end;
         {error, Reason} ->
             shackle_utils:warning_msg(?MODULE,
                 "bootstrap error: ~p~n", [Reason]),
-            nodes(T, Port, Datacenter)
+            nodes(T, Port)
     end.
 
 peers(Ip, Port) ->
@@ -123,9 +113,10 @@ peers(Ip, Port) ->
                 {ok, undefined} ->
                     {ok, {result, _ , _, Rows}} =
                         marina_utils:query(Socket, ?LOCAL_QUERY),
+                    [[_RpcAddress, Datacenter, _Tokens]] = Rows,
                     {ok, {result, _ , _, Rows2}} =
                         marina_utils:query(Socket, ?PEERS_QUERY),
-                    {ok, Rows ++ Rows2};
+                    {ok, Rows ++ Rows2, Datacenter};
                 {error, Reason} ->
                     {error, Reason}
             end;

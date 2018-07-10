@@ -2,16 +2,28 @@
 -include("marina_internal.hrl").
 
 -export([
+    authenticate/1,
     connect/2,
+    frame_flags/0,
     pack/1,
     query/2,
     query_opts/2,
     sync_msg/2,
+    startup/1,
     timeout/2,
-    unpack/1
+    unpack/1,
+    use_keyspace/1
 ]).
 
 %% public
+-spec authenticate(inet:socket()) ->
+    ok | {error, atom()}.
+
+authenticate(Socket) ->
+    Username = ?GET_ENV(username, undefined),
+    Password = ?GET_ENV(password, undefined),
+    authenticate(Username, Password, Socket).
+
 -spec connect(inet:socket_address() | inet:hostname(), inet:port_number()) ->
     {ok, inet:socket()} | {error, atom()}.
 
@@ -22,6 +34,15 @@ connect(Ip, Port) ->
             {ok, Socket};
         {error, Reason} ->
             {error, Reason}
+    end.
+
+-spec frame_flags() ->
+    frame_flag().
+
+frame_flags() ->
+    case ?GET_ENV(compression, false) of
+        true -> 1;
+        _ -> 0
     end.
 
 -spec pack(binary() | iolist()) ->
@@ -77,6 +98,19 @@ sync_msg(Socket, Msg) ->
             {error, Reason}
     end.
 
+-spec startup(inet:socket()) ->
+    {ok, binary() | undefined} | {error, atom()}.
+
+startup(Socket) ->
+    FrameFlags = frame_flags(),
+    Msg = marina_request:startup(FrameFlags),
+    case marina_utils:sync_msg(Socket, Msg) of
+        {ok, Response} ->
+            {ok, Response};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
 -spec unpack(binary()) ->
     {ok, binary()} | {error, term()}.
 
@@ -90,7 +124,29 @@ timeout(Timeout, Timestamp) ->
     Diff = timer:now_diff(os:timestamp(), Timestamp) div 1000,
     Timeout - Diff.
 
+-spec use_keyspace(inet:socket()) ->
+    ok | {error, atom()}.
+
+use_keyspace(Socket) ->
+    Keyspace = ?GET_ENV(keyspace, undefined),
+    use_keyspace(Keyspace, Socket).
+
 %% private
+authenticate(undefined, undefined, _Socket) ->
+    ok;
+authenticate(Username, Password, Socket) when is_binary(Username);
+    is_binary(Username) ->
+
+    FrameFlags = frame_flags(),
+    Msg = marina_request:auth_response(FrameFlags, Username, Password),
+
+    case marina_utils:sync_msg(Socket, Msg) of
+        {ok, undefined} ->
+            ok;
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
 rcv_buf(Socket, Buffer) ->
     case gen_tcp:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT) of
         {ok, Msg} ->
@@ -101,6 +157,20 @@ rcv_buf(Socket, Buffer) ->
                 {_Rest, [Frame | _]} ->
                     marina_body:decode(Frame)
             end;
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+use_keyspace(undefined, _Socket) ->
+    ok;
+use_keyspace(Keyspace, Socket) when is_binary(Keyspace)->
+    FrameFlags = frame_flags(),
+    Query = <<"USE \"", Keyspace/binary, "\"">>,
+    Msg = marina_request:query(0, FrameFlags, Query, #{}),
+
+    case marina_utils:sync_msg(Socket, Msg) of
+        {ok, Keyspace} ->
+            ok;
         {error, Reason} ->
             {error, Reason}
     end.

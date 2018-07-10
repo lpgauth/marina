@@ -5,6 +5,7 @@
 -compile({inline_size, 512}).
 
 -export([
+    auth_response/3,
     execute/4,
     prepare/3,
     query/4,
@@ -12,6 +13,19 @@
 ]).
 
 %% public
+-spec auth_response(frame_flag(), binary(), binary()) -> iolist().
+
+auth_response(FrameFlags, Username, Password) ->
+    Body = <<0, Username/binary, 0, Password/binary>>,
+    Body2 = encode_body(FrameFlags, [marina_types:encode_bytes(Body)]),
+
+    marina_frame:encode(#frame {
+        stream = ?DEFAULT_STREAM,
+        opcode = ?OP_AUTH_RESPONSE,
+        flags = FrameFlags,
+        body = Body2
+    }).
+
 -spec execute(stream(), frame_flag(), statement_id(), query_opts()) -> iolist().
 
 execute(Stream, FrameFlags, StatementId, QueryOpts) ->

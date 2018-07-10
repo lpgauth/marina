@@ -16,31 +16,45 @@
 -record(state, {
     buffer      = marina_buffer:new() :: buffer(),
     frame_flags = 0                   :: frame_flag(),
-    keyspace    = undefined           :: binary() | undefined,
     requests    = 0                   :: non_neg_integer()
 }).
 
 -type state() :: #state {}.
 
 %% shackle_server callbacks
--spec init() -> {ok, state()}.
+-spec init() ->
+    {ok, state()}.
 
 init() ->
-    Keyspace = ?GET_ENV(keyspace, undefined),
-
     {ok, #state {
-        frame_flags = frame_flags(),
-        keyspace = Keyspace
+        frame_flags = marina_utils:frame_flags()
     }}.
 
--spec setup(inet:socket(), state()) -> {ok, state()} |
+-spec setup(inet:socket(), state()) ->
+    {ok, state()} |
     {error, atom(), state()}.
 
-setup(Socket, #state {frame_flags = FrameFlags} = State) ->
-    Msg = marina_request:startup(FrameFlags),
-    case marina_utils:sync_msg(Socket, Msg) of
+setup(Socket, State) ->
+    case marina_utils:startup(Socket) of
         {ok, undefined} ->
-            set_keyspace(Socket, State);
+            case marina_utils:use_keyspace(Socket) of
+                ok ->
+                    {ok, State};
+                {error, Reason} ->
+                    {error, Reason, State}
+            end;
+        {ok, <<"org.apache.cassandra.auth.PasswordAuthenticator">>} ->
+            case marina_utils:authenticate(Socket) of
+                ok ->
+                    case marina_utils:use_keyspace(Socket) of
+                        ok ->
+                            {ok, State};
+                        {error, Reason} ->
+                            {error, Reason, State}
+                    end;
+                {error, Reason} ->
+                    {error, Reason, State}
+            end;
         {error, Reason} ->
             {error, Reason, State}
     end.
@@ -82,30 +96,8 @@ handle_data(Data, #state {
         buffer = Buffer2
     }}.
 
--spec terminate(state()) -> ok.
+-spec terminate(state()) ->
+    ok.
 
 terminate(_State) ->
     ok.
-
-%% private
-frame_flags() ->
-    case ?GET_ENV(compression, false) of
-        true -> 1;
-        _ -> 0
-    end.
-
-set_keyspace(_Socket, #state {keyspace = undefined} = State) ->
-    {ok, State};
-set_keyspace(Socket, #state {
-        frame_flags = FrameFlags,
-        keyspace = Keyspace
-    } = State) ->
-
-    Query = <<"USE \"", Keyspace/binary, "\"">>,
-    Msg = marina_request:query(0, FrameFlags, Query, #{}),
-    case marina_utils:sync_msg(Socket, Msg) of
-        {ok, Keyspace} ->
-            {ok, State};
-        {error, Reason} ->
-            {error, Reason, State}
-    end.

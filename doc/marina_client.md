@@ -36,7 +36,7 @@ frame_flag() = 0..1
 
 
 <pre><code>
-state() = #state{buffer = <a href="#type-buffer">buffer()</a>, frame_flags = <a href="#type-frame_flag">frame_flag()</a>, keyspace = binary() | undefined, requests = non_neg_integer()}
+state() = #state{buffer = <a href="#type-buffer">buffer()</a>, frame_flags = <a href="#type-frame_flag">frame_flag()</a>, requests = non_neg_integer()}
 </code></pre>
 
 <a name="index"></a>

@@ -94,12 +94,21 @@ values() = [<a href="#type-value">value()</a>]
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#execute-4">execute/4</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-3">prepare/3</a></td><td></td></tr><tr><td valign="top"><a href="#query-4">query/4</a></td><td></td></tr><tr><td valign="top"><a href="#startup-1">startup/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#auth_response-3">auth_response/3</a></td><td></td></tr><tr><td valign="top"><a href="#execute-4">execute/4</a></td><td></td></tr><tr><td valign="top"><a href="#prepare-3">prepare/3</a></td><td></td></tr><tr><td valign="top"><a href="#query-4">query/4</a></td><td></td></tr><tr><td valign="top"><a href="#startup-1">startup/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
+
+<a name="auth_response-3"></a>
+
+### auth_response/3 ###
+
+<pre><code>
+auth_response(FrameFlags::<a href="#type-frame_flag">frame_flag()</a>, Username::binary(), Password::binary()) -&gt; iolist()
+</code></pre>
+<br />
 
 <a name="execute-4"></a>
 

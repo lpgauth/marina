@@ -11,6 +11,7 @@ High-Performance Erlang Cassandra CQL Client
 
 ## Features
 
+* Authentication support
 * Compression support (LZ4)
 * CQL spec 3.2.0
 * Fast pool implementation (random, round_robin)
@@ -161,7 +162,6 @@ make xref
 
 ### TODOs
 
-* Basic authentication
 * Batch queries
 * Rebuild ring when topology changes
 

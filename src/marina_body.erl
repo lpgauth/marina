@@ -18,12 +18,15 @@ decode(#frame {flags = 1, body = Body, opcode = Opcode}) ->
     decode(Opcode, Body2).
 
 %% private
-decode(?OP_READY, _) ->
-    {ok, undefined};
 decode(?OP_ERROR, Body) ->
     {Code, Rest} = marina_types:decode_int(Body),
     {Msg, _Rest2} = marina_types:decode_string(Rest),
     {error, {Code, Msg}};
+decode(?OP_READY, _) ->
+    {ok, undefined};
+decode(?OP_AUTHENTICATE, Body) ->
+    {Authenticator, <<>>} = marina_types:decode_string(Body),
+    {ok, Authenticator};
 decode(?OP_RESULT, <<1:32/integer>>) ->
     {ok, undefined};
 decode(?OP_RESULT, <<2:32/integer, Rest/binary>>) ->
@@ -63,7 +66,9 @@ decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
             {Option, Option2}
     end,
 
-    {ok, {ChangeType, Target, Options}}.
+    {ok, {ChangeType, Target, Options}};
+decode(?OP_AUTH_SUCCESS, _) ->
+    {ok, undefined}.
 
 decode_columns(Bin, Count) ->
     decode_columns(Bin, Count, []).

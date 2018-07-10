@@ -46,6 +46,12 @@ High-Performance Erlang Cassandra CQL Client
     <td>default keyspace</td>
   </tr>
   <tr>
+    <td>password</td>
+    <td>binary()</td>
+    <td>undefined</td>
+    <td>password for authentication</td>
+  </tr>
+  <tr>
     <td>pool_size</td>
     <td>pos_integer()</td>
     <td>16</td>
@@ -80,6 +86,12 @@ High-Performance Erlang Cassandra CQL Client
     <td>random | token_aware</td>
     <td>token_aware</td>
     <td>load balancing strategy across nodes</td>
+  </tr>
+  <tr>
+    <td>username</td>
+    <td>binary()</td>
+    <td>undefined</td>
+    <td>username for authentication</td>
   </tr>
 </table>
 

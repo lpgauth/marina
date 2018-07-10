@@ -214,16 +214,16 @@ tuples_subtest() ->
 
 %% utils
 bootstrap() ->
+    marina_app:start(),
     timer:sleep(500),
-    query(<<"DROP KEYSPACE test;">>),
-    timer:sleep(250),
-    {ok, _} = query(<<"CREATE KEYSPACE test WITH REPLICATION =
+    query(<<"CREATE KEYSPACE test WITH REPLICATION =
         {'class':'SimpleStrategy', 'replication_factor':1};">>),
-    {ok, _} = query(<<"CREATE TABLE test.users (key uuid, column1 text,
+    query(<<"CREATE TABLE test.users (key uuid, column1 text,
         column2 text, value blob, PRIMARY KEY (key, column1, column2));">>),
-    {ok, _} = query(<<"INSERT INTO test.users (key, column1, column2, value)
+    query(<<"INSERT INTO test.users (key, column1, column2, value)
         values (99492dfe-d94a-11e4-af39-58f44110757d, 'test', 'test2',
-        intAsBlob(0))">>).
+        intAsBlob(0))">>),
+    marina_app:stop().
 
 cleanup() ->
     marina_app:stop().
@@ -245,13 +245,11 @@ query(Query) ->
 
 setup(KeyVals) ->
     error_logger:tty(false),
-    marina_app:start(),
     bootstrap(),
-    marina_app:stop(),
     application:load(marina),
     set_env(KeyVals),
     marina_app:start(),
-    timer:sleep(500).
+    timer:sleep(250).
 
 set_env([]) ->
     ok;

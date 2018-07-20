@@ -1,13 +1,13 @@
 cache:
   directories:
     - $HOME/.cache/rebar3
-    - $TRAVIS_BUILD_DIR/_build
 install: true
 language: erlang
 notifications:
   email: false
 otp_release:
-  - 20.1
+  - 21.0.3
+  - 20.3
   - 19.3
 script: "make travis"
 services:

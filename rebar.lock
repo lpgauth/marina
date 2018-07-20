@@ -14,5 +14,5 @@
   0},
  {<<"shackle">>,
   {git,"https://github.com/lpgauth/shackle.git",
-       {ref,"d8a837c36f6e675e91b7e78f249f233c78f45cd5"}},
+       {ref,"1cf730d86b918df5d390dcfce7f33f49de8e2084"}},
   0}].

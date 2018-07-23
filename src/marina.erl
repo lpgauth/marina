@@ -12,13 +12,13 @@
 
 %% public
 -spec async_query(query(), query_opts()) ->
-    {ok, reference()} | error().
+    {ok, shackle:request_id()} | error().
 
 async_query(Query, QueryOpts) ->
     async_call({query, Query}, QueryOpts).
 
 -spec async_reusable_query(query(), query_opts()) ->
-    {ok, reference()} | error().
+    {ok, shackle:request_id()} | error().
 
 async_reusable_query(Query, QueryOpts) ->
     RoutingKey = marina_utils:query_opts(routing_key, QueryOpts),

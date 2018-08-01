@@ -2,6 +2,7 @@
 -include("marina_internal.hrl").
 
 -export([
+    subscribe/1,
     start_link/0
 ]).
 
@@ -15,12 +16,13 @@
 -define(MSG_BOOTSTRAP, bootstrap_pool).
 
 -record(state, {
-    bootstrap_ips :: list(),
-    datacenter    :: undefined | binary(),
-    node_count    :: undefined | pos_integer(),
-    port          :: pos_integer(),
-    strategy      :: random | token_aware,
-    timer_ref     :: undefined | reference()
+    bootstrap_ips    :: list(),
+    datacenter       :: undefined | binary(),
+    node_count       :: undefined | pos_integer(),
+    port             :: pos_integer(),
+    strategy         :: random | token_aware,
+    subscribers = [] :: [pid()],
+    timer_ref        :: undefined | reference()
 }).
 
 -type state() :: #state {}.
@@ -31,6 +33,18 @@
 
 start_link() ->
     metal:start_link(?MODULE, ?MODULE, undefined).
+
+-spec subscribe(pid()) ->
+    ok | {error, marina_not_started}.
+
+subscribe(Pid) ->
+    case whereis(?MODULE) of
+        undefined ->
+            {error, marina_not_started};
+        Pid2 ->
+            Pid2 ! {subscribe, Pid},
+            ok
+    end.
 
 %% metal callbacks
 -spec init(atom(), pid(), undefined) ->
@@ -55,21 +69,42 @@ init(_Name, _Parent, undefined) ->
 handle_msg(?MSG_BOOTSTRAP, #state {
         bootstrap_ips = BootstrapIps,
         port = Port,
-        strategy = Strategy
+        strategy = Strategy,
+        subscribers = Subscribers
     } = State) ->
 
     case nodes(BootstrapIps, Port) of
         {ok, Nodes} ->
             marina_pool:start(Strategy, Nodes),
+            [Pid ! {marina, pool_started} || Pid <- Subscribers],
+
             {ok, State#state {
                 node_count = length(Nodes)
             }};
         {error, _Reason} ->
             shackle_utils:warning_msg(?MODULE, "bootstrap failed~n", []),
+
             {ok, State#state {
                 timer_ref = erlang:send_after(500, self(), ?MSG_BOOTSTRAP)
             }}
-    end.
+    end;
+handle_msg({subscribe, Pid}, #state {
+        subscribers = Subscribers,
+        node_count = NodeCount
+    } = State) when NodeCount /= undefined  ->
+
+    Pid ! {marina, pool_started},
+
+    {ok, State#state {
+        subscribers = [Pid | Subscribers]
+    }};
+handle_msg({subscribe, Pid}, #state {
+        subscribers = Subscribers
+    } = State) ->
+
+    {ok, State#state {
+        subscribers = [Pid | Subscribers]
+    }}.
 
 -spec terminate(term(), state()) ->
     ok.

@@ -35,8 +35,6 @@ node(RoutingKey) ->
     case foil:lookup(?MODULE, strategy) of
         {ok, Strategy} ->
             case node(Strategy, RoutingKey) of
-                undefined ->
-                    {error, marina_pool_not_started};
                 {ok, Node} ->
                     {ok, Node};
                 {error, _Reason} ->
@@ -68,6 +66,7 @@ start(token_aware, Nodes) ->
 
 stop(0) ->
     foil:delete(?MODULE, strategy),
+    foil:delete(?MODULE, ready),
     foil:load(?MODULE);
 stop(N) ->
     {ok, NodeId} = foil:lookup(?MODULE, {node, N}),
@@ -122,9 +121,11 @@ start(<<A, B, C, D>> = RpcAddress) ->
 
 start([], random, N) ->
     foil:insert(?MODULE, strategy, {random, N - 1}),
+    foil:insert(?MODULE, ready, true),
     foil:load(?MODULE);
 start([], token_aware, N) ->
     foil:insert(?MODULE, strategy, {token_aware, N - 1}),
+    foil:insert(?MODULE, ready, true),
     foil:load(?MODULE);
 start([{RpcAddress, _Tokens} | T], Strategy, N) ->
     case start(RpcAddress) of

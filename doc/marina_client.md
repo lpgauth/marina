@@ -44,7 +44,7 @@ state() = #state{buffer = <a href="#type-buffer">buffer()</a>, frame_flags = <a 
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#handle_data-2">handle_data/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_request-2">handle_request/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-0">init/0</a></td><td></td></tr><tr><td valign="top"><a href="#setup-2">setup/2</a></td><td></td></tr><tr><td valign="top"><a href="#terminate-1">terminate/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#handle_data-2">handle_data/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_request-2">handle_request/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr><tr><td valign="top"><a href="#setup-2">setup/2</a></td><td></td></tr><tr><td valign="top"><a href="#terminate-1">terminate/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -69,12 +69,12 @@ handle_request(X1::term(), State::<a href="#type-state">state()</a>) -&gt; {ok, 
 </code></pre>
 <br />
 
-<a name="init-0"></a>
+<a name="init-1"></a>
 
-### init/0 ###
+### init/1 ###
 
 <pre><code>
-init() -&gt; {ok, <a href="#type-state">state()</a>}
+init(Opts::undefined) -&gt; {ok, <a href="#type-state">state()</a>}
 </code></pre>
 <br />
 

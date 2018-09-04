@@ -113,9 +113,13 @@ reusable_query(Pool, Query, QueryOpts) ->
             case Execute of
                 {error, {9472, _}} ->
                     marina_cache:erase(Pool, Query),
-                    Timeout2 = marina_utils:timeout(Timeout, Timestamp),
-                    reusable_query(Pool, Query,
-                        QueryOpts#{timeout => Timeout2});
+                    case marina_utils:timeout(Timeout, Timestamp) of
+                        Timeout2 when Timeout2 > 0 ->
+                            reusable_query(Pool, Query,
+                                QueryOpts#{timeout => Timeout2});
+                        _ ->
+                            {error, timeout}
+                    end;
                 Response ->
                     Response
             end;
@@ -123,9 +127,13 @@ reusable_query(Pool, Query, QueryOpts) ->
             case call(Pool, {prepare, Query}, QueryOpts) of
                 {ok, StatementId} ->
                     marina_cache:put(Pool, Query, StatementId),
-                    Timeout2 = marina_utils:timeout(Timeout, Timestamp),
-                    call(Pool, {execute, StatementId},
-                        QueryOpts#{timeout => Timeout2});
+                    case marina_utils:timeout(Timeout, Timestamp) of
+                        Timeout2 when Timeout2 > 0 ->
+                            call(Pool, {execute, StatementId},
+                                QueryOpts#{timeout => Timeout2});
+                        _ ->
+                            {error, timeout}
+                    end;
                 {error, Reason} ->
                     {error, Reason}
             end

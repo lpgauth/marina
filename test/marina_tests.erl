@@ -215,7 +215,7 @@ tuples_subtest() ->
 %% utils
 bootstrap() ->
     marina_app:start(),
-    timer:sleep(500),
+    ok = marina:ready(500),
     query(<<"CREATE KEYSPACE test WITH REPLICATION =
         {'class':'SimpleStrategy', 'replication_factor':1};">>),
     query(<<"CREATE TABLE test.users (key uuid, column1 text,
@@ -226,7 +226,8 @@ bootstrap() ->
     marina_app:stop().
 
 cleanup() ->
-    marina_app:stop().
+    marina_app:stop(),
+    {error, marina_not_started} = marina:ready(500).
 
 datatypes_columns(Cols) ->
     list_to_binary(datatypes_columns(1, Cols)).
@@ -249,7 +250,8 @@ setup(KeyVals) ->
     application:load(marina),
     set_env(KeyVals),
     marina_app:start(),
-    timer:sleep(250).
+    ok = marina:ready(500),
+    ok = marina:ready(500).
 
 set_env([]) ->
     ok;

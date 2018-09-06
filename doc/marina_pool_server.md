@@ -16,7 +16,7 @@
 
 
 <pre><code>
-state() = #state{bootstrap_ips = list(), datacenter = undefined | binary(), node_count = undefined | pos_integer(), port = pos_integer(), strategy = random | token_aware, timer_ref = undefined | reference()}
+state() = #state{bootstrap_ips = list(), datacenter = undefined | binary(), node_count = undefined | pos_integer(), port = pos_integer(), strategy = random | token_aware, subscribers = [pid()], timer_ref = undefined | reference()}
 </code></pre>
 
 <a name="index"></a>
@@ -24,7 +24,7 @@ state() = #state{bootstrap_ips = list(), datacenter = undefined | binary(), node
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#handle_msg-2">handle_msg/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-3">init/3</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td></td></tr><tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#handle_msg-2">handle_msg/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-3">init/3</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td></td></tr><tr><td valign="top"><a href="#subscribe-1">subscribe/1</a></td><td></td></tr><tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -55,6 +55,15 @@ init(Name::atom(), Parent::pid(), X3::undefined) -&gt; no_return()
 
 <pre><code>
 start_link() -&gt; {ok, pid()}
+</code></pre>
+<br />
+
+<a name="subscribe-1"></a>
+
+### subscribe/1 ###
+
+<pre><code>
+subscribe(Pid::pid()) -&gt; ok | {error, marina_not_started}
 </code></pre>
 <br />
 

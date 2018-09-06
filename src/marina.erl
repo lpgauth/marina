@@ -3,8 +3,10 @@
 
 -export([
     async_query/2,
+    async_ready/1,
     async_reusable_query/2,
     query/2,
+    ready/1,
     receive_response/1,
     response/1,
     reusable_query/2
@@ -16,6 +18,18 @@
 
 async_query(Query, QueryOpts) ->
     async_call({query, Query}, QueryOpts).
+
+-spec async_ready(pid()) ->
+    ok | {error, marina_not_started}.
+
+async_ready(Pid) ->
+    case foil:lookup(marina_pool, ready) of
+        {ok, true} ->
+            Pid ! {marina, pool_started},
+            ok;
+        {error, _} ->
+            marina_pool_server:subscribe(Pid)
+    end.
 
 -spec async_reusable_query(query(), query_opts()) ->
     {ok, shackle:request_id()} | error().
@@ -34,6 +48,22 @@ async_reusable_query(Query, QueryOpts) ->
 
 query(Query, QueryOpts) ->
     call({query, Query}, QueryOpts).
+
+-spec ready(timeout()) ->
+    ok | {error, marina_not_started | timeout}.
+
+ready(Timeout) ->
+    case async_ready(self()) of
+        ok ->
+            receive
+                {marina, pool_started} ->
+                    ok
+            after Timeout ->
+                {error, timeout}
+            end;
+        {error, _} = E ->
+            E
+    end.
 
 -spec receive_response(term()) ->
     {ok, term()} | error().
@@ -70,7 +100,6 @@ async_call(Msg, QueryOpts) ->
         {error, Reason} ->
             {error, Reason}
     end.
-
 
 async_call(Pool, Msg, QueryOpts) ->
     Pid = marina_utils:query_opts(pid, QueryOpts),

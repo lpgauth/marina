@@ -74,7 +74,7 @@ values() = [<a href="#type-value">value()</a>]
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_query-2">async_query/2</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-2">async_reusable_query/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-2">query/2</a></td><td></td></tr><tr><td valign="top"><a href="#receive_response-1">receive_response/1</a></td><td></td></tr><tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-2">reusable_query/2</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_query-2">async_query/2</a></td><td></td></tr><tr><td valign="top"><a href="#async_ready-1">async_ready/1</a></td><td></td></tr><tr><td valign="top"><a href="#async_reusable_query-2">async_reusable_query/2</a></td><td></td></tr><tr><td valign="top"><a href="#query-2">query/2</a></td><td></td></tr><tr><td valign="top"><a href="#ready-1">ready/1</a></td><td></td></tr><tr><td valign="top"><a href="#receive_response-1">receive_response/1</a></td><td></td></tr><tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr><tr><td valign="top"><a href="#reusable_query-2">reusable_query/2</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -86,7 +86,16 @@ values() = [<a href="#type-value">value()</a>]
 ### async_query/2 ###
 
 <pre><code>
-async_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
+async_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, <a href="/Users/lp.gauthier/Git/marina/_build/default/lib/shackle/doc/shackle.md#type-request_id">shackle:request_id()</a>} | <a href="#type-error">error()</a>
+</code></pre>
+<br />
+
+<a name="async_ready-1"></a>
+
+### async_ready/1 ###
+
+<pre><code>
+async_ready(Pid::pid()) -&gt; ok | {error, marina_not_started}
 </code></pre>
 <br />
 
@@ -95,7 +104,7 @@ async_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-
 ### async_reusable_query/2 ###
 
 <pre><code>
-async_reusable_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, reference()} | <a href="#type-error">error()</a>
+async_reusable_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, <a href="/Users/lp.gauthier/Git/marina/_build/default/lib/shackle/doc/shackle.md#type-request_id">shackle:request_id()</a>} | <a href="#type-error">error()</a>
 </code></pre>
 <br />
 
@@ -105,6 +114,15 @@ async_reusable_query(Query::<a href="#type-query">query()</a>, QueryOpts::<a hre
 
 <pre><code>
 query(Query::<a href="#type-query">query()</a>, QueryOpts::<a href="#type-query_opts">query_opts()</a>) -&gt; {ok, term()} | <a href="#type-error">error()</a>
+</code></pre>
+<br />
+
+<a name="ready-1"></a>
+
+### ready/1 ###
+
+<pre><code>
+ready(Timeout::timeout()) -&gt; ok | {error, marina_not_started | timeout}
 </code></pre>
 <br />
 

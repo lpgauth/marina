@@ -13,11 +13,14 @@
 ]).
 
 -define(MSG_BOOTSTRAP, bootstrap_pool).
+-define(MSG_PEER_WATCHER, peer_watch).
+-define(PEER_WATCH_INTERVAL, 60000).
 
 -record(state, {
     bootstrap_ips :: list(),
     datacenter    :: undefined | binary(),
     node_count    :: undefined | pos_integer(),
+    nodes         :: list(),
     port          :: pos_integer(),
     strategy      :: random | token_aware,
     timer_ref     :: undefined | reference()
@@ -61,15 +64,42 @@ handle_msg(?MSG_BOOTSTRAP, #state {
     case nodes(BootstrapIps, Port) of
         {ok, Nodes} ->
             marina_pool:start(Strategy, Nodes),
+            timer:send_after(1000, self(), ?MSG_PEER_WATCHER),
             {ok, State#state {
-                node_count = length(Nodes)
+                node_count = length(Nodes),
+                nodes = Nodes
             }};
         {error, _Reason} ->
             shackle_utils:warning_msg(?MODULE, "bootstrap failed~n", []),
             {ok, State#state {
                 timer_ref = erlang:send_after(500, self(), ?MSG_BOOTSTRAP)
             }}
+    end;
+handle_msg(?MSG_PEER_WATCHER, #state {
+        bootstrap_ips = BootstrapIps,
+        port = Port,
+        strategy = Strategy,
+        nodes = OldNodes
+    } = State) ->
+    case nodes(BootstrapIps, Port) of
+        {ok, Nodes} ->
+            NodesToStart = Nodes -- OldNodes,
+            NodesToStop = OldNodes -- Nodes,
+            stop_nodes(NodesToStop, Strategy, Nodes),
+            start_nodes(Strategy, NodesToStart, OldNodes),
+            timer:send_after(?PEER_WATCH_INTERVAL, self(), ?MSG_PEER_WATCHER),
+            {ok, State#state{
+                node_count = length(Nodes),
+                nodes = Nodes
+            }};
+
+        {error, Reason} ->
+            shackle_utils:warning_msg(?MODULE, "failed to refresh cassandra peers ~p~n", [Reason]),
+            {ok, State#state{
+                timer_ref = erlang:send_after(500, self(), ?MSG_PEER_WATCHER)
+            }}
     end.
+
 
 -spec terminate(term(), state()) ->
     ok.
@@ -140,3 +170,22 @@ peers_query(Socket) ->
     [[_RpcAddress, Datacenter, _Tokens]] = Rows,
     {ok, {result, _ , _, Rows2}} = marina_utils:query(Socket, ?PEERS_QUERY),
     {ok, Rows ++ Rows2, Datacenter}.
+
+%% start new nodes found in cassandra cluster.
+start_nodes(_Strategy, [], _OldNodes) ->
+    ok;
+%% the reason why to start all nodes instead of nodestostart is
+%% because marina_ring needs all nodes to build the ring.
+%% for started nodes, it will not be started again.
+start_nodes(Strategy, NodesToStart, OldNodes) ->
+    shackle_utils:warning_msg(?MODULE, "found new nodes, starting ~p", [NodesToStart]),
+    %% make sure the new nodes are in the end of the list
+    %% so foil will not overwrite random settings
+    marina_pool:start(Strategy, OldNodes ++ NodesToStart).
+
+%% stop nodes removed from cassandra cluster.
+stop_nodes([], _Strategy, _Nodes) ->
+    ok;
+stop_nodes(NodesToStop, Strategy, Nodes) ->
+    shackle_utils:warning_msg(?MODULE, "nodes get removed from cluster, stopping worker pool ~p", [NodesToStop]),
+    marina_pool:stop_nodes(NodesToStop, Strategy, Nodes).

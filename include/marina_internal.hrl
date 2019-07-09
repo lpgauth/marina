@@ -63,5 +63,5 @@
 -define(ETS_TABLE_CACHE, marina_cache).
 
 %% queries
--define(LOCAL_QUERY, <<"select rpc_address, data_center, tokens from system.local;">>).
+-define(LOCAL_QUERY, <<"select broadcast_address, data_center, tokens from system.local;">>).
 -define(PEERS_QUERY, <<"select rpc_address, data_center, tokens from system.peers;">>).

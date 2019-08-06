@@ -130,7 +130,9 @@ nodes([Ip | T], Port) ->
 peers(Ip, Port) ->
     case connect(Ip, Port) of
         {ok, Socket} ->
-            peers_query(Socket);
+            V = peers_query(Socket),
+            gen_tcp:close(Socket),
+            V;
         {error, Reason} ->
             {error, Reason}
     end.

@@ -79,28 +79,6 @@ terminate(_Reason, #state {node_count = NodeCount}) ->
     ok.
 
 %% private
-connect(Ip, Port) ->
-    case marina_utils:connect(Ip, Port) of
-        {ok, Socket} ->
-            case marina_utils:startup(Socket) of
-                {ok, undefined} ->
-                    {ok, Socket};
-                {ok, <<"org.apache.cassandra.auth.PasswordAuthenticator">>} ->
-                    case marina_utils:authenticate(Socket) of
-                        ok ->
-                            {ok, Socket};
-                        {error, Reason} ->
-                            gen_tcp:close(Socket),
-                            {error, Reason}
-                    end;
-                {error, Reason} ->
-                    gen_tcp:close(Socket),
-                    {error, Reason}
-            end;
-        {error, Reason} ->
-            {error, Reason}
-    end.
-
 filter_datacenter([], _Datacenter) ->
     [];
 filter_datacenter([[RpcAddress, _Datacenter, Tokens] | T], undefined) ->
@@ -128,15 +106,15 @@ nodes([Ip | T], Port) ->
     end.
 
 peers(Ip, Port) ->
-    case connect(Ip, Port) of
+    case marina_utils:connect(Ip, Port) of
         {ok, Socket} ->
-            peers_query(Socket);
+            {ok, {result, _ , _, Rows}} =
+                marina_utils:query(Socket, ?LOCAL_QUERY),
+            {ok, {result, _ , _, Rows2}} =
+                marina_utils:query(Socket, ?PEERS_QUERY),
+            gen_tcp:close(Socket),
+            [[_, Datacenter, _]] = Rows,
+            {ok, Rows ++ Rows2, Datacenter};
         {error, Reason} ->
             {error, Reason}
     end.
-
-peers_query(Socket) ->
-    {ok, {result, _ , _, Rows}} = marina_utils:query(Socket, ?LOCAL_QUERY),
-    [[_RpcAddress, Datacenter, _Tokens]] = Rows,
-    {ok, {result, _ , _, Rows2}} = marina_utils:query(Socket, ?PEERS_QUERY),
-    {ok, Rows ++ Rows2, Datacenter}.

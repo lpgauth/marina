@@ -31,7 +31,21 @@ connect(Ip, Port) ->
     SocketOpts = ?DEFAULT_SOCKET_OPTIONS ++ [{active, false}],
     case gen_tcp:connect(Ip, Port, SocketOpts) of
         {ok, Socket} ->
-            {ok, Socket};
+            case marina_utils:startup(Socket) of
+                {ok, undefined} ->
+                    {ok, Socket};
+                {ok, <<"org.apache.cassandra.auth.PasswordAuthenticator">>} ->
+                    case marina_utils:authenticate(Socket) of
+                        ok ->
+                            {ok, Socket};
+                        {error, Reason} ->
+                            gen_tcp:close(Socket),
+                            {error, Reason}
+                    end;
+                {error, Reason} ->
+                    gen_tcp:close(Socket),
+                    {error, Reason}
+            end;
         {error, Reason} ->
             {error, Reason}
     end.

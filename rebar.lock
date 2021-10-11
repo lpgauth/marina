@@ -1,3 +1,4 @@
+{"1.2.0",
 [{<<"foil">>,
   {git,"https://github.com/lpgauth/foil.git",
        {ref,"56440106cc70f45d53ae461e98a547b5cde63646"}},
@@ -14,5 +15,13 @@
   0},
  {<<"shackle">>,
   {git,"https://github.com/lpgauth/shackle.git",
-       {ref,"1cf730d86b918df5d390dcfce7f33f49de8e2084"}},
-  0}].
+       {ref,"a498ef0fde4808fa71fd5fe1404543475aaf7043"}},
+  0}]}.
+[
+{pkg_hash,[
+ {<<"granderl">>, <<"F20077A68BD80B8D8783BD15A052813C6483771DEC1A5B837D307CBE92F14122">>},
+ {<<"metal">>, <<"5D3D1322DA7BCD34B94FED5486F577973685298883954F7A3E517EF5EF6953F5">>}]},
+{pkg_hash_ext,[
+ {<<"granderl">>, <<"0641473F29BC3211C832A6DD3ADAA04544A5DFFC1C62372556946F236DF2DAD6">>},
+ {<<"metal">>, <<"88B82B634998A1A768DEDCD372C2F7E657B19445325C0AF5CCBAC62C77210F1D">>}]}
+].

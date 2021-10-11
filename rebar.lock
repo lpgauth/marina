@@ -10,7 +10,7 @@
  {<<"metal">>,{pkg,<<"metal">>,<<"0.1.1">>},1},
  {<<"murmur">>,
   {git,"https://github.com/lpgauth/murmur.git",
-       {ref,"709445d213514ab1121fb67329dca945ffb11599"}},
+       {ref,"1ef5b3680c61498aa9f9c99aae6ea021d7844b71"}},
   0},
  {<<"shackle">>,
   {git,"https://github.com/lpgauth/shackle.git",

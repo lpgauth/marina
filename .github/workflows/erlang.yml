@@ -1,0 +1,22 @@
+name: Erlang CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: lpgauth/erlang-cassandra:0.1.1
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Start Cassandra
+      run: cassandra -R
+    - name: Compile
+      run: make compile
+    - name: Elvis rock
+      run: make elvis
+    - name: Run xref
+      run: make xref
+    - name: Run eunit
+      run: make eunit
+    - name: Run dialyzer
+      run: make dialyzer

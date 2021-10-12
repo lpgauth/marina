@@ -1,3 +1,4 @@
+{"1.1.0",
 [{<<"foil">>,
   {git,"https://github.com/lpgauth/foil.git",
        {ref,"56440106cc70f45d53ae461e98a547b5cde63646"}},
@@ -5,14 +6,19 @@
  {<<"granderl">>,{pkg,<<"granderl">>,<<"0.1.5">>},1},
  {<<"lz4">>,
   {git,"https://github.com/lpgauth/erlang-lz4.git",
-       {ref,"faf5c9e1bb083adb49638cddecfc9069596c43f9"}},
+       {ref,"d52a642b9f6a4451a5f4ab7bc718d2fcfcf67f7f"}},
   0},
  {<<"metal">>,{pkg,<<"metal">>,<<"0.1.1">>},1},
  {<<"murmur">>,
   {git,"https://github.com/lpgauth/murmur.git",
-       {ref,"709445d213514ab1121fb67329dca945ffb11599"}},
+       {ref,"1ef5b3680c61498aa9f9c99aae6ea021d7844b71"}},
   0},
  {<<"shackle">>,
   {git,"https://github.com/lpgauth/shackle.git",
-       {ref,"1cf730d86b918df5d390dcfce7f33f49de8e2084"}},
-  0}].
+       {ref,"a498ef0fde4808fa71fd5fe1404543475aaf7043"}},
+  0}]}.
+[
+{pkg_hash,[
+ {<<"granderl">>, <<"F20077A68BD80B8D8783BD15A052813C6483771DEC1A5B837D307CBE92F14122">>},
+ {<<"metal">>, <<"5D3D1322DA7BCD34B94FED5486F577973685298883954F7A3E517EF5EF6953F5">>}]}
+].

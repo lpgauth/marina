@@ -45,8 +45,6 @@ profile:
 
 test: elvis xref eunit dialyzer
 
-travis: test coveralls
-
 xref:
 	@echo "Running rebar3 xref..."
 	@$(REBAR3) xref

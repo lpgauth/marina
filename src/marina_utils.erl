@@ -62,7 +62,8 @@ pack(Binary) ->
     {ok, term()} | {error, term()}.
 
 query(Socket, Query) ->
-    Msg = marina_request:query(0, 0, Query, #{skip_metadata => true}),
+    FrameFlags = frame_flags(),
+    Msg = marina_request:query(0, FrameFlags, Query, #{skip_metadata => true}),
     sync_msg(Socket, Msg).
 
 -spec query_opts(atom(), query_opts()) ->

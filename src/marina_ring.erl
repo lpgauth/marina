@@ -5,6 +5,8 @@
     {marina_ring_utils, lookup, 1}
 ]).
 
+-dialyzer({nowarn_function, lookup/1}).
+
 -export([
     build/1,
     lookup/1

@@ -1,6 +1,0 @@
-%% encoding: UTF-8
-{application,marina}.
-{modules,[marina,marina_app,marina_body,marina_buffer,marina_cache,
-          marina_client,marina_compiler,marina_frame,marina_pool,
-          marina_pool_server,marina_request,marina_ring,marina_sup,
-          marina_token,marina_types,marina_utils]}.

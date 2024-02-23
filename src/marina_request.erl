@@ -93,7 +93,7 @@ startup(FrameFlags) ->
     marina_frame:encode(#frame {
         stream = ?DEFAULT_STREAM,
         opcode = ?OP_STARTUP,
-        flags = FrameFlags,
+        flags = 0,
         body = [marina_types:encode_string_map(Body)]
     }).
 

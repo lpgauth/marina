@@ -1,10 +1,13 @@
 -module(marina_tests).
 -include("test.hrl").
 
+-define(IP, "172.18.0.2").
+
 %% runners
 marina_test_() ->
     {setup,
         fun () -> setup([
+            {ip, ?IP},
             {keyspace, <<"test">>},
             {pool_size, 1}
         ]) end,
@@ -27,6 +30,7 @@ marina_test_() ->
 marina_compression_test_() ->
     {setup,
         fun () -> setup([
+            {ip, ?IP},
             {compression, true},
             {keyspace, <<"test">>}
         ]) end,
@@ -214,6 +218,8 @@ tuples_subtest() ->
 
 %% utils
 bootstrap() ->
+    application:load(marina),
+    application:set_env(?APP, ip, ?IP),
     marina_app:start(),
     timer:sleep(500),
     query(<<"CREATE KEYSPACE test WITH REPLICATION =

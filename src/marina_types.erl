@@ -16,10 +16,12 @@
     decode_string_list/1,
     decode_string_map/1,
     decode_string_multimap/1,
+    decode_tinyint/1,
     decode_uuid/1,
     encode_boolean/1,
     encode_bytes/1,
     encode_int/1,
+    encode_list/1,
     encode_long/1,
     encode_long_string/1,
     encode_short/1,
@@ -27,7 +29,8 @@
     encode_string/1,
     encode_string_list/1,
     encode_string_map/1,
-    encode_string_multimap/1
+    encode_string_multimap/1,
+    encode_tinyint/1
 ]).
 
 %% public
@@ -90,6 +93,11 @@ decode_string_map(<<Length:16, Rest/binary>>) ->
 decode_string_multimap(<<Length:16, Rest/binary>>) ->
     decode_string_multimap(Rest, Length, []).
 
+-spec decode_tinyint(binary()) -> {integer(), binary()}.
+
+decode_tinyint(<<Value:8, Rest/binary>>) ->
+    {Value, Rest}.
+
 -spec decode_uuid(binary()) -> {binary(), binary()}.
 
 decode_uuid(<<Value:16/binary, Rest/binary>>) ->
@@ -111,6 +119,11 @@ encode_bytes(Value) ->
 
 encode_int(Value) ->
     <<Value:32>>.
+
+-spec encode_list([binary()]) -> binary().
+
+encode_list(Values) ->
+    iolist_to_binary([encode_short(length(Values)), Values]).
 
 -spec encode_long(integer()) -> binary().
 
@@ -153,6 +166,9 @@ encode_string_map(KeyValues) ->
 
 encode_string_multimap(KeyValues) ->
     encode_string_multimap(KeyValues, []).
+
+encode_tinyint(Value) ->
+    <<Value:8>>.
 
 %% private
 decode_long_string_set(Bin, 0, Acc) ->

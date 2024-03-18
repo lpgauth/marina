@@ -1,8 +1,5 @@
 # marina
-High-Performance Erlang Cassandra CQL Client
-
-[![Build Status](https://travis-ci.org/lpgauth/marina.svg?branch=master)](https://travis-ci.org/lpgauth/marina)
-[![Coverage Status](https://coveralls.io/repos/github/lpgauth/marina/badge.svg?branch=master)](https://coveralls.io/github/lpgauth/marina?branch=master)
+High-Performance Erlang Cassandra / Scylla CQL Client
 
 ### Requirements
 
@@ -100,9 +97,6 @@ High-Performance Erlang Cassandra CQL Client
 
 The pool is bootstraped by querying the `system.peers` table. `marina` will try each ip from `boostrap_ips` until it can connect and retrieve the list of peers. For backward compatibility, `ip` will be used if `bootstrap_ips` is not provided.
 
-## API
-<a href="http://github.com/lpgauth/marina/blob/master/doc/marina.md#index" class="module">Function Index</a>
-
 ### Examples
 
 ```erlang
@@ -155,7 +149,6 @@ The pool is bootstraped by querying the `system.peers` table. `marina` will try 
 
 ```makefile
 make dialyzer
-make elvis
 make eunit
 make xref
 ```
@@ -170,7 +163,7 @@ make xref
 ```license
 The MIT License (MIT)
 
-Copyright (c) 2015-2018 Louis-Philippe Gauthier
+Copyright (c) 2015-2024 Louis-Philippe Gauthier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

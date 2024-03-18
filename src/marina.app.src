@@ -6,7 +6,12 @@
     kernel,
     stdlib,
     shackle,
-    foil
+    foil,
+    murmur,
+    lz4,
+    metal,
+    syntax_tools,
+    compiler
   ]},
   {mod, {marina_app, []}},
   {env, []}

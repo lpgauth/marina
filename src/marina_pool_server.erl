@@ -1,4 +1,6 @@
 -module(marina_pool_server).
+-compile({no_auto_import,[nodes/2]}).
+
 -include("marina_internal.hrl").
 
 -export([

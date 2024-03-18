@@ -1,24 +1,28 @@
-{"1.1.0",
+{"1.2.0",
 [{<<"foil">>,
   {git,"https://github.com/lpgauth/foil.git",
-       {ref,"56440106cc70f45d53ae461e98a547b5cde63646"}},
+       {ref,"e462829855a745d8f20fb0508ae3eb8e323b03bd"}},
   0},
- {<<"granderl">>,{pkg,<<"granderl">>,<<"0.1.5">>},1},
+ {<<"granderl">>,
+  {git,"https://github.com/tokenrove/granderl.git",
+       {ref,"ee3fac0a2ca1d460c90808537216707f82cc777f"}},
+  0},
  {<<"lz4">>,
   {git,"https://github.com/lpgauth/erlang-lz4.git",
-       {ref,"d52a642b9f6a4451a5f4ab7bc718d2fcfcf67f7f"}},
+       {ref,"30ac242cf8f6ec9ef097f494ae87f6295039ffd4"}},
   0},
  {<<"metal">>,{pkg,<<"metal">>,<<"0.1.1">>},1},
  {<<"murmur">>,
   {git,"https://github.com/lpgauth/murmur.git",
-       {ref,"1ef5b3680c61498aa9f9c99aae6ea021d7844b71"}},
+       {ref,"db2cd781c895d03561bc967ca75fe95e67a92dcf"}},
   0},
  {<<"shackle">>,
   {git,"https://github.com/lpgauth/shackle.git",
-       {ref,"a498ef0fde4808fa71fd5fe1404543475aaf7043"}},
+       {ref,"a4f7d82d10115cf0d676582b638a56260be685d5"}},
   0}]}.
 [
 {pkg_hash,[
- {<<"granderl">>, <<"F20077A68BD80B8D8783BD15A052813C6483771DEC1A5B837D307CBE92F14122">>},
- {<<"metal">>, <<"5D3D1322DA7BCD34B94FED5486F577973685298883954F7A3E517EF5EF6953F5">>}]}
+ {<<"metal">>, <<"5D3D1322DA7BCD34B94FED5486F577973685298883954F7A3E517EF5EF6953F5">>}]},
+{pkg_hash_ext,[
+ {<<"metal">>, <<"88B82B634998A1A768DEDCD372C2F7E657B19445325C0AF5CCBAC62C77210F1D">>}]}
 ].

@@ -167,6 +167,8 @@ encode_string_map(KeyValues) ->
 encode_string_multimap(KeyValues) ->
     encode_string_multimap(KeyValues, []).
 
+-spec encode_tinyint(integer()) -> binary().
+
 encode_tinyint(Value) ->
     <<Value:8>>.
 

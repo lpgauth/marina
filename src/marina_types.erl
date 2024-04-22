@@ -10,6 +10,7 @@
     decode_long/1,
     decode_long_string/1,
     decode_long_string_set/1,
+    decode_number_list/1,
     decode_short/1,
     decode_short_bytes/1,
     decode_string/1,
@@ -60,6 +61,11 @@ decode_long_string(Bin) ->
 
 decode_long_string_set(<<Length:32, Rest/binary>>) ->
     decode_long_string_set(Rest, Length, []).
+
+-spec decode_number_list(binary()) -> {[integer()], binary()}.
+
+decode_number_list(<<Length:32, Rest/binary>>) ->
+    decode_number_list(Rest, Length, []).
 
 -spec decode_short(binary()) -> {integer(), binary()}.
 
@@ -173,6 +179,11 @@ encode_tinyint(Value) ->
     <<Value:8>>.
 
 %% private
+decode_number_list(Bin, 0, Acc) ->
+    {lists:reverse(Acc), Bin};
+decode_number_list(<<Pos:32, Number:(Pos * 8), Rest/binary>>, Length, Acc) ->
+    decode_number_list(Rest, Length - 1, [Number | Acc]).
+
 decode_long_string_set(Bin, 0, Acc) ->
     {lists:reverse(Acc), Bin};
 decode_long_string_set(Bin, Length, Acc) ->

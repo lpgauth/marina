@@ -8,8 +8,9 @@
     pack/1,
     query/2,
     query_opts/2,
-    sync_msg/2,
+    server_to_pool/1,
     startup/1,
+    sync_msg/2,
     timeout/2,
     unpack/1,
     use_keyspace/1
@@ -87,6 +88,14 @@ query_opts(timeout, QueryOpts) ->
     maps:get(timeout, QueryOpts, ?DEFAULT_TIMEOUT);
 query_opts(values, QueryOpts) ->
     maps:get(values, QueryOpts, undefined).
+
+-spec server_to_pool(atom()) -> atom().
+
+server_to_pool(Node) ->
+    NodeSplit = binary:split(erlang:atom_to_binary(Node), <<"_">>, [global]),
+    PoolSplit = lists:sublist(NodeSplit, length(NodeSplit) - 1),
+    PoolBin = erlang:iolist_to_binary(lists:join(<<"_">>, PoolSplit)),
+    erlang:binary_to_atom(PoolBin).
 
 -spec sync_msg(inet:socket(), iodata()) ->
     {ok, term()} | {error, term()}.

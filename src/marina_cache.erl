@@ -3,6 +3,7 @@
 
 -export([
     erase/2,
+    erase_server/1,
     get/2,
     init/0,
     put/3
@@ -19,6 +20,14 @@ erase(Pool, Key) ->
         error:badarg ->
             {error, not_found}
     end.
+
+
+-spec erase_server(shackle:request_id()) -> ok.
+
+erase_server({ServerName, _}) ->
+    Pool = marina_utils:server_to_pool(ServerName),
+    ets:select_delete(?ETS_TABLE_CACHE, [{{{'$1', '$2'}, '_'}, [], [{'==', '$1', Pool}]}]),
+    ok.
 
 -spec get(atom(), binary()) -> {ok, term()} | {error, not_found}.
 

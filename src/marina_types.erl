@@ -6,6 +6,8 @@
 
 -export([
     decode_bytes/1,
+    decode_double/1,
+    decode_float/1,
     decode_int/1,
     decode_long/1,
     decode_long_string/1,
@@ -21,6 +23,8 @@
     decode_uuid/1,
     encode_boolean/1,
     encode_bytes/1,
+    encode_double/1,
+    encode_float/1,
     encode_int/1,
     encode_list/1,
     encode_long/1,
@@ -40,6 +44,16 @@
 decode_bytes(<<255, 255, 255, 255, Rest/binary>>) ->
     {null, Rest};
 decode_bytes(<<Pos:32, Value:Pos/binary, Rest/binary>>) ->
+    {Value, Rest}.
+
+-spec decode_double(binary()) -> {float(), binary()}.
+
+decode_double(<<Value:64/float, Rest/binary>>) ->
+    {Value, Rest}.
+
+-spec decode_float(binary()) -> {float(), binary()}.
+
+decode_float(<<Value:32/float, Rest/binary>>) ->
     {Value, Rest}.
 
 -spec decode_int(binary()) -> {integer(), binary()}.
@@ -120,6 +134,16 @@ encode_bytes(null) ->
     <<255, 255, 255, 255>>;
 encode_bytes(Value) ->
     <<(encode_int(size(Value)))/binary, Value/binary>>.
+
+-spec encode_double(float()) -> binary().
+
+encode_double(Value) ->
+    <<Value:64/float>>.
+
+-spec encode_float(float()) -> binary().
+
+encode_float(Value) ->
+    <<Value:32/float>>.
 
 -spec encode_int(integer()) -> binary().
 

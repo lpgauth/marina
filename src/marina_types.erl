@@ -100,7 +100,7 @@ decode_string(Bin) ->
 
 -spec decode_string_list(binary()) -> {[binary()], binary()}.
 
-decode_string_list(<<Length:16, Rest/binary>>) ->
+decode_string_list(<<Length:32, Rest/binary>>) ->
     decode_string_list(Rest, Length, []).
 
 -spec decode_string_map(binary()) -> {[{binary(), binary()}], binary()}.
@@ -185,7 +185,7 @@ encode_string(Value) ->
 
 encode_string_list(Values) ->
     EncodedValues = [encode_string(Value) || Value <- Values],
-    iolist_to_binary([encode_short(length(Values)), EncodedValues]).
+    iolist_to_binary([encode_int(length(Values)), EncodedValues]).
 
 -spec encode_string_map([{binary(), binary()}]) -> binary().
 
@@ -216,7 +216,7 @@ decode_long_string_set(Bin, Length, Acc) ->
 
 decode_string_list(Bin, 0, Acc) ->
     {lists:reverse(Acc), Bin};
-decode_string_list(<<Pos:16, String:Pos/binary, Rest/binary>>, Length, Acc) ->
+decode_string_list(<<Pos:32, String:Pos/binary, Rest/binary>>, Length, Acc) ->
     decode_string_list(Rest, Length - 1, [String | Acc]).
 
 decode_string_map(Bin, 0, Acc) ->

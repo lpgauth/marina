@@ -69,7 +69,7 @@
     page_size => pos_integer(),
     paging_state => binary(),
     pid => pid(),
-    routing_key => binary(),
+    routing_key => routing_key(),
     skip_metadata => boolean(),
     timeout => pos_integer(),
     values => values()
@@ -77,6 +77,7 @@
 
 -type result() :: #result {}.
 -type result_metadata() :: #result_metadata {}.
+-type routing_key() :: integer() | binary().
 -type statement_id() :: binary().
 -type stream() :: 0..32768.
 -type value() :: binary().

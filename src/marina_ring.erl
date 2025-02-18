@@ -24,7 +24,7 @@ build(Nodes) ->
     Ranges = ranges(lists:usort(lists:flatten(Ring))),
     marina_compiler:ring_utils(Ranges).
 
--spec lookup(binary()) ->
+-spec lookup(routing_key()) ->
     atom().
 
 lookup(Key) ->

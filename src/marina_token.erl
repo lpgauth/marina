@@ -6,7 +6,7 @@
 ]).
 
 %% public
--spec m3p(integer() | binary()) ->
+-spec m3p(routing_key()) ->
     integer().
 
 m3p(Key) when is_integer(Key) ->

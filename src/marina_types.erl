@@ -58,12 +58,12 @@ decode_float(<<Value:32/float, Rest/binary>>) ->
 
 -spec decode_int(binary()) -> {integer(), binary()}.
 
-decode_int(<<Value:32, Rest/binary>>) ->
+decode_int(<<Value:32/signed, Rest/binary>>) ->
     {Value, Rest}.
 
 -spec decode_long(binary()) -> {integer(), binary()}.
 
-decode_long(<<Value:64, Rest/binary>>) ->
+decode_long(<<Value:64/signed, Rest/binary>>) ->
     {Value, Rest}.
 
 -spec decode_long_string(binary()) -> {binary(), binary()}.
@@ -83,7 +83,7 @@ decode_number_list(<<Length:32, Rest/binary>>) ->
 
 -spec decode_short(binary()) -> {integer(), binary()}.
 
-decode_short(<<Value:16, Rest/binary>>) ->
+decode_short(<<Value:16/signed, Rest/binary>>) ->
     {Value, Rest}.
 
 -spec decode_short_bytes(binary()) -> {binary(), binary()}.
@@ -115,7 +115,7 @@ decode_string_multimap(<<Length:16, Rest/binary>>) ->
 
 -spec decode_tinyint(binary()) -> {integer(), binary()}.
 
-decode_tinyint(<<Value:8, Rest/binary>>) ->
+decode_tinyint(<<Value:8/signed, Rest/binary>>) ->
     {Value, Rest}.
 
 -spec decode_uuid(binary()) -> {binary(), binary()}.
@@ -148,7 +148,7 @@ encode_float(Value) ->
 -spec encode_int(integer()) -> binary().
 
 encode_int(Value) ->
-    <<Value:32>>.
+    <<Value:32/signed>>.
 
 -spec encode_list([binary()]) -> binary().
 
@@ -158,7 +158,7 @@ encode_list(Values) ->
 -spec encode_long(integer()) -> binary().
 
 encode_long(Value) ->
-    <<Value:64>>.
+    <<Value:64/signed>>.
 
 -spec encode_long_string(binary()) -> binary().
 
@@ -167,7 +167,7 @@ encode_long_string(Value) ->
 
 -spec encode_short(integer()) -> binary().
 encode_short(Value) ->
-    <<Value:16>>.
+    <<Value:16/signed>>.
 
 -spec encode_short_bytes(binary()) -> binary().
 
@@ -200,7 +200,7 @@ encode_string_multimap(KeyValues) ->
 -spec encode_tinyint(integer()) -> binary().
 
 encode_tinyint(Value) ->
-    <<Value:8>>.
+    <<Value:8/signed>>.
 
 %% private
 decode_number_list(Bin, 0, Acc) ->

@@ -2,7 +2,7 @@
 -include("marina_internal.hrl").
 
 -ignore_xref([
-    {marina_ring_utils, lookup_tree, 1}
+    {marina_ring_utils, lookup, 1}
 ]).
 
 -dialyzer({nowarn_function, lookup/1}).
@@ -29,7 +29,7 @@ build(Nodes) ->
     atom().
 
 lookup(Key) ->
-    marina_ring_utils:lookup_tree(marina_token:m3p(Key)).
+    marina_ring_utils:lookup(marina_token:m3p(Key)).
 
 %% private
 build_tree(Sorted) ->

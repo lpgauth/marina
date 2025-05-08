@@ -23,8 +23,7 @@ forms(Tree) ->
     Module = erl_syntax:attribute(erl_syntax:atom(module),
         [erl_syntax:atom(marina_ring_utils)]),
     ExportList = [
-        erl_syntax:arity_qualifier(erl_syntax:atom(lookup), erl_syntax:integer(1)),
-        erl_syntax:arity_qualifier(erl_syntax:atom(lookup_tree), erl_syntax:integer(1))
+        erl_syntax:arity_qualifier(erl_syntax:atom(lookup), erl_syntax:integer(1))
     ],
     Export = erl_syntax:attribute(erl_syntax:atom(export),
         [erl_syntax:list(ExportList)]),

@@ -23,8 +23,7 @@ build(Nodes) ->
     end, Nodes),
     Sorted = lists:usort(lists:flatten(Ring)),
     Tree = build_tree(Sorted),
-    Ranges = ranges(Sorted),
-    marina_compiler:ring_utils(Ranges, Tree).
+    marina_compiler:ring_utils(Tree).
 
 -spec lookup(routing_key()) ->
     atom().
@@ -33,15 +32,6 @@ lookup(Key) ->
     marina_ring_utils:lookup_tree(marina_token:m3p(Key)).
 
 %% private
-ranges(Ring) ->
-    ranges(Ring, undefined, []).
-
-ranges([], LastToken, Acc) ->
-    [{_Range, HostId} | _] = Ranges = lists:reverse(Acc),
-    Ranges ++ [{{LastToken, undefined}, HostId}];
-ranges([{Token, HostId} | T], LastToken, Acc) ->
-    ranges(T, Token, [{{LastToken, Token}, HostId} | Acc]).
-
 build_tree(Sorted) ->
     [{_, First} | _] = Sorted,
     Input = Sorted ++ [{undefined, First}],

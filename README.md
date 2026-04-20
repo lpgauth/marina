@@ -25,7 +25,7 @@ Pin to the latest tag (recommended):
 
 ```erlang
 {deps, [
-    {marina, {git, "https://github.com/lpgauth/marina.git", {tag, "0.3.13"}}}
+    {marina, {git, "https://github.com/lpgauth/marina.git", {tag, "0.4.0"}}}
 ]}.
 ```
 

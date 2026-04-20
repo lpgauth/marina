@@ -19,7 +19,7 @@
 }).
 
 -record(frame, {
-    flags  :: 0 | 1,
+    flags  :: byte(),
     stream :: integer(),
     opcode :: non_neg_integer(),
     body   :: iolist() | binary()

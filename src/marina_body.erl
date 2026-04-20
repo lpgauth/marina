@@ -11,11 +11,12 @@
 %% public
 -spec decode(frame()) -> {ok, term()} | {error, atom()}.
 
-decode(#frame {flags = 0, body = Body, opcode = Opcode}) ->
-    decode(Opcode, Body);
-decode(#frame {flags = 1, body = Body, opcode = Opcode}) ->
-    {ok, Body2} = marina_utils:unpack(Body),
-    decode(Opcode, Body2).
+decode(#frame {flags = Flags, body = Body, opcode = Opcode}) ->
+    Body1 = maybe_decompress(Flags, Body),
+    Body2 = skip_tracing(Flags, Body1),
+    Body3 = skip_custom_payload(Flags, Body2),
+    Body4 = skip_warnings(Flags, Body3),
+    decode(Opcode, Body4).
 
 %% private
 decode(?OP_ERROR, Body) ->
@@ -45,7 +46,7 @@ decode(?OP_RESULT, <<3:32/integer, Rest/binary>>) ->
     {ok, Keyspace};
 decode(?OP_RESULT, <<4:32/integer, Rest/binary>>) ->
     {Id, Rest2} = marina_types:decode_short_bytes(Rest),
-    {_Metadata, Rest3} = decode_result_metadata(Rest2),
+    {_Metadata, Rest3} = decode_prepared_metadata(Rest2),
     {_ResultMetadata, <<>>} = decode_result_metadata(Rest3),
     {ok, Id};
 decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
@@ -69,6 +70,45 @@ decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
     {ok, {ChangeType, Target, Options}};
 decode(?OP_AUTH_SUCCESS, _) ->
     {ok, undefined}.
+
+maybe_decompress(Flags, Body) when Flags band 16#01 =:= 16#01 ->
+    {ok, Body2} = marina_utils:unpack(Body),
+    Body2;
+maybe_decompress(_Flags, Body) ->
+    Body.
+
+skip_tracing(Flags, <<_Uuid:16/binary, Rest/binary>>)
+  when Flags band 16#02 =:= 16#02 ->
+    Rest;
+skip_tracing(_Flags, Body) ->
+    Body.
+
+skip_custom_payload(Flags, <<N:16/unsigned, Rest/binary>>)
+  when Flags band 16#04 =:= 16#04 ->
+    skip_bytes_map(N, Rest);
+skip_custom_payload(_Flags, Body) ->
+    Body.
+
+skip_bytes_map(0, Body) ->
+    Body;
+skip_bytes_map(N, <<KLen:16/unsigned, _Key:KLen/binary,
+                    VLen:32/signed, VBody/binary>>) when VLen >= 0 ->
+    <<_Val:VLen/binary, Rest/binary>> = VBody,
+    skip_bytes_map(N - 1, Rest);
+skip_bytes_map(N, <<KLen:16/unsigned, _Key:KLen/binary,
+                    _VLen:32/signed, Rest/binary>>) ->
+    skip_bytes_map(N - 1, Rest).
+
+skip_warnings(Flags, <<N:16/unsigned, Rest/binary>>)
+  when Flags band 16#08 =:= 16#08 ->
+    skip_string_list(N, Rest);
+skip_warnings(_Flags, Body) ->
+    Body.
+
+skip_string_list(0, Body) ->
+    Body;
+skip_string_list(N, <<Len:16/unsigned, _S:Len/binary, Rest/binary>>) ->
+    skip_string_list(N - 1, Rest).
 
 decode_columns(Bin, Count) ->
     decode_columns(Bin, Count, []).
@@ -165,6 +205,28 @@ decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer,
         paging_state = PagingState
     }, Rest3}.
 
+%% PREPARED result metadata (v4+) carries a pk_count + pk_indexes preamble
+%% that the plain ROWS result_metadata does not. marina does not consume the
+%% pk info for routing, so we skip it and fall through to the shared tail.
+decode_prepared_metadata(<<Flags:32/integer, ColumnsCount:32/integer,
+    PkCount:32/integer, PkRest/binary>>) ->
+
+    PkSkip = PkCount * 2,
+    <<_PkIndexes:PkSkip/binary, Rest/binary>> = PkRest,
+    {GlobalTableSpec, HasMorePages, NoMetaData} = decode_result_flags(Flags),
+    {PagingState, Rest2} = decode_result_paging_state(Rest, HasMorePages),
+    {Columns, Rest3} = case NoMetaData of
+        true -> {[], Rest2};
+        false ->
+            decode_columns_metadata(Rest2, ColumnsCount, GlobalTableSpec)
+    end,
+
+    {#result_metadata {
+        columns_count = ColumnsCount,
+        columns = Columns,
+        paging_state = PagingState
+    }, Rest3}.
+
 decode_rows(Bin, Count, ColumnsCount) ->
     decode_rows(Bin, Count, ColumnsCount, []).
 
@@ -207,10 +269,16 @@ decode_type(<<16#F:16, Rest/binary>>) ->
     {timeuuid, Rest};
 decode_type(<<16#10:16, Rest/binary>>) ->
     {inet, Rest};
+decode_type(<<16#11:16, Rest/binary>>) ->
+    {date, Rest};
+decode_type(<<16#12:16, Rest/binary>>) ->
+    {time, Rest};
 decode_type(<<16#13:16, Rest/binary>>) ->
     {smallint, Rest};
 decode_type(<<16#14:16, Rest/binary>>) ->
     {tinyint, Rest};
+decode_type(<<16#15:16, Rest/binary>>) ->
+    {duration, Rest};
 decode_type(<<16#20:16, Rest/binary>>) ->
     {Type, Rest2} = decode_type(Rest),
     {{list, Type}, Rest2};

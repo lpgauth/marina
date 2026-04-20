@@ -57,15 +57,16 @@ init(_Name, _Parent, undefined) ->
 
 handle_msg(?MSG_BOOTSTRAP, #state {
         bootstrap_ips = BootstrapIps,
+        nodes = OldNodes,
         port = Port,
         strategy = Strategy
     } = State) ->
 
     case nodes(BootstrapIps, Port) of
-        {ok, Nodes} ->
-            marina_pool:start(Strategy, Nodes),
+        {ok, NewNodes} ->
+            ok = marina_pool:sync(Strategy, NewNodes, OldNodes),
             {ok, State#state {
-                nodes = Nodes
+                nodes = NewNodes
             }};
         {error, _Reason} ->
             shackle_utils:warning_msg(?MODULE, "bootstrap failed~n", []),

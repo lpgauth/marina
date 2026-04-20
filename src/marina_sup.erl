@@ -24,5 +24,6 @@ init([]) ->
     marina_pool:init(),
 
     {ok, {{one_for_one, 5, 10}, [
-        ?CHILD(marina_pool_server)
+        ?CHILD(marina_pool_server),
+        ?CHILD(marina_control)
     ]}}.

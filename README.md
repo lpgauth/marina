@@ -9,8 +9,9 @@ High-Performance Erlang Cassandra / Scylla CQL Client
 ## Features
 
 * Authentication support
+* Batch queries (LOGGED / UNLOGGED / COUNTER)
 * Compression support (LZ4)
-* CQL spec 3.2.0
+* CQL native protocol v4
 * Fast pool implementation (random, round_robin)
 * Load-balancing policies (random, token_aware)
 * Performance optimized
@@ -26,9 +27,15 @@ High-Performance Erlang Cassandra / Scylla CQL Client
     <th>Description</th>
   </theader>
   <tr>
+    <td>backlog_size</td>
+    <td>pos_integer()</td>
+    <td>1024</td>
+    <td>per-connection shackle backlog</td>
+  </tr>
+  <tr>
     <td>bootstrap_ips</td>
-    <td>[list()]</td>
-    <td>["5.5.5.5", "5.5.5.6"]</td>
+    <td>[string()]</td>
+    <td>["127.0.0.1"]</td>
     <td>ips used to bootstrap the pool</td>
   </tr>
   <tr>
@@ -56,6 +63,12 @@ High-Performance Erlang Cassandra / Scylla CQL Client
     <td>number of connections per node</td>
   </tr>
   <tr>
+    <td>pool_strategy</td>
+    <td>random | round_robin</td>
+    <td>random</td>
+    <td>shackle's connection-selection strategy within a per-node pool</td>
+  </tr>
+  <tr>
     <td>port</td>
     <td>pos_integer()</td>
     <td>9042</td>
@@ -78,6 +91,12 @@ High-Performance Erlang Cassandra / Scylla CQL Client
     <td>pos_integer()</td>
     <td>1500</td>
     <td>reconnect minimum time</td>
+  </tr>
+  <tr>
+    <td>socket_options</td>
+    <td>[gen_tcp:option()]</td>
+    <td>see marina_internal.hrl</td>
+    <td>gen_tcp socket options for each connection</td>
   </tr>
   <tr>
     <td>strategy</td>
@@ -143,6 +162,13 @@ The pool is bootstraped by querying the `system.peers` table. `marina` will try 
      {column_spec,<<"test">>,<<"users">>,<<"value">>,blob}],
         undefined},
             0,[]}}
+
+6> marina:batch([
+    {query, <<"INSERT INTO test.kv (k, v) VALUES (1, 'a')">>, []},
+    {query, <<"INSERT INTO test.kv (k, v) VALUES (2, 'b')">>, []}
+], #{batch_type => logged, timeout => 1000}).
+
+{ok,undefined}
 ```
 
 ## Tests

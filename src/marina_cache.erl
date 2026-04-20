@@ -4,6 +4,7 @@
 -export([
     erase/2,
     erase_pool/1,
+    erase_server/1,
     get/2,
     init/0,
     put/3
@@ -26,6 +27,18 @@ erase(Pool, Key) ->
 erase_pool(Pool) ->
     ets:select_delete(?ETS_TABLE_CACHE,
         [{{{'$1', '$2'}, '_'}, [{'==', '$1', Pool}], [true]}]).
+
+%% Evict every cached prepared statement for the shackle pool that a
+%% given request_id belongs to. Intended for the server-side
+%% `Unprepared` (9472) error path from async_reusable_query — once the
+%% server has forgotten the statement id, the client's next execute
+%% will fail until the cache entry is gone so the statement gets
+%% re-prepared.
+-spec erase_server(shackle:request_id()) -> ok.
+
+erase_server({ServerName, _}) ->
+    _ = erase_pool(marina_utils:server_to_pool(ServerName)),
+    ok.
 
 -spec get(atom(), binary()) -> {ok, term()} | {error, not_found}.
 

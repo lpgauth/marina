@@ -8,6 +8,7 @@
     pack/1,
     query/2,
     query_opts/2,
+    server_to_pool/1,
     startup/1,
     sync_msg/2,
     timeout/2,
@@ -89,6 +90,18 @@ query_opts(timeout, QueryOpts) ->
     maps:get(timeout, QueryOpts, ?DEFAULT_TIMEOUT);
 query_opts(values, QueryOpts) ->
     maps:get(values, QueryOpts, undefined).
+
+%% Strip the trailing `_<index>` suffix shackle appends to each server
+%% process atom, yielding the pool name. Used by
+%% marina_cache:erase_server/1 to map a request_id back to the pool
+%% whose prepared-statement cache needs to be flushed.
+-spec server_to_pool(atom()) -> atom().
+
+server_to_pool(Node) ->
+    NodeSplit = binary:split(erlang:atom_to_binary(Node), <<"_">>, [global]),
+    PoolSplit = lists:sublist(NodeSplit, length(NodeSplit) - 1),
+    PoolBin = erlang:iolist_to_binary(lists:join(<<"_">>, PoolSplit)),
+    erlang:binary_to_atom(PoolBin).
 
 -spec sync_msg(inet:socket(), iodata()) ->
     {ok, term()} | {error, term()}.

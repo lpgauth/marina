@@ -11,7 +11,8 @@ marina_cache_test_() ->
          fun erase_removes_single_entry/0,
          fun erase_missing_is_not_found/0,
          fun erase_pool_removes_all_for_pool/0,
-         fun erase_pool_leaves_other_pools_alone/0]}.
+         fun erase_pool_leaves_other_pools_alone/0,
+         fun erase_server_strips_index_suffix/0]}.
 
 put_then_get() ->
     ok = marina_cache:put(pool_a, <<"q1">>, <<"id1">>),
@@ -47,3 +48,14 @@ erase_pool_leaves_other_pools_alone() ->
     ?assertEqual(1, marina_cache:erase_pool(pool_c)),
     ?assertEqual({error, not_found}, marina_cache:get(pool_c, <<"q1">>)),
     ?assertEqual({ok, <<"id_d">>}, marina_cache:get(pool_d, <<"q1">>)).
+
+erase_server_strips_index_suffix() ->
+    %% shackle registers each pool connection as `pool_name_<index>`.
+    %% erase_server/1 takes a request_id `{server_name, _ref}` and
+    %% must strip the trailing index to land back on the pool atom.
+    %% Regression guard — this public API is consumed by external
+    %% callers that hit it from the 9472 Unprepared error path.
+    ok = marina_cache:put('marina_10.0.0.1', <<"q">>, <<"id">>),
+    ok = marina_cache:erase_server({'marina_10.0.0.1_3', make_ref()}),
+    ?assertEqual({error, not_found},
+        marina_cache:get('marina_10.0.0.1', <<"q">>)).

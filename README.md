@@ -1,8 +1,8 @@
 # marina
 
-High-performance Erlang client for [Apache Cassandra](https://cassandra.apache.org/) and [ScyllaDB](https://www.scylladb.com/), speaking the CQL binary protocol directly over TCP.
-
 [![Erlang CI](https://github.com/lpgauth/marina/actions/workflows/erlang.yml/badge.svg)](https://github.com/lpgauth/marina/actions/workflows/erlang.yml)
+
+High-performance Erlang client for [Apache Cassandra](https://cassandra.apache.org/) and [ScyllaDB](https://www.scylladb.com/), speaking the CQL binary protocol directly over TCP.
 
 ## Features
 
@@ -21,7 +21,15 @@ High-performance Erlang client for [Apache Cassandra](https://cassandra.apache.o
 
 ## Installation
 
-Add to your `rebar.config`:
+Pin to the latest tag (recommended):
+
+```erlang
+{deps, [
+    {marina, {git, "https://github.com/lpgauth/marina.git", {tag, "0.3.13"}}}
+]}.
+```
+
+Or follow master:
 
 ```erlang
 {deps, [
@@ -108,9 +116,9 @@ Asynchronous (return a `shackle:request_id()`, consume via `marina:receive_respo
 
 ## Architecture notes
 
-- **Bootstrap.** On application start, `marina_pool_server` dials each `bootstrap_ip` until one responds, runs `SELECT rpc_address, data_center, tokens FROM system.{local,peers}`, filters by the seed node's datacenter, and starts one [`shackle`](https://github.com/lpgauth/shackle) pool per peer.
-- **Token-aware routing.** With `strategy = token_aware`, `marina_ring:build/1` builds a balanced BST keyed on token intervals and `marina_compiler` compiles it to a `marina_ring_utils:lookup/1` function at runtime. Murmur3-hashed routing keys traverse the tree in O(log N).
-- **Topology refresh.** `marina_control` owns a dedicated CQL connection that `REGISTER`s for `TOPOLOGY_CHANGE`, `STATUS_CHANGE`, and `SCHEMA_CHANGE`. On any topology event (and on every reconnect, as an anti-missed-event guard) it re-runs `system.peers` and posts `{topology_full_sync, Nodes}` to `marina_pool_server`, which diffs against the current pool set, starts/stops shackle pools as needed, clears prepared-statement caches for removed nodes, and rebuilds the ring.
+- **Bootstrap.** Dial each `bootstrap_ip` in order, query `system.local` + `system.peers`, filter by the seed's datacenter, start one shackle pool per peer.
+- **Token-aware routing.** On boot, a balanced BST over token intervals is compiled to a runtime-generated `marina_ring_utils:lookup/1`. Routing keys are hashed with Murmur3 and traverse the tree in O(log N).
+- **Topology refresh.** `marina_control` holds one long-lived CQL connection subscribed to `TOPOLOGY_CHANGE`, `STATUS_CHANGE`, and `SCHEMA_CHANGE`. Any topology event — or any reconnect — re-queries `system.peers` and posts `{topology_full_sync, Nodes}` to the pool server, which diffs the node list, adds/removes pools, evicts prepared-statement cache for removed pools, and rebuilds the ring.
 
 ## Development
 

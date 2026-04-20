@@ -46,7 +46,7 @@ decode(?OP_RESULT, <<3:32/integer, Rest/binary>>) ->
     {ok, Keyspace};
 decode(?OP_RESULT, <<4:32/integer, Rest/binary>>) ->
     {Id, Rest2} = marina_types:decode_short_bytes(Rest),
-    {_Metadata, Rest3} = decode_result_metadata(Rest2),
+    {_Metadata, Rest3} = decode_prepared_metadata(Rest2),
     {_ResultMetadata, <<>>} = decode_result_metadata(Rest3),
     {ok, Id};
 decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
@@ -191,6 +191,28 @@ decode_result_paging_state(Rest, false) ->
 decode_result_metadata(<<Flags:32/integer, ColumnsCount:32/integer,
     Rest/binary>>) ->
 
+    {GlobalTableSpec, HasMorePages, NoMetaData} = decode_result_flags(Flags),
+    {PagingState, Rest2} = decode_result_paging_state(Rest, HasMorePages),
+    {Columns, Rest3} = case NoMetaData of
+        true -> {[], Rest2};
+        false ->
+            decode_columns_metadata(Rest2, ColumnsCount, GlobalTableSpec)
+    end,
+
+    {#result_metadata {
+        columns_count = ColumnsCount,
+        columns = Columns,
+        paging_state = PagingState
+    }, Rest3}.
+
+%% PREPARED result metadata (v4+) carries a pk_count + pk_indexes preamble
+%% that the plain ROWS result_metadata does not. marina does not consume the
+%% pk info for routing, so we skip it and fall through to the shared tail.
+decode_prepared_metadata(<<Flags:32/integer, ColumnsCount:32/integer,
+    PkCount:32/integer, PkRest/binary>>) ->
+
+    PkSkip = PkCount * 2,
+    <<_PkIndexes:PkSkip/binary, Rest/binary>> = PkRest,
     {GlobalTableSpec, HasMorePages, NoMetaData} = decode_result_flags(Flags),
     {PagingState, Rest2} = decode_result_paging_state(Rest, HasMorePages),
     {Columns, Rest3} = case NoMetaData of

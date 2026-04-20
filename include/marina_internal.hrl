@@ -40,7 +40,7 @@
 -define(HEADER_SIZE, 9).
 -define(LZ4_COMPRESSION, {<<"COMPRESSION">>, <<"lz4">>}).
 -define(MAX_STREAM_ID, 32768).
--define(PROTO_VERSION, 3).
+-define(PROTO_VERSION, 4).
 
 -define(OP_ERROR, 16#00).
 -define(OP_STARTUP, 16#01).

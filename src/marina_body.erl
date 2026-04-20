@@ -247,10 +247,16 @@ decode_type(<<16#F:16, Rest/binary>>) ->
     {timeuuid, Rest};
 decode_type(<<16#10:16, Rest/binary>>) ->
     {inet, Rest};
+decode_type(<<16#11:16, Rest/binary>>) ->
+    {date, Rest};
+decode_type(<<16#12:16, Rest/binary>>) ->
+    {time, Rest};
 decode_type(<<16#13:16, Rest/binary>>) ->
     {smallint, Rest};
 decode_type(<<16#14:16, Rest/binary>>) ->
     {tinyint, Rest};
+decode_type(<<16#15:16, Rest/binary>>) ->
+    {duration, Rest};
 decode_type(<<16#20:16, Rest/binary>>) ->
     {Type, Rest2} = decode_type(Rest),
     {{list, Type}, Rest2};

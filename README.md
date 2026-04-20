@@ -1,207 +1,130 @@
 # marina
-High-Performance Erlang Cassandra / Scylla CQL Client
 
-### Requirements
+High-performance Erlang client for [Apache Cassandra](https://cassandra.apache.org/) and [ScyllaDB](https://www.scylladb.com/), speaking the CQL binary protocol directly over TCP.
 
-* Cassandra 2.1+ / Scylla 2.x+
-* Erlang/OTP 24+
+[![Erlang CI](https://github.com/lpgauth/marina/actions/workflows/erlang.yml/badge.svg)](https://github.com/lpgauth/marina/actions/workflows/erlang.yml)
 
 ## Features
 
-* Authentication support
-* Batch queries (LOGGED / UNLOGGED / COUNTER)
-* Compression support (LZ4)
-* CQL native protocol v4
-* Fast pool implementation (random, round_robin)
-* Load-balancing policies (random, token_aware)
-* Performance optimized
-* Prepared statement cache
-* Ring refresh on TOPOLOGY_CHANGE events (event-driven, no polling)
+- **CQL native protocol v4** — covers queries, prepared statements, batches, paging, and server-side events.
+- **Batch queries** — LOGGED / UNLOGGED / COUNTER, mixing raw and prepared statements.
+- **Prepared statement cache** — per-pool, keyed on the query binary.
+- **Load-balancing** — `random` or `token_aware` (Murmur3-hash routing keys to the owning replica).
+- **Topology awareness** — a persistent control connection subscribes to `TOPOLOGY_CHANGE` events and drives a ring re-sync on any membership change. No polling.
+- **LZ4 compression** — optional, opt-in via `compression`.
+- **Authentication** — plaintext `PasswordAuthenticator`.
 
-## Environment variables
+## Requirements
 
-<table width="100%">
-  <theader>
-    <th>Name</th>
-    <th>Type</th>
-    <th>Default</th>
-    <th>Description</th>
-  </theader>
-  <tr>
-    <td>backlog_size</td>
-    <td>pos_integer()</td>
-    <td>1024</td>
-    <td>per-connection shackle backlog</td>
-  </tr>
-  <tr>
-    <td>bootstrap_ips</td>
-    <td>[string()]</td>
-    <td>["127.0.0.1"]</td>
-    <td>ips used to bootstrap the pool</td>
-  </tr>
-  <tr>
-    <td>compression</td>
-    <td>boolean()</td>
-    <td>false</td>
-    <td>enable lz4 compression</td>
-  </tr>
-  <tr>
-    <td>keyspace</td>
-    <td>undefined | binary()</td>
-    <td>undefined</td>
-    <td>default keyspace</td>
-  </tr>
-  <tr>
-    <td>password</td>
-    <td>binary()</td>
-    <td>undefined</td>
-    <td>password for authentication</td>
-  </tr>
-  <tr>
-    <td>pool_size</td>
-    <td>pos_integer()</td>
-    <td>16</td>
-    <td>number of connections per node</td>
-  </tr>
-  <tr>
-    <td>pool_strategy</td>
-    <td>random | round_robin</td>
-    <td>random</td>
-    <td>shackle's connection-selection strategy within a per-node pool</td>
-  </tr>
-  <tr>
-    <td>port</td>
-    <td>pos_integer()</td>
-    <td>9042</td>
-    <td>server port</td>
-  </tr>
-  <tr>
-    <td>reconnect</td>
-    <td>boolean()</td>
-    <td>true</td>
-    <td>reconnect closed connections</td>
-  </tr>
-  <tr>
-    <td>reconnect_time_max</td>
-    <td>pos_integer() | infinity</td>
-    <td>120000</td>
-    <td>reconnect maximum time</td>
-  </tr>
-  <tr>
-    <td>reconnect_time_min</td>
-    <td>pos_integer()</td>
-    <td>1500</td>
-    <td>reconnect minimum time</td>
-  </tr>
-  <tr>
-    <td>socket_options</td>
-    <td>[gen_tcp:option()]</td>
-    <td>see marina_internal.hrl</td>
-    <td>gen_tcp socket options for each connection</td>
-  </tr>
-  <tr>
-    <td>strategy</td>
-    <td>random | token_aware</td>
-    <td>token_aware</td>
-    <td>load balancing strategy across nodes</td>
-  </tr>
-  <tr>
-    <td>username</td>
-    <td>binary()</td>
-    <td>undefined</td>
-    <td>username for authentication</td>
-  </tr>
-</table>
+- Cassandra 2.1+ / ScyllaDB 2.x+
+- Erlang/OTP 24+
 
-### Bootstraping
+## Installation
 
-The pool is bootstraped by querying the `system.peers` table. `marina` will try each ip from `boostrap_ips` until it can connect and retrieve the list of peers. For backward compatibility, `ip` will be used if `bootstrap_ips` is not provided.
+Add to your `rebar.config`:
 
-### Examples
+```erlang
+{deps, [
+    {marina, {git, "https://github.com/lpgauth/marina.git", {branch, "master"}}}
+]}.
+```
+
+## Configuration
+
+All settings are read from the `marina` application env.
+
+| Name                 | Type                          | Default                    | Description                                                               |
+| -------------------- | ----------------------------- | -------------------------- | ------------------------------------------------------------------------- |
+| `backlog_size`       | `pos_integer()`               | `1024`                     | Per-connection [shackle](https://github.com/lpgauth/shackle) backlog.     |
+| `bootstrap_ips`      | `[string()]`                  | `["127.0.0.1"]`            | IPs tried in order until one responds with `system.peers`.                |
+| `compression`        | `boolean()`                   | `false`                    | Negotiate LZ4 compression on every connection.                            |
+| `keyspace`           | `undefined` \| `binary()`     | `undefined`                | Default keyspace; issued as `USE …` after startup.                        |
+| `password`           | `binary()`                    | `undefined`                | Password for `PasswordAuthenticator`.                                     |
+| `pool_size`          | `pos_integer()`               | `16`                       | Number of shackle connections per node.                                   |
+| `pool_strategy`      | `random` \| `round_robin`     | `random`                   | Shackle's strategy for picking a connection from a per-node pool.         |
+| `port`               | `pos_integer()`               | `9042`                     | Server port.                                                              |
+| `reconnect`          | `boolean()`                   | `true`                     | Auto-reconnect closed connections.                                        |
+| `reconnect_time_max` | `pos_integer()` \| `infinity` | `120000`                   | Upper bound on the reconnect backoff (ms).                                |
+| `reconnect_time_min` | `pos_integer()`               | `1500`                     | Lower bound on the reconnect backoff (ms).                                |
+| `socket_options`     | `[gen_tcp:option()]`          | see `marina_internal.hrl`  | `gen_tcp` options applied to every connection.                            |
+| `strategy`           | `random` \| `token_aware`     | `token_aware`              | Node selection: random, or Murmur3-hash the `routing_key` to the replica. |
+| `username`           | `binary()`                    | `undefined`                | Username for `PasswordAuthenticator`.                                     |
+
+## Usage
+
+Start the application, then call the query API:
 
 ```erlang
 1> marina_app:start().
+{ok, [granderl, metal, shackle, foil, marina, ...]}
 
-{ok,[granderl,metal,shackle,foil,marina]}
+2> marina:query(<<"SELECT id, name FROM users LIMIT 1">>, #{timeout => 1000}).
+{ok, {result, _Metadata, 1, [[<<"…">>, <<"alice">>]]}}
 
-2> marina:query(<<"SELECT * FROM test.users LIMIT 1;">>, #{timeout => 1000}).
+3> marina:query(<<"SELECT * FROM users WHERE id = ?">>,
+                #{values      => [Uuid],
+                  routing_key => Uuid,
+                  timeout     => 1000}).
+{ok, {result, _Metadata, 1, [Row]}}
 
-{ok,{result,{result_metadata,4,
-    [{column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
-     {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
-     {column_spec,<<"test">>,<<"users">>,<<"column2">>,varchar},
-     {column_spec,<<"test">>,<<"users">>,<<"value">>,blob}],
-    undefined},
-    1,
-    [[<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>,
-      <<"test">>,<<"test2">>,
-      <<0,0,0,0>>]]}}
-}}
+4> marina:reusable_query(<<"SELECT * FROM users WHERE id = ?">>,
+                         #{values => [Uuid], timeout => 1000}).
+{ok, {result, _Metadata, 1, [Row]}}
 
-3> marina:query(<<"SELECT * FROM test.users WHERE key = ?;">>,
-    #{values => [<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,125>>],
-    skip_metadata => true, timeout => 1000}).
-
-{ok,{result,{result_metadata,4,[],undefined},
-    1,
-    [[<<153,73,45,254,217,74,17,228,175,57,88,244,65,16,117,
-        125>>,
-      <<"test">>,<<"test2">>,
-      <<0,0,0,0>>]]}}
-
-4> {ok, Ref} = marina:async_reusable_query(<<"SELECT * FROM test.users WHERE key = ?;">>,
-    #{values => [<<207,85,107,110,157,137,17,226,167,153,120,43,203,102,219,173>>]}).
-
-{ok,{'marina_df74df08-e5bc-42e8-af61-c24dfeda6f2c_5',#Ref<0.1577389904.1118830594.250171>}}
-
-5> marina:receive_response(Ref).
-
-{ok,{result,{result_metadata,4,
-    [{column_spec,<<"test">>,<<"users">>,<<"key">>,uid},
-     {column_spec,<<"test">>,<<"users">>,<<"column1">>,varchar},
-     {column_spec,<<"test">>,<<"users">>,<<"column2">>,varchar},
-     {column_spec,<<"test">>,<<"users">>,<<"value">>,blob}],
-        undefined},
-            0,[]}}
-
-6> marina:batch([
-    {query, <<"INSERT INTO test.kv (k, v) VALUES (1, 'a')">>, []},
-    {query, <<"INSERT INTO test.kv (k, v) VALUES (2, 'b')">>, []}
-], #{batch_type => logged, timeout => 1000}).
-
-{ok,undefined}
+5> marina:batch([
+        {query, <<"INSERT INTO kv (k, v) VALUES (1, 'a')">>, []},
+        {query, <<"INSERT INTO kv (k, v) VALUES (2, 'b')">>, []}
+   ], #{batch_type => logged, timeout => 1000}).
+{ok, undefined}
 ```
 
-## Tests
+### API surface
 
-```makefile
-make dialyzer
-make eunit
-make xref
+Synchronous:
+- `marina:query/2` — raw CQL query.
+- `marina:reusable_query/2` — prepares the query once per pool, caches the statement id, executes with bound values thereafter.
+- `marina:batch/2` — LOGGED, UNLOGGED, or COUNTER batch mixing raw and prepared statements.
+
+Asynchronous (return a `shackle:request_id()`, consume via `marina:receive_response/1`):
+- `marina:async_query/2`
+- `marina:async_reusable_query/2`
+- `marina:async_batch/2`
+
+### Query options
+
+`query_opts()` is a map; unknown keys are ignored.
+
+| Key                 | Type                               | Default                   |
+| ------------------- | ---------------------------------- | ------------------------- |
+| `batch_type`        | `logged` \| `unlogged` \| `counter`| `logged`                  |
+| `consistency_level` | `?CONSISTENCY_*`                   | `?CONSISTENCY_ONE`        |
+| `page_size`         | `pos_integer()`                    | unset                     |
+| `paging_state`      | `binary()`                         | unset                     |
+| `pid`               | `pid()`                            | `self()`                  |
+| `routing_key`       | `integer()` \| `binary()`          | `undefined`               |
+| `skip_metadata`     | `boolean()`                        | `false`                   |
+| `timeout`           | `pos_integer()`                    | `1000`                    |
+| `values`            | `[binary()]`                       | `undefined`               |
+
+## Architecture notes
+
+- **Bootstrap.** On application start, `marina_pool_server` dials each `bootstrap_ip` until one responds, runs `SELECT rpc_address, data_center, tokens FROM system.{local,peers}`, filters by the seed node's datacenter, and starts one [`shackle`](https://github.com/lpgauth/shackle) pool per peer.
+- **Token-aware routing.** With `strategy = token_aware`, `marina_ring:build/1` builds a balanced BST keyed on token intervals and `marina_compiler` compiles it to a `marina_ring_utils:lookup/1` function at runtime. Murmur3-hashed routing keys traverse the tree in O(log N).
+- **Topology refresh.** `marina_control` owns a dedicated CQL connection that `REGISTER`s for `TOPOLOGY_CHANGE`, `STATUS_CHANGE`, and `SCHEMA_CHANGE`. On any topology event (and on every reconnect, as an anti-missed-event guard) it re-runs `system.peers` and posts `{topology_full_sync, Nodes}` to `marina_pool_server`, which diffs against the current pool set, starts/stops shackle pools as needed, clears prepared-statement caches for removed nodes, and rebuilds the ring.
+
+## Development
+
+```sh
+make compile     # rebar3 compile with strict warnings
+make xref        # cross-reference analysis
+make dialyzer    # success typing
+make eunit       # unit + integration tests (expects ScyllaDB at 172.18.0.2:9042)
+make test        # xref + eunit + dialyzer
+make bench       # ring-lookup micro-benchmark
 ```
+
+The bundled `Dockerfile` produces the CI image (`lpgauth/erlang-scylla:28.3.1-6.2.3-amd64`) by layering OTP 28.3.1 (from the official `erlang` image) on top of `scylladb/scylla:6.2.3`. For local integration tests, run that image or a plain ScyllaDB container on `172.18.0.2:9042`.
 
 ## License
 
-```license
-The MIT License (MIT)
-
-Copyright (c) 2015-2024 Louis-Philippe Gauthier
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+MIT — see [LICENSE](LICENSE).

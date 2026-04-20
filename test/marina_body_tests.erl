@@ -64,6 +64,68 @@ schema_change_is_passed_through_raw_test() ->
     %% that decoder later.
     ?assertMatch(<<_:16, "CREATED", _:16, "KEYSPACE", _:16, "test2">>, Raw).
 
+flag_preambles_decoded_in_spec_order_test() ->
+    %% Spec order inside a response body when multiple flag bits are set:
+    %%   [tracing_id (0x02)][warnings (0x08)][custom_payload (0x04)][message]
+    %% Build a READY response with all three preambles and assert the
+    %% body decoder consumes them in that order — reordering would either
+    %% crash on length mismatch or read the wrong bytes as the message.
+    TracingUuid = <<1:128>>,
+    Warnings = <<(byte_size(<<"slow query">>)):16, "slow query">>,
+    CustomPayload = <<>>,
+    Body = <<TracingUuid/binary,
+             1:16, Warnings/binary,        %% 1 warning string
+             0:16, CustomPayload/binary>>, %% empty custom_payload map
+    Flags = 16#02 bor 16#04 bor 16#08,
+    ?assertEqual({ok, undefined},
+        marina_body:decode(#frame {
+            flags = Flags,
+            stream = 0,
+            opcode = ?OP_READY,
+            body = Body
+        })).
+
+result_schema_change_function_test() ->
+    %% CREATE FUNCTION response: target=FUNCTION, options =
+    %%   <string keyspace><string name><string list arg_types>
+    Body = <<5:32,                               %% kind = SCHEMA_CHANGE
+             (encode_string(<<"CREATED">>))/binary,
+             (encode_string(<<"FUNCTION">>))/binary,
+             (encode_string(<<"test">>))/binary,
+             (encode_string(<<"add">>))/binary,
+             2:16,
+             (encode_string(<<"int">>))/binary,
+             (encode_string(<<"int">>))/binary>>,
+    ?assertEqual(
+        {ok, {<<"CREATED">>, <<"FUNCTION">>,
+            {<<"test">>, <<"add">>, [<<"int">>, <<"int">>]}}},
+        marina_body:decode(#frame {
+            flags = 0, stream = 1, opcode = ?OP_RESULT, body = Body
+        })).
+
+result_schema_change_aggregate_test() ->
+    Body = <<5:32,
+             (encode_string(<<"DROPPED">>))/binary,
+             (encode_string(<<"AGGREGATE">>))/binary,
+             (encode_string(<<"test">>))/binary,
+             (encode_string(<<"mysum">>))/binary,
+             1:16,
+             (encode_string(<<"bigint">>))/binary>>,
+    ?assertEqual(
+        {ok, {<<"DROPPED">>, <<"AGGREGATE">>,
+            {<<"test">>, <<"mysum">>, [<<"bigint">>]}}},
+        marina_body:decode(#frame {
+            flags = 0, stream = 1, opcode = ?OP_RESULT, body = Body
+        })).
+
+auth_challenge_test() ->
+    Token = <<1, 2, 3, 4, 5>>,
+    Body = <<(byte_size(Token)):32/signed, Token/binary>>,
+    ?assertEqual({ok, {auth_challenge, Token}},
+        marina_body:decode(#frame {
+            flags = 0, stream = 1, opcode = ?OP_AUTH_CHALLENGE, body = Body
+        })).
+
 %% helpers
 decode_event_frame(Body) ->
     marina_body:decode(#frame {

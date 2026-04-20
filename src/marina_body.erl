@@ -13,9 +13,11 @@
 
 decode(#frame {flags = Flags, body = Body, opcode = Opcode}) ->
     Body1 = maybe_decompress(Flags, Body),
+    %% Spec order inside a flagged response body:
+    %%   [tracing_id][warnings][custom_payload]<message>
     Body2 = skip_tracing(Flags, Body1),
-    Body3 = skip_custom_payload(Flags, Body2),
-    Body4 = skip_warnings(Flags, Body3),
+    Body3 = skip_warnings(Flags, Body2),
+    Body4 = skip_custom_payload(Flags, Body3),
     decode(Opcode, Body4).
 
 %% private
@@ -64,11 +66,23 @@ decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
         <<"TYPE">> ->
             {Option, Rest4} = marina_types:decode_string(Rest3),
             {Option2, <<>>} = marina_types:decode_string(Rest4),
-            {Option, Option2}
+            {Option, Option2};
+        Fn when Fn =:= <<"FUNCTION">>; Fn =:= <<"AGGREGATE">> ->
+            {Keyspace, Rest4} = marina_types:decode_string(Rest3),
+            {Name, Rest5} = marina_types:decode_string(Rest4),
+            {ArgTypes, <<>>} = marina_types:decode_string_list(Rest5),
+            {Keyspace, Name, ArgTypes}
     end,
 
     {ok, {ChangeType, Target, Options}};
+decode(?OP_AUTH_CHALLENGE, Body) ->
+    {Token, <<>>} = marina_types:decode_bytes(Body),
+    {ok, {auth_challenge, Token}};
 decode(?OP_AUTH_SUCCESS, _) ->
+    %% Spec allows a trailing [bytes] token here. marina's authenticate
+    %% path matches on {ok, undefined} so we keep the existing shape —
+    %% the token is only meaningful for SASL mechanisms that do a
+    %% multi-round handshake, which marina does not currently support.
     {ok, undefined};
 decode(?OP_EVENT, Body) ->
     {EventType, Rest} = marina_types:decode_string(Body),

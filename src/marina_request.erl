@@ -109,7 +109,8 @@ query(Stream, FrameFlags, Query, QueryOpts) ->
 -spec register(stream(), frame_flag(), [binary()]) -> iolist().
 
 register(Stream, FrameFlags, EventTypes) ->
-    Body = encode_body(FrameFlags, [encode_string_list(EventTypes)]),
+    Body = encode_body(FrameFlags,
+        [marina_types:encode_string_list(EventTypes)]),
 
     marina_frame:encode(#frame {
         stream = Stream,
@@ -155,13 +156,6 @@ encode_batch_query({prepared, StatementId, Values}) ->
 encode_batch_values(Values) ->
     [marina_types:encode_short(length(Values)),
      [marina_types:encode_bytes(V) || V <- Values]].
-
-%% Spec-correct [string list] encoder — a [short] n followed by n [string].
-%% marina_types:encode_string_list/1 prefixes with an [int], which does not
-%% match the CQL wire format and would make the server reject REGISTER.
-encode_string_list(Values) ->
-    Parts = [marina_types:encode_string(V) || V <- Values],
-    iolist_to_binary([marina_types:encode_short(length(Values)), Parts]).
 
 flags(QueryOpts) ->
     {Mask1, Values} = values_flag(QueryOpts),

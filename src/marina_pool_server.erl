@@ -19,7 +19,7 @@
 -record(state, {
     bootstrap_ips :: list(),
     datacenter    :: undefined | binary(),
-    node_count    :: undefined | pos_integer(),
+    nodes         :: [{binary(), binary()}],
     port          :: pos_integer(),
     strategy      :: random | token_aware,
     timer_ref     :: undefined | reference()
@@ -47,6 +47,7 @@ init(_Name, _Parent, undefined) ->
 
     {ok, #state {
         bootstrap_ips = BootstrapIps,
+        nodes = [],
         port = Port,
         strategy = Strategy
     }}.
@@ -56,28 +57,36 @@ init(_Name, _Parent, undefined) ->
 
 handle_msg(?MSG_BOOTSTRAP, #state {
         bootstrap_ips = BootstrapIps,
+        nodes = OldNodes,
         port = Port,
         strategy = Strategy
     } = State) ->
 
     case nodes(BootstrapIps, Port) of
-        {ok, Nodes} ->
-            marina_pool:start(Strategy, Nodes),
+        {ok, NewNodes} ->
+            ok = marina_pool:sync(Strategy, NewNodes, OldNodes),
             {ok, State#state {
-                node_count = length(Nodes)
+                nodes = NewNodes
             }};
         {error, _Reason} ->
             shackle_utils:warning_msg(?MODULE, "bootstrap failed~n", []),
             {ok, State#state {
                 timer_ref = erlang:send_after(500, self(), ?MSG_BOOTSTRAP)
             }}
-    end.
+    end;
+handle_msg({topology_full_sync, NewNodes}, #state {
+        nodes = OldNodes,
+        strategy = Strategy
+    } = State) ->
+
+    ok = marina_pool:sync(Strategy, NewNodes, OldNodes),
+    {ok, State#state {nodes = NewNodes}}.
 
 -spec terminate(term(), state()) ->
     ok.
 
-terminate(_Reason, #state {node_count = NodeCount}) ->
-    marina_pool:stop(NodeCount),
+terminate(_Reason, #state {nodes = Nodes}) ->
+    marina_pool:stop(length(Nodes)),
     ok.
 
 %% private

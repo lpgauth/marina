@@ -69,7 +69,38 @@ decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
 
     {ok, {ChangeType, Target, Options}};
 decode(?OP_AUTH_SUCCESS, _) ->
-    {ok, undefined}.
+    {ok, undefined};
+decode(?OP_EVENT, Body) ->
+    {EventType, Rest} = marina_types:decode_string(Body),
+    decode_event(EventType, Rest).
+
+decode_event(<<"TOPOLOGY_CHANGE">>, Body) ->
+    {Kind, Rest} = marina_types:decode_string(Body),
+    {Addr, _Port, <<>>} = decode_inet(Rest),
+    {ok, {event, topology_change, event_kind(Kind), Addr}};
+decode_event(<<"STATUS_CHANGE">>, Body) ->
+    {Kind, Rest} = marina_types:decode_string(Body),
+    {Addr, _Port, <<>>} = decode_inet(Rest),
+    {ok, {event, status_change, event_kind(Kind), Addr}};
+decode_event(<<"SCHEMA_CHANGE">>, Body) ->
+    %% Payload shape matches OP_RESULT kind 5. marina does not consume schema
+    %% events, so pass the raw body through without committing to a shape —
+    %% a future schema-aware caller can decode it at the call site.
+    {ok, {event, schema_change, Body}}.
+
+event_kind(<<"NEW_NODE">>) -> new_node;
+event_kind(<<"REMOVED_NODE">>) -> removed_node;
+event_kind(<<"MOVED_NODE">>) -> moved_node;
+event_kind(<<"UP">>) -> up;
+event_kind(<<"DOWN">>) -> down;
+event_kind(Other) -> Other.
+
+%% [inet] = <byte N><N bytes of IP><int port>
+decode_inet(<<4, A, B, C, D, Port:32/signed, Rest/binary>>) ->
+    {{A, B, C, D}, Port, Rest};
+decode_inet(<<16, A:16, B:16, C:16, D:16, E:16, F:16, G:16, H:16,
+              Port:32/signed, Rest/binary>>) ->
+    {{A, B, C, D, E, F, G, H}, Port, Rest}.
 
 maybe_decompress(Flags, Body) when Flags band 16#01 =:= 16#01 ->
     {ok, Body2} = marina_utils:unpack(Body),

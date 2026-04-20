@@ -3,6 +3,7 @@
 
 -export([
     erase/2,
+    erase_pool/1,
     get/2,
     init/0,
     put/3
@@ -19,6 +20,12 @@ erase(Pool, Key) ->
         error:badarg ->
             {error, not_found}
     end.
+
+-spec erase_pool(atom()) -> non_neg_integer().
+
+erase_pool(Pool) ->
+    ets:select_delete(?ETS_TABLE_CACHE,
+        [{{{'$1', '$2'}, '_'}, [{'==', '$1', Pool}], [true]}]).
 
 -spec get(atom(), binary()) -> {ok, term()} | {error, not_found}.
 

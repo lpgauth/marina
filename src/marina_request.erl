@@ -3,12 +3,14 @@
 
 -compile(inline).
 -compile({inline_size, 512}).
+-compile({no_auto_import, [register/2]}).
 
 -export([
     auth_response/3,
     execute/4,
     prepare/3,
     query/4,
+    register/3,
     startup/1
 ]).
 
@@ -80,6 +82,18 @@ query(Stream, FrameFlags, Query, QueryOpts) ->
         body = Body2
     }).
 
+-spec register(stream(), frame_flag(), [binary()]) -> iolist().
+
+register(Stream, FrameFlags, EventTypes) ->
+    Body = encode_body(FrameFlags, [encode_string_list(EventTypes)]),
+
+    marina_frame:encode(#frame {
+        stream = Stream,
+        opcode = ?OP_REGISTER,
+        flags = FrameFlags,
+        body = Body
+    }).
+
 -spec startup(frame_flag()) -> iolist().
 
 startup(FrameFlags) ->
@@ -103,6 +117,13 @@ encode_body(0, Body) ->
 encode_body(1, Body) ->
     {ok, Body2} = marina_utils:pack(Body),
     Body2.
+
+%% Spec-correct [string list] encoder — a [short] n followed by n [string].
+%% marina_types:encode_string_list/1 prefixes with an [int], which does not
+%% match the CQL wire format and would make the server reject REGISTER.
+encode_string_list(Values) ->
+    Parts = [marina_types:encode_string(V) || V <- Values],
+    iolist_to_binary([marina_types:encode_short(length(Values)), Parts]).
 
 flags(QueryOpts) ->
     {Mask1, Values} = values_flag(QueryOpts),

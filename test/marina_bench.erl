@@ -149,14 +149,14 @@ setup_foil(NumNodes) ->
     _ = application:ensure_all_started(foil),
     _ = catch foil:delete(marina_pool),
     ok = marina_pool:init(),
-    ok = foil:insert(marina_pool, strategy, {token_aware, NumNodes}),
-    ok = foil:load(marina_pool),
+    persistent_term:put({marina_pool, strategy}, {token_aware, NumNodes}),
     %% Sanity: the lookup must actually succeed or the benchmark is measuring
-    %% the foil `try/catch undef` error path, not the success path.
-    {ok, {token_aware, NumNodes}} = foil:lookup(marina_pool, strategy),
+    %% an error path.
+    {token_aware, NumNodes} = persistent_term:get({marina_pool, strategy}),
     ok.
 
 teardown_foil() ->
+    _ = persistent_term:erase({marina_pool, strategy}),
     _ = catch foil:delete(marina_pool),
     ok.
 

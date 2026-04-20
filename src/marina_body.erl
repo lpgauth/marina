@@ -75,7 +75,14 @@ decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
     end,
 
     {ok, {ChangeType, Target, Options}};
+decode(?OP_AUTH_CHALLENGE, Body) ->
+    {Token, <<>>} = marina_types:decode_bytes(Body),
+    {ok, {auth_challenge, Token}};
 decode(?OP_AUTH_SUCCESS, _) ->
+    %% Spec allows a trailing [bytes] token here. marina's authenticate
+    %% path matches on {ok, undefined} so we keep the existing shape —
+    %% the token is only meaningful for SASL mechanisms that do a
+    %% multi-round handshake, which marina does not currently support.
     {ok, undefined};
 decode(?OP_EVENT, Body) ->
     {EventType, Rest} = marina_types:decode_string(Body),

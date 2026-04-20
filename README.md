@@ -155,7 +155,6 @@ make xref
 
 ### TODOs
 
-* Batch queries
 * Rebuild ring when topology changes
 
 ## License

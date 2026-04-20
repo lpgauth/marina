@@ -69,6 +69,8 @@ query(Socket, Query) ->
 -spec query_opts(atom(), query_opts()) ->
     term().
 
+query_opts(batch_type, QueryOpts) ->
+    maps:get(batch_type, QueryOpts, logged);
 query_opts(consistency_level, QueryOpts) ->
     maps:get(consistency_level, QueryOpts, ?DEFAULT_CONSISTENCY_LEVEL);
 query_opts(flags, QueryOpts) ->

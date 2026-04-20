@@ -2,8 +2,10 @@
 -include("marina_internal.hrl").
 
 -export([
+    async_batch/2,
     async_query/2,
     async_reusable_query/2,
+    batch/2,
     query/2,
     receive_response/1,
     response/1,
@@ -11,6 +13,12 @@
 ]).
 
 %% public
+-spec async_batch([batch_query()], query_opts()) ->
+    {ok, shackle:request_id()} | error().
+
+async_batch(Queries, QueryOpts) ->
+    async_call({batch, Queries}, QueryOpts).
+
 -spec async_query(query(), query_opts()) ->
     {ok, shackle:request_id()} | error().
 
@@ -28,6 +36,12 @@ async_reusable_query(Query, QueryOpts) ->
         {error, Reason} ->
             {error, Reason}
     end.
+
+-spec batch([batch_query()], query_opts()) ->
+    {ok, term()} | error().
+
+batch(Queries, QueryOpts) ->
+    call({batch, Queries}, QueryOpts).
 
 -spec query(query(), query_opts()) ->
     {ok, term()} | error().

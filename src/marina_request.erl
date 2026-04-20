@@ -7,6 +7,7 @@
 
 -export([
     auth_response/3,
+    batch/4,
     execute/4,
     prepare/3,
     query/4,
@@ -26,6 +27,29 @@ auth_response(FrameFlags, Username, Password) ->
         opcode = ?OP_AUTH_RESPONSE,
         flags = FrameFlags,
         body = Body2
+    }).
+
+-spec batch(stream(), frame_flag(), [batch_query()], query_opts()) -> iolist().
+
+batch(Stream, FrameFlags, Queries, QueryOpts) ->
+    BatchType = encode_batch_type(
+        marina_utils:query_opts(batch_type, QueryOpts)),
+    ConsistencyLevel = marina_utils:query_opts(consistency_level, QueryOpts),
+    EncodedQueries = [encode_batch_query(Q) || Q <- Queries],
+
+    Body = encode_body(FrameFlags, [
+        BatchType,
+        marina_types:encode_short(length(Queries)),
+        EncodedQueries,
+        marina_types:encode_short(ConsistencyLevel),
+        <<0>>
+    ]),
+
+    marina_frame:encode(#frame {
+        stream = Stream,
+        opcode = ?OP_BATCH,
+        flags = FrameFlags,
+        body = Body
     }).
 
 -spec execute(stream(), frame_flag(), statement_id(), query_opts()) -> iolist().
@@ -117,6 +141,20 @@ encode_body(0, Body) ->
 encode_body(1, Body) ->
     {ok, Body2} = marina_utils:pack(Body),
     Body2.
+
+encode_batch_type(logged) -> <<0>>;
+encode_batch_type(unlogged) -> <<1>>;
+encode_batch_type(counter) -> <<2>>.
+
+encode_batch_query({query, Query, Values}) ->
+    [<<0>>, marina_types:encode_long_string(Query), encode_batch_values(Values)];
+encode_batch_query({prepared, StatementId, Values}) ->
+    [<<1>>, marina_types:encode_short_bytes(StatementId),
+     encode_batch_values(Values)].
+
+encode_batch_values(Values) ->
+    [marina_types:encode_short(length(Values)),
+     [marina_types:encode_bytes(V) || V <- Values]].
 
 %% Spec-correct [string list] encoder — a [short] n followed by n [string].
 %% marina_types:encode_string_list/1 prefixes with an [int], which does not

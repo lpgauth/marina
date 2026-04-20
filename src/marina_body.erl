@@ -11,11 +11,12 @@
 %% public
 -spec decode(frame()) -> {ok, term()} | {error, atom()}.
 
-decode(#frame {flags = 0, body = Body, opcode = Opcode}) ->
-    decode(Opcode, Body);
-decode(#frame {flags = 1, body = Body, opcode = Opcode}) ->
-    {ok, Body2} = marina_utils:unpack(Body),
-    decode(Opcode, Body2).
+decode(#frame {flags = Flags, body = Body, opcode = Opcode}) ->
+    Body1 = maybe_decompress(Flags, Body),
+    Body2 = skip_tracing(Flags, Body1),
+    Body3 = skip_custom_payload(Flags, Body2),
+    Body4 = skip_warnings(Flags, Body3),
+    decode(Opcode, Body4).
 
 %% private
 decode(?OP_ERROR, Body) ->
@@ -69,6 +70,45 @@ decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
     {ok, {ChangeType, Target, Options}};
 decode(?OP_AUTH_SUCCESS, _) ->
     {ok, undefined}.
+
+maybe_decompress(Flags, Body) when Flags band 16#01 =:= 16#01 ->
+    {ok, Body2} = marina_utils:unpack(Body),
+    Body2;
+maybe_decompress(_Flags, Body) ->
+    Body.
+
+skip_tracing(Flags, <<_Uuid:16/binary, Rest/binary>>)
+  when Flags band 16#02 =:= 16#02 ->
+    Rest;
+skip_tracing(_Flags, Body) ->
+    Body.
+
+skip_custom_payload(Flags, <<N:16/unsigned, Rest/binary>>)
+  when Flags band 16#04 =:= 16#04 ->
+    skip_bytes_map(N, Rest);
+skip_custom_payload(_Flags, Body) ->
+    Body.
+
+skip_bytes_map(0, Body) ->
+    Body;
+skip_bytes_map(N, <<KLen:16/unsigned, _Key:KLen/binary,
+                    VLen:32/signed, VBody/binary>>) when VLen >= 0 ->
+    <<_Val:VLen/binary, Rest/binary>> = VBody,
+    skip_bytes_map(N - 1, Rest);
+skip_bytes_map(N, <<KLen:16/unsigned, _Key:KLen/binary,
+                    _VLen:32/signed, Rest/binary>>) ->
+    skip_bytes_map(N - 1, Rest).
+
+skip_warnings(Flags, <<N:16/unsigned, Rest/binary>>)
+  when Flags band 16#08 =:= 16#08 ->
+    skip_string_list(N, Rest);
+skip_warnings(_Flags, Body) ->
+    Body.
+
+skip_string_list(0, Body) ->
+    Body;
+skip_string_list(N, <<Len:16/unsigned, _S:Len/binary, Rest/binary>>) ->
+    skip_string_list(N - 1, Rest).
 
 decode_columns(Bin, Count) ->
     decode_columns(Bin, Count, []).

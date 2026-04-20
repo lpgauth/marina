@@ -66,7 +66,12 @@ decode(?OP_RESULT, <<5:32/integer, Rest/binary>>) ->
         <<"TYPE">> ->
             {Option, Rest4} = marina_types:decode_string(Rest3),
             {Option2, <<>>} = marina_types:decode_string(Rest4),
-            {Option, Option2}
+            {Option, Option2};
+        Fn when Fn =:= <<"FUNCTION">>; Fn =:= <<"AGGREGATE">> ->
+            {Keyspace, Rest4} = marina_types:decode_string(Rest3),
+            {Name, Rest5} = marina_types:decode_string(Rest4),
+            {ArgTypes, <<>>} = marina_types:decode_string_list(Rest5),
+            {Keyspace, Name, ArgTypes}
     end,
 
     {ok, {ChangeType, Target, Options}};

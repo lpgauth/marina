@@ -37,10 +37,19 @@ profile:
 	@_build/test/lib/fprofx/erlgrindx -p fprofx.analysis
 	@$(CACHEGRIND) fprofx.cgrind
 
+bench:
+	@echo "Running ring lookup benchmark..."
+	@$(REBAR3) as test compile
+	@erl -noshell \
+	     -pa _build/test/lib/*/ebin \
+	     -pa _build/test/lib/*/test \
+	     -eval 'marina_bench:run()' \
+	     -eval 'init:stop()'
+
 test: xref eunit dialyzer
 
 xref:
 	@echo "Running rebar3 xref..."
 	@$(REBAR3) xref
 
-.PHONY: clean compile dialyzer edoc eunit profile xref
+.PHONY: bench clean compile dialyzer edoc eunit profile xref

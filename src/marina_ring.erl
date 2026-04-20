@@ -17,11 +17,10 @@
     ok.
 
 build(Nodes) ->
-    Ring = lists:map(fun ({RpcAddress, Tokens}) ->
+    Sorted = lists:usort(lists:flatmap(fun ({RpcAddress, Tokens}) ->
         {Tokens2, <<>>} = marina_types:decode_long_string_set(Tokens),
         [{binary_to_integer(Token), RpcAddress} || Token <- Tokens2]
-    end, Nodes),
-    Sorted = lists:usort(lists:flatten(Ring)),
+    end, Nodes)),
     Tree = build_tree(Sorted),
     marina_compiler:ring_utils(Tree).
 

@@ -51,9 +51,12 @@ node(RoutingKey) ->
     atom().
 
 node_id(<<A, B, C, D>>) ->
-    RpcAddress = lists:flatten(lists:join(".", [integer_to_list(X) ||
-        X <- [A, B, C, D]])),
-    list_to_atom("marina_" ++ RpcAddress).
+    Name = <<"marina_",
+             (integer_to_binary(A))/binary, ".",
+             (integer_to_binary(B))/binary, ".",
+             (integer_to_binary(C))/binary, ".",
+             (integer_to_binary(D))/binary>>,
+    binary_to_atom(Name, utf8).
 
 -spec start(random | token_aware, [{binary(), binary()}]) ->
     ok.

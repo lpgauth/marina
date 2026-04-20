@@ -1,4 +1,4 @@
-FROM scylladb/scylla:5.2
+FROM scylladb/scylla:6.2.3
 
 RUN apt-get update
 RUN apt-get -y --no-install-recommends install \
@@ -17,7 +17,7 @@ RUN apt-get -y --no-install-recommends install \
   git
 
 RUN mkdir -p /OTP/subdir
-RUN wget -nv "https://github.com/erlang/otp/archive/OTP-26.2.3.tar.gz" && tar -zxf "OTP-26.2.3.tar.gz" -C /OTP/subdir --strip-components=1
+RUN wget -nv "https://github.com/erlang/otp/archive/OTP-28.3.1.tar.gz" && tar -zxf "OTP-28.3.1.tar.gz" -C /OTP/subdir --strip-components=1
 WORKDIR /OTP/subdir
 RUN ./otp_build autoconf
 RUN ./configure --with-ssl

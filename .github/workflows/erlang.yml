@@ -4,13 +4,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: lpgauth/erlang-scylla:26.2.2-5.2-amd64
+      image: lpgauth/erlang-scylla:28.3.1-6.2.3-amd64
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Start Scylla
       run: |
         python3 /docker-entrypoint.py&
-        sleep 30
+        sleep 60
     - name: Set Path
       run: |
         echo "/usr/local/lib/erlang/bin" >> $GITHUB_PATH

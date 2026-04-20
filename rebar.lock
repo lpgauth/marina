@@ -9,7 +9,7 @@
   0},
  {<<"lz4">>,
   {git,"https://github.com/lpgauth/erlang-lz4.git",
-       {ref,"30ac242cf8f6ec9ef097f494ae87f6295039ffd4"}},
+       {ref,"9f2368addb07af0ea573fd1f1afd53e17adbea23"}},
   0},
  {<<"metal">>,{pkg,<<"metal">>,<<"0.1.1">>},1},
  {<<"murmur">>,

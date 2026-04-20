@@ -141,6 +141,7 @@ nodes([Ip | T], Port) ->
 peers(Ip, Port) ->
     case connect(Ip, Port) of
         {ok, Socket} ->
+            log_shard_info(Ip, Socket),
             peers_query(Socket);
         {error, Reason} ->
             {error, Reason}
@@ -151,3 +152,22 @@ peers_query(Socket) ->
     [[_RpcAddress, Datacenter, _Tokens]] = Rows,
     {ok, {result, _ , _, Rows2}} = marina_utils:query(Socket, ?PEERS_QUERY),
     {ok, Rows ++ Rows2, Datacenter}.
+
+%% Run OPTIONS against the bootstrap socket and log the Scylla shard
+%% advertisement if present. Non-fatal on error — if the server is
+%% Cassandra or the OPTIONS exchange fails for any reason, we silently
+%% fall back to node-level routing.
+log_shard_info(Ip, Socket) ->
+    case marina_utils:options(Socket) of
+        {ok, {supported, Multimap}} ->
+            case marina_shard:parse(Multimap) of
+                undefined ->
+                    ok;
+                Info ->
+                    shackle_utils:warning_msg(?MODULE,
+                        "scylla shard info from ~s: ~p~n", [Ip, Info]),
+                    ok
+            end;
+        _ ->
+            ok
+    end.

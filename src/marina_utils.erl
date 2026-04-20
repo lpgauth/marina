@@ -5,6 +5,7 @@
     authenticate/1,
     connect/2,
     frame_flags/0,
+    options/1,
     pack/1,
     query/2,
     query_opts/2,
@@ -44,6 +45,15 @@ frame_flags() ->
         true -> 1;
         _ -> 0
     end.
+
+-spec options(inet:socket()) ->
+    {ok, term()} | {error, term()}.
+
+options(Socket) ->
+    %% OPTIONS precedes STARTUP, so compression has not been negotiated
+    %% — emit the frame uncompressed regardless of the app env.
+    Msg = marina_request:options(0),
+    sync_msg(Socket, Msg).
 
 -spec pack(binary() | iolist()) ->
     {ok, binary()} | {error, term()}.

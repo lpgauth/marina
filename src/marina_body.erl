@@ -13,9 +13,11 @@
 
 decode(#frame {flags = Flags, body = Body, opcode = Opcode}) ->
     Body1 = maybe_decompress(Flags, Body),
+    %% Spec order inside a flagged response body:
+    %%   [tracing_id][warnings][custom_payload]<message>
     Body2 = skip_tracing(Flags, Body1),
-    Body3 = skip_custom_payload(Flags, Body2),
-    Body4 = skip_warnings(Flags, Body3),
+    Body3 = skip_warnings(Flags, Body2),
+    Body4 = skip_custom_payload(Flags, Body3),
     decode(Opcode, Body4).
 
 %% private

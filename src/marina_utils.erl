@@ -8,7 +8,6 @@
     pack/1,
     query/2,
     query_opts/2,
-    server_to_pool/1,
     startup/1,
     sync_msg/2,
     timeout/2,
@@ -89,14 +88,6 @@ query_opts(timeout, QueryOpts) ->
 query_opts(values, QueryOpts) ->
     maps:get(values, QueryOpts, undefined).
 
--spec server_to_pool(atom()) -> atom().
-
-server_to_pool(Node) ->
-    NodeSplit = binary:split(erlang:atom_to_binary(Node), <<"_">>, [global]),
-    PoolSplit = lists:sublist(NodeSplit, length(NodeSplit) - 1),
-    PoolBin = erlang:iolist_to_binary(lists:join(<<"_">>, PoolSplit)),
-    erlang:binary_to_atom(PoolBin).
-
 -spec sync_msg(inet:socket(), iodata()) ->
     {ok, term()} | {error, term()}.
 
@@ -144,8 +135,8 @@ use_keyspace(Socket) ->
 %% private
 authenticate(undefined, undefined, _Socket) ->
     ok;
-authenticate(Username, Password, Socket) when is_binary(Username);
-    is_binary(Username) ->
+authenticate(Username, Password, Socket) when is_binary(Username),
+    is_binary(Password) ->
 
     FrameFlags = frame_flags(),
     Msg = marina_request:auth_response(FrameFlags, Username, Password),

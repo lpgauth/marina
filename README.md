@@ -3,8 +3,8 @@ High-Performance Erlang Cassandra / Scylla CQL Client
 
 ### Requirements
 
-* Cassandra 2.1+
-* Erlang 19.0+
+* Cassandra 2.1+ / Scylla 2.x+
+* Erlang/OTP 24+
 
 ## Features
 

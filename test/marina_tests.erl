@@ -36,13 +36,24 @@ marina_suite(ExtraEnv, Tests) ->
 
 start(ExtraEnv) ->
     error_logger:tty(false),
+    %% Phase 1: start marina without a default keyspace and seed the
+    %% `test` schema. Without this, every connection's `USE test` would
+    %% fail against a fresh server — USE runs inside shackle's per-
+    %% connection setup, so a missing keyspace means zero working
+    %% connections and `{error, no_server}` from every test.
     application:load(marina),
     application:set_env(marina, ip, ?IP),
+    application:set_env(marina, keyspace, undefined),
+    marina_app:start(),
+    timer:sleep(500),
+    ensure_base_schema(),
+    marina_app:stop(),
+    %% Phase 2: restart with the caller's ExtraEnv (and the default
+    %% keyspace) on top of a now-ready schema.
     application:set_env(marina, keyspace, <<"test">>),
     [application:set_env(marina, K, V) || {K, V} <- ExtraEnv],
     marina_app:start(),
-    timer:sleep(250),
-    ensure_base_schema().
+    timer:sleep(250).
 
 ensure_base_schema() ->
     q(<<"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION ="

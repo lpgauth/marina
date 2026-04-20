@@ -16,6 +16,7 @@ High-Performance Erlang Cassandra / Scylla CQL Client
 * Load-balancing policies (random, token_aware)
 * Performance optimized
 * Prepared statement cache
+* Ring refresh on TOPOLOGY_CHANGE events (event-driven, no polling)
 
 ## Environment variables
 
@@ -178,10 +179,6 @@ make dialyzer
 make eunit
 make xref
 ```
-
-### TODOs
-
-* Rebuild ring when topology changes
 
 ## License
 

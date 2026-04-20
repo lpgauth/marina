@@ -16,6 +16,7 @@ marina_test_() ->
         fun async_query_subtest/0,
         fun async_reusable_query_subtest/0,
         fun async_reusable_query_invalid_query_subtest/0,
+        fun batch_subtest/0,
         fun counters_subtest/0,
         fun paging_subtest/0,
         fun query_subtest/0,
@@ -60,6 +61,41 @@ async_reusable_query_subtest() ->
 async_reusable_query_invalid_query_subtest() ->
     Query = <<"SELECT * FROM user LIMIT 1;">>,
     {error, {8704, _}} = marina:async_reusable_query(Query, #{}).
+
+batch_subtest() ->
+    query(<<"DROP TABLE test.batch_rows;">>),
+    query(<<"CREATE TABLE test.batch_rows (k int PRIMARY KEY, v text);">>),
+
+    %% LOGGED batch of two raw INSERTs
+    {ok, undefined} = marina:batch([
+        {query, <<"INSERT INTO test.batch_rows (k, v) VALUES (1, 'a')">>, []},
+        {query, <<"INSERT INTO test.batch_rows (k, v) VALUES (2, 'b')">>, []}
+    ], #{batch_type => logged,
+         consistency_level => ?CONSISTENCY_LOCAL_ONE,
+         timeout => ?TIMEOUT}),
+    {ok, {result, _, 2, _}} = query(<<"SELECT * FROM test.batch_rows;">>),
+
+    %% Warm the prepared-statement cache, then pull the id out to feed a batch
+    InsertPrepared =
+        <<"INSERT INTO test.batch_rows (k, v) VALUES (?, ?)">>,
+    {ok, _} = marina:reusable_query(InsertPrepared,
+        #{values => [marina_types:encode_int(3), <<"c">>],
+          consistency_level => ?CONSISTENCY_LOCAL_ONE,
+          timeout => ?TIMEOUT}),
+    {ok, Pool} = marina_pool:node(undefined),
+    {ok, StatementId} = marina_cache:get(Pool, InsertPrepared),
+
+    %% UNLOGGED batch mixing a prepared statement and a raw query
+    {ok, undefined} = marina:batch([
+        {prepared, StatementId,
+            [marina_types:encode_int(4), <<"d">>]},
+        {query, <<"INSERT INTO test.batch_rows (k, v) VALUES (5, 'e')">>, []}
+    ], #{batch_type => unlogged,
+         consistency_level => ?CONSISTENCY_LOCAL_ONE,
+         timeout => ?TIMEOUT}),
+    {ok, {result, _, 5, _}} = query(<<"SELECT * FROM test.batch_rows;">>),
+
+    query(<<"DROP TABLE test.batch_rows;">>).
 
 counters_subtest() ->
     query(<<"DROP TABLE test.page_view_counts;">>),

@@ -60,11 +60,16 @@
     ?CONSISTENCY_LOCAL_SERIAL |
     ?CONSISTENCY_LOCAL_ONE.
 
+-type batch_type() :: logged | unlogged | counter.
+-type batch_query() ::
+    {query, query(), values()} |
+    {prepared, statement_id(), values()}.
 -type error() :: {error, term()}.
 -type frame() :: #frame {}.
 -type frame_flag() :: 0..1.
 -type query() :: binary().
 -type query_opts() :: #{
+    batch_type => batch_type(),
     consistency_level => consistency_level(),
     page_size => pos_integer(),
     paging_state => binary(),

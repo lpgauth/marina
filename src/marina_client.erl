@@ -69,6 +69,8 @@ handle_request({Request, QueryOpts}, #state {
 
     RequestId = Requests rem ?MAX_STREAM_ID,
     Data = case Request of
+        {batch, Queries} ->
+            marina_request:batch(RequestId, FrameFlags, Queries, QueryOpts);
         {execute, StatementId} ->
             marina_request:execute(RequestId, FrameFlags, StatementId,
                 QueryOpts);

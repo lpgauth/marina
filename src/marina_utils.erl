@@ -144,8 +144,8 @@ use_keyspace(Socket) ->
 %% private
 authenticate(undefined, undefined, _Socket) ->
     ok;
-authenticate(Username, Password, Socket) when is_binary(Username);
-    is_binary(Username) ->
+authenticate(Username, Password, Socket) when is_binary(Username),
+    is_binary(Password) ->
 
     FrameFlags = frame_flags(),
     Msg = marina_request:auth_response(FrameFlags, Username, Password),

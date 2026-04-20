@@ -84,6 +84,9 @@ decode(?OP_AUTH_SUCCESS, _) ->
     %% the token is only meaningful for SASL mechanisms that do a
     %% multi-round handshake, which marina does not currently support.
     {ok, undefined};
+decode(?OP_SUPPORTED, Body) ->
+    {Multimap, <<>>} = marina_types:decode_string_multimap(Body),
+    {ok, {supported, Multimap}};
 decode(?OP_EVENT, Body) ->
     {EventType, Rest} = marina_types:decode_string(Body),
     decode_event(EventType, Rest).

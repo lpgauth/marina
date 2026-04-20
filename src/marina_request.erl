@@ -9,6 +9,7 @@
     auth_response/3,
     batch/4,
     execute/4,
+    options/1,
     prepare/3,
     query/4,
     register/3,
@@ -69,6 +70,16 @@ execute(Stream, FrameFlags, StatementId, QueryOpts) ->
         opcode = ?OP_EXECUTE,
         flags = FrameFlags,
         body = Body2
+    }).
+
+-spec options(frame_flag()) -> iolist().
+
+options(FrameFlags) ->
+    marina_frame:encode(#frame {
+        stream = ?DEFAULT_STREAM,
+        opcode = ?OP_OPTIONS,
+        flags = FrameFlags,
+        body = []
     }).
 
 -spec prepare(stream(), frame_flag(), query()) -> iolist().

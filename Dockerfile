@@ -1,28 +1,27 @@
-FROM scylladb/scylla:5.2
+FROM scylladb/scylla:6.2.3
 
-RUN apt-get update
-RUN apt-get -y --no-install-recommends install \
-  autoconf \
-  dpkg-dev \
-  gcc \
-  g++ \
-  make \
-  libncurses-dev \
-  unixodbc-dev \
-  libssl-dev \
-  libsctp-dev \
-  wget \
+RUN apt-get update && apt-get -y --no-install-recommends install \
   ca-certificates \
-  pax-utils \
-  git
+  dpkg-dev \
+  g++ \
+  gcc \
+  git \
+  libncurses6 \
+  libsctp1 \
+  libssl-dev \
+  make \
+  && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /OTP/subdir
-RUN wget -nv "https://github.com/erlang/otp/archive/OTP-26.2.3.tar.gz" && tar -zxf "OTP-26.2.3.tar.gz" -C /OTP/subdir --strip-components=1
-WORKDIR /OTP/subdir
-RUN ./otp_build autoconf
-RUN ./configure --with-ssl
-RUN make -j$(getconf _NPROCESSORS_ONLN)
-RUN make -j$(getconf _NPROCESSORS_ONLN) install
-RUN find /usr/local -regex '/usr/local/lib/erlang/\(lib/\|erts-\).*/\(man\|obj\|c_src\|emacs\|info\|examples\)' | xargs rm -rf
-RUN find /usr/local -name src | xargs -r find | grep -v '\.hrl$' | xargs rm -v || true
-RUN find /usr/local -name src | xargs -r find | xargs rmdir -vp || true
+ENV PATH="/usr/local/bin:${PATH}"
+
+COPY --from=erlang:28.3.1 /usr/local/lib/erlang /usr/local/lib/erlang
+COPY --from=erlang:28.3.1 /usr/local/bin/ct_run /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/dialyzer /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/epmd /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/erl /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/erlc /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/escript /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/rebar3 /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/run_erl /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/to_erl /usr/local/bin/
+COPY --from=erlang:28.3.1 /usr/local/bin/typer /usr/local/bin/

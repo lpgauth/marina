@@ -69,7 +69,7 @@ handle_msg(?MSG_BOOTSTRAP, #state {
                 nodes = NewNodes
             }};
         {error, _Reason} ->
-            shackle_utils:warning_msg(?MODULE, "bootstrap failed~n", []),
+            logger:warning("[~p] bootstrap failed~n", [?MODULE]),
             {ok, State#state {
                 timer_ref = erlang:send_after(500, self(), ?MSG_BOOTSTRAP)
             }}
@@ -133,8 +133,7 @@ nodes([Ip | T], Port) ->
                     {ok, Nodes}
             end;
         {error, Reason} ->
-            shackle_utils:warning_msg(?MODULE,
-                "bootstrap error: ~p~n", [Reason]),
+            logger:warning("[~p] bootstrap error: ~p~n", [?MODULE, Reason]),
             nodes(T, Port)
     end.
 

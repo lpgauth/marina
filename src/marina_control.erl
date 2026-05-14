@@ -117,13 +117,11 @@ connecting(internal, connect, #data {
                     }};
                 {error, Reason} ->
                     _ = gen_tcp:close(Socket),
-                    shackle_utils:warning_msg(?MODULE,
-                        "register failed: ~p~n", [Reason]),
+                    logger:warning("[~p] register failed: ~p~n", [?MODULE, Reason]),
                     backoff(Data)
             end;
         {error, Reason} ->
-            shackle_utils:warning_msg(?MODULE,
-                "control connect failed: ~p~n", [Reason]),
+            logger:warning("[~p] control connect failed: ~p~n", [?MODULE, Reason]),
             backoff(Data)
     end;
 connecting(state_timeout, reconnect, Data) ->
@@ -153,11 +151,10 @@ subscribed(info, {tcp, Socket, Chunk}, #data {
             {keep_state, Data#data {buffer = Rest}}
     end;
 subscribed(info, {tcp_closed, Socket}, #data {socket = Socket} = Data) ->
-    shackle_utils:warning_msg(?MODULE, "control socket closed~n", []),
+    logger:warning("[~p] control socket closed~n", [?MODULE]),
     backoff(Data#data {socket = undefined, buffer = <<>>});
 subscribed(info, {tcp_error, Socket, Reason}, #data {socket = Socket} = Data) ->
-    shackle_utils:warning_msg(?MODULE,
-        "control socket error: ~p~n", [Reason]),
+    logger:warning("[~p] control socket error: ~p~n", [?MODULE, Reason]),
     _ = gen_tcp:close(Socket),
     backoff(Data#data {socket = undefined, buffer = <<>>});
 subscribed(_, _, Data) ->
@@ -179,13 +176,11 @@ establish([Ip | Rest], Port) ->
                     {ok, Socket, Nodes};
                 {error, Reason} ->
                     _ = gen_tcp:close(Socket),
-                    shackle_utils:warning_msg(?MODULE,
-                        "seed ~s handshake failed: ~p~n", [Ip, Reason]),
+                    logger:warning("[~p] seed ~s handshake failed: ~p~n", [?MODULE, Ip, Reason]),
                     establish(Rest, Port)
             end;
         {error, Reason} ->
-            shackle_utils:warning_msg(?MODULE,
-                "seed ~s unreachable: ~p~n", [Ip, Reason]),
+            logger:warning("[~p] seed ~s unreachable: ~p~n", [?MODULE, Ip, Reason]),
             establish(Rest, Port)
     end.
 
@@ -238,18 +233,15 @@ process_frames([]) ->
 process_frames([#frame {stream = ?EVENT_STREAM} = Frame | Rest]) ->
     case marina_body:decode(Frame) of
         {ok, {event, topology_change, Kind, Addr}} ->
-            shackle_utils:warning_msg(?MODULE,
-                "topology change: ~p ~p~n", [Kind, Addr]),
+            logger:warning("[~p] topology change: ~p ~p~n", [?MODULE, Kind, Addr]),
             cycle;
         {ok, {event, status_change, Kind, Addr}} ->
-            shackle_utils:warning_msg(?MODULE,
-                "status change: ~p ~p~n", [Kind, Addr]),
+            logger:warning("[~p] status change: ~p ~p~n", [?MODULE, Kind, Addr]),
             process_frames(Rest);
         {ok, {event, schema_change, _Body}} ->
             process_frames(Rest);
         {ok, Other} ->
-            shackle_utils:warning_msg(?MODULE,
-                "unexpected event frame: ~p~n", [Other]),
+            logger:warning("[~p] unexpected event frame: ~p~n", [?MODULE, Other]),
             process_frames(Rest)
     end;
 process_frames([_Frame | Rest]) ->

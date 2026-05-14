@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.4.5
+
+### Changed
+
+- `error/0` is now `{error, error_reason()}` where `error_reason/0`
+  is a documented sum type — was `{error, term()}`, which gave
+  dialyzer nothing to check at call sites. The sum covers:
+
+  - `marina_pool_not_started` and `timeout` (marina-level)
+  - `cql_error()` — `{Code :: pos_integer(), Msg :: binary()}`, the
+    Cassandra/Scylla server-side error tuple
+  - `no_server`, `pool_not_started`, `shackle_not_started` (shackle
+    errors that propagate through marina)
+
+  `cql_error/0` is exported as a public type so callers can pattern-
+  match against it cleanly.
+
+- `marina_body:decode/1` spec corrected: was `{error, atom()}`,
+  is actually `{error, cql_error()}` — the `{Code, Msg}` shape was
+  documented but the spec contradicted it. Real bug; dialyzer
+  was silently accepting `atom()` because no caller was destructuring.
+
+- Four `marina_types` spec corrections (real correctness bugs, not
+  just imprecision):
+
+  - `decode_short_bytes/1` and `decode_string/1` can return
+    `{null, binary()}` on the 0xFFFF sentinel; specs claimed
+    `{binary(), binary()}`.
+  - `encode_bytes/1` and `encode_short_bytes/1` accept `null` as
+    input (encoded as the sentinel); specs claimed `binary()` only.
+
+  No behavioural change — the functions handled `null` correctly
+  already, the specs just lied about it.
+
+No source changes beyond the type tightening; existing callers
+continue to work unchanged. Dialyzer now flags `{error, typo}`
+at call sites that don't match the sum.
+
 ## 0.4.4
 
 ### Added

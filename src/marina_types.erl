@@ -86,14 +86,14 @@ decode_number_list(<<Length:32, Rest/binary>>) ->
 decode_short(<<Value:16/signed, Rest/binary>>) ->
     {Value, Rest}.
 
--spec decode_short_bytes(binary()) -> {binary(), binary()}.
+-spec decode_short_bytes(binary()) -> {null | binary(), binary()}.
 
 decode_short_bytes(<<255, 255, Rest/binary>>) ->
     {null, Rest};
 decode_short_bytes(<<Pos:16, Value:Pos/binary, Rest/binary>>) ->
     {Value, Rest}.
 
--spec decode_string(binary()) -> {binary(), binary()}.
+-spec decode_string(binary()) -> {null | binary(), binary()}.
 
 decode_string(Bin) ->
     decode_short_bytes(Bin).
@@ -128,7 +128,7 @@ decode_uuid(<<Value:16/binary, Rest/binary>>) ->
 encode_boolean(false) -> <<0>>;
 encode_boolean(true) -> <<1>>.
 
--spec encode_bytes(binary()) -> binary().
+-spec encode_bytes(null | binary()) -> binary().
 
 encode_bytes(null) ->
     <<255, 255, 255, 255>>;
@@ -169,7 +169,7 @@ encode_long_string(Value) ->
 encode_short(Value) ->
     <<Value:16/signed>>.
 
--spec encode_short_bytes(binary()) -> binary().
+-spec encode_short_bytes(null | binary()) -> binary().
 
 encode_short_bytes(null) ->
     <<255, 255>>;

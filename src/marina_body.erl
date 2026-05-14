@@ -9,7 +9,7 @@
 ]).
 
 %% public
--spec decode(frame()) -> {ok, term()} | {error, atom()}.
+-spec decode(frame()) -> {ok, term()} | {error, cql_error()}.
 
 decode(#frame {flags = Flags, body = Body, opcode = Opcode}) ->
     Body1 = maybe_decompress(Flags, Body),

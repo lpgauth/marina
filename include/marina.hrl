@@ -64,7 +64,15 @@
 -type batch_query() ::
     {query, query(), values()} |
     {prepared, statement_id(), values()}.
--type error() :: {error, term()}.
+-type cql_error() :: {pos_integer(), binary()}.
+-type error_reason() ::
+    %% marina-level
+    marina_pool_not_started | timeout |
+    %% Cassandra/Scylla server-side error: {Code, Msg}
+    cql_error() |
+    %% shackle errors that propagate through marina
+    no_server | pool_not_started | shackle_not_started.
+-type error() :: {error, error_reason()}.
 -type frame() :: #frame {}.
 -type frame_flag() :: 0..1.
 -type query() :: binary().

@@ -115,6 +115,16 @@ Asynchronous (return a `shackle:request_id()`, consume via `marina:receive_respo
 | `timeout`           | `pos_integer()`                    | `1000`                    |
 | `values`            | `[binary()]`                       | `undefined`               |
 
+### Errors
+
+All `marina:*` calls return `{ok, term()} | {error, error_reason()}` where `error_reason/0` (exported, added in 0.4.5) enumerates:
+
+- **`marina_pool_not_started`**, **`timeout`** — marina-level routing / wait errors.
+- **`cql_error()`** — `{pos_integer(), binary()}`, the Cassandra/Scylla server-side error tuple. The integer is the [CQL error code](https://cassandra.apache.org/doc/latest/cassandra/developing/cql/error_codes.html); the binary is the server-supplied message.
+- **`no_server`**, **`pool_not_started`**, **`shackle_not_started`** — shackle-level errors that propagate through marina.
+
+`cql_error/0` is exported as a public type so callers can pattern-match against the server-error shape cleanly.
+
 ## Architecture notes
 
 - **Bootstrap.** Dial each `bootstrap_ip` in order, query `system.local` + `system.peers`, filter by the seed's datacenter, start one shackle pool per peer.

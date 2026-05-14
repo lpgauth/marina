@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.4.3
+
+### Changed
+
+- Replaced `lz4` git ref (`lpgauth/erlang-lz4`) with the new
+  in-house **`lz4_nif`** hex package (0.1.1). `marina_utils:pack/1'
+  and `unpack/1' call `lz4_nif:compress/2' and `lz4_nif:uncompress/2'
+  respectively — same API, same return shape.
+- Replaced `murmur` git ref (`lpgauth/murmur`) with the new in-house
+  **`murmur_nif`** hex package (0.1.0). `marina_token:m3p/1' calls
+  `murmur_nif:murmur3_cassandra_x64_128/1'. Byte-for-byte compatible
+  with the legacy fork (verified across inputs with high-byte
+  sequences where the signed/unsigned variant difference matters);
+  same token integers, no routing changes.
+
+Both new NIFs follow the same standards as the rest of the
+ecosystem: vendored upstream source, raw NIF (no rustler runtime),
+dirty CPU scheduler for inputs above 20 KB, `enif_consume_timeslice`
+accounting on the inline path, hex publish config, CI matrix
+covering OTP 25-28, MIT license for the wrapper plus the upstream
+license for the vendored code.
+
+With this swap marina's only remaining non-hex deps are the
+plumbing inside its test profile (fprofx git ref).
+
 ## 0.4.2
 
 Infrastructure refresh: dependency bumps + docs migration.

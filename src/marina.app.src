@@ -7,8 +7,8 @@
     stdlib,
     shackle,
     foil,
-    murmur,
-    lz4,
+    murmur_nif,
+    lz4_nif,
     metal,
     syntax_tools,
     compiler

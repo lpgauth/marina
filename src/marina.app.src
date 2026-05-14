@@ -14,5 +14,8 @@
     compiler
   ]},
   {mod, {marina_app, []}},
-  {env, []}
+  {env, []},
+  {licenses, ["MIT"]},
+  {links, [{"GitHub", "https://github.com/lpgauth/marina"}]},
+  {maintainers, ["Louis-Philippe Gauthier"]}
 ]}.

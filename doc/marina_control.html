@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module marina_control</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module marina_control</h1>
+<ul class="index"><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+
+<p><b>Behaviours:</b> <a href="gen_statem.html"><code>gen_statem</code></a>.</p>
+
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-data">data()</a></h3>
+<p><code>data() = #data{bootstrap_ips = [string()], port = pos_integer(), backoff = pos_integer(), socket = undefined | <a href="/Users/lpgauth/Git/lpgauth/kernel/doc/inet.html#type-socket" docgen-rel="seetype" docgen-href="kernel:inet#socket/0">inet:socket()</a>, buffer = binary()}</code></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#callback_mode-0">callback_mode/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#code_change-4">code_change/4</a></td><td></td></tr>
+<tr><td valign="top"><a href="#connecting-3">connecting/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#subscribed-3">subscribed/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#terminate-3">terminate/3</a></td><td></td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="callback_mode-0">callback_mode/0</a></h3>
+<div class="spec">
+<p><code>callback_mode() -&gt; state_functions</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="code_change-4">code_change/4</a></h3>
+<div class="spec">
+<p><code>code_change(OldVsn::term(), OldState::atom(), OldData::<a href="#type-data" docgen-rel="seetype" docgen-href="#data/0">data()</a>, Extra::term()) -&gt; {ok, atom(), <a href="#type-data" docgen-rel="seetype" docgen-href="#data/0">data()</a>}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="connecting-3">connecting/3</a></h3>
+<div class="spec">
+<p><code>connecting(X1::<a href="/Users/lpgauth/Git/lpgauth/stdlib/doc/gen_statem.html#type-event_type" docgen-rel="seetype" docgen-href="stdlib:gen_statem#event_type/0">gen_statem:event_type()</a>, X2::term(), Data::<a href="#type-data" docgen-rel="seetype" docgen-href="#data/0">data()</a>) -&gt; <a href="/Users/lpgauth/Git/lpgauth/stdlib/doc/gen_statem.html#type-event_handler_result" docgen-rel="seetype" docgen-href="stdlib:gen_statem#event_handler_result/0">gen_statem:event_handler_result</a>(atom())</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="init-1">init/1</a></h3>
+<div class="spec">
+<p><code>init(X1::undefined) -&gt; {ok, connecting, <a href="#type-data" docgen-rel="seetype" docgen-href="#data/0">data()</a>, [<a href="/Users/lpgauth/Git/lpgauth/stdlib/doc/gen_statem.html#type-action" docgen-rel="seetype" docgen-href="stdlib:gen_statem#action/0">gen_statem:action()</a>]}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="start_link-0">start_link/0</a></h3>
+<div class="spec">
+<p><code>start_link() -&gt; {ok, pid()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="subscribed-3">subscribed/3</a></h3>
+<div class="spec">
+<p><code>subscribed(X1::<a href="/Users/lpgauth/Git/lpgauth/stdlib/doc/gen_statem.html#type-event_type" docgen-rel="seetype" docgen-href="stdlib:gen_statem#event_type/0">gen_statem:event_type()</a>, X2::term(), Data::<a href="#type-data" docgen-rel="seetype" docgen-href="#data/0">data()</a>) -&gt; <a href="/Users/lpgauth/Git/lpgauth/stdlib/doc/gen_statem.html#type-event_handler_result" docgen-rel="seetype" docgen-href="stdlib:gen_statem#event_handler_result/0">gen_statem:event_handler_result</a>(atom())</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="terminate-3">terminate/3</a></h3>
+<div class="spec">
+<p><code>terminate(Reason::term(), State::atom(), Data::<a href="#type-data" docgen-rel="seetype" docgen-href="#data/0">data()</a>) -&gt; ok</code><br></p>
+<p> </p>
+</div>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

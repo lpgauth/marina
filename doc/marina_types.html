@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module marina_types</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module marina_types</h1>
+<ul class="index"><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#decode_bytes-1">decode_bytes/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_double-1">decode_double/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_float-1">decode_float/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_int-1">decode_int/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_long-1">decode_long/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_long_string-1">decode_long_string/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_long_string_set-1">decode_long_string_set/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_number_list-1">decode_number_list/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_short-1">decode_short/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_short_bytes-1">decode_short_bytes/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_string-1">decode_string/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_string_list-1">decode_string_list/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_string_map-1">decode_string_map/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_string_multimap-1">decode_string_multimap/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_tinyint-1">decode_tinyint/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#decode_uuid-1">decode_uuid/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_boolean-1">encode_boolean/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_bytes-1">encode_bytes/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_double-1">encode_double/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_float-1">encode_float/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_int-1">encode_int/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_list-1">encode_list/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_long-1">encode_long/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_long_string-1">encode_long_string/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_short-1">encode_short/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_short_bytes-1">encode_short_bytes/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_string-1">encode_string/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_string_list-1">encode_string_list/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_string_map-1">encode_string_map/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_string_multimap-1">encode_string_multimap/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#encode_tinyint-1">encode_tinyint/1</a></td><td></td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="decode_bytes-1">decode_bytes/1</a></h3>
+<div class="spec">
+<p><code>decode_bytes(X1::binary()) -&gt; {null, binary()} | {binary(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_double-1">decode_double/1</a></h3>
+<div class="spec">
+<p><code>decode_double(X1::binary()) -&gt; {float(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_float-1">decode_float/1</a></h3>
+<div class="spec">
+<p><code>decode_float(X1::binary()) -&gt; {float(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_int-1">decode_int/1</a></h3>
+<div class="spec">
+<p><code>decode_int(X1::binary()) -&gt; {integer(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_long-1">decode_long/1</a></h3>
+<div class="spec">
+<p><code>decode_long(X1::binary()) -&gt; {integer(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_long_string-1">decode_long_string/1</a></h3>
+<div class="spec">
+<p><code>decode_long_string(Bin::binary()) -&gt; {binary(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_long_string_set-1">decode_long_string_set/1</a></h3>
+<div class="spec">
+<p><code>decode_long_string_set(X1::binary()) -&gt; {[binary()], binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_number_list-1">decode_number_list/1</a></h3>
+<div class="spec">
+<p><code>decode_number_list(X1::binary()) -&gt; {[integer()], binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_short-1">decode_short/1</a></h3>
+<div class="spec">
+<p><code>decode_short(X1::binary()) -&gt; {integer(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_short_bytes-1">decode_short_bytes/1</a></h3>
+<div class="spec">
+<p><code>decode_short_bytes(X1::binary()) -&gt; {binary(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_string-1">decode_string/1</a></h3>
+<div class="spec">
+<p><code>decode_string(Bin::binary()) -&gt; {binary(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_string_list-1">decode_string_list/1</a></h3>
+<div class="spec">
+<p><code>decode_string_list(X1::binary()) -&gt; {[binary()], binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_string_map-1">decode_string_map/1</a></h3>
+<div class="spec">
+<p><code>decode_string_map(X1::binary()) -&gt; {[{binary(), binary()}], binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_string_multimap-1">decode_string_multimap/1</a></h3>
+<div class="spec">
+<p><code>decode_string_multimap(X1::binary()) -&gt; {[{binary(), [binary()]}], binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_tinyint-1">decode_tinyint/1</a></h3>
+<div class="spec">
+<p><code>decode_tinyint(X1::binary()) -&gt; {integer(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="decode_uuid-1">decode_uuid/1</a></h3>
+<div class="spec">
+<p><code>decode_uuid(X1::binary()) -&gt; {binary(), binary()}</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_boolean-1">encode_boolean/1</a></h3>
+<div class="spec">
+<p><code>encode_boolean(X1::boolean()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_bytes-1">encode_bytes/1</a></h3>
+<div class="spec">
+<p><code>encode_bytes(Value::binary()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_double-1">encode_double/1</a></h3>
+<div class="spec">
+<p><code>encode_double(Value::float()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_float-1">encode_float/1</a></h3>
+<div class="spec">
+<p><code>encode_float(Value::float()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_int-1">encode_int/1</a></h3>
+<div class="spec">
+<p><code>encode_int(Value::integer()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_list-1">encode_list/1</a></h3>
+<div class="spec">
+<p><code>encode_list(Values::[binary()]) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_long-1">encode_long/1</a></h3>
+<div class="spec">
+<p><code>encode_long(Value::integer()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_long_string-1">encode_long_string/1</a></h3>
+<div class="spec">
+<p><code>encode_long_string(Value::binary()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_short-1">encode_short/1</a></h3>
+<div class="spec">
+<p><code>encode_short(Value::integer()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_short_bytes-1">encode_short_bytes/1</a></h3>
+<div class="spec">
+<p><code>encode_short_bytes(Value::binary()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_string-1">encode_string/1</a></h3>
+<div class="spec">
+<p><code>encode_string(Value::binary()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_string_list-1">encode_string_list/1</a></h3>
+<div class="spec">
+<p><code>encode_string_list(Values::[binary()]) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_string_map-1">encode_string_map/1</a></h3>
+<div class="spec">
+<p><code>encode_string_map(KeyValues::[{binary(), binary()}]) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_string_multimap-1">encode_string_multimap/1</a></h3>
+<div class="spec">
+<p><code>encode_string_multimap(KeyValues::[{binary(), [binary()]}]) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="encode_tinyint-1">encode_tinyint/1</a></h3>
+<div class="spec">
+<p><code>encode_tinyint(Value::integer()) -&gt; binary()</code><br></p>
+<p> </p>
+</div>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module marina</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module marina</h1>
+<ul class="index"><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#async_batch-2">async_batch/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#async_query-2">async_query/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#async_reusable_query-2">async_reusable_query/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#batch-2">batch/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#query-2">query/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#receive_response-1">receive_response/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#response-1">response/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#reusable_query-2">reusable_query/2</a></td><td></td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="async_batch-2">async_batch/2</a></h3>
+<div class="spec">
+<p><code>async_batch(Queries::[<a href="#type-batch_query" docgen-rel="seetype" docgen-href="#batch_query/0">batch_query()</a>], QueryOpts::<a href="#type-query_opts" docgen-rel="seetype" docgen-href="#query_opts/0">query_opts()</a>) -&gt; {ok, <a href="/Users/lpgauth/Git/lpgauth/shackle/doc/shackle.html#type-request_id" docgen-rel="seetype" docgen-href="shackle:shackle#request_id/0">shackle:request_id()</a>} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a></code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="async_query-2">async_query/2</a></h3>
+<div class="spec">
+<p><code>async_query(Query::<a href="#type-query" docgen-rel="seetype" docgen-href="#query/0">query()</a>, QueryOpts::<a href="#type-query_opts" docgen-rel="seetype" docgen-href="#query_opts/0">query_opts()</a>) -&gt; {ok, <a href="/Users/lpgauth/Git/lpgauth/shackle/doc/shackle.html#type-request_id" docgen-rel="seetype" docgen-href="shackle:shackle#request_id/0">shackle:request_id()</a>} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a></code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="async_reusable_query-2">async_reusable_query/2</a></h3>
+<div class="spec">
+<p><code>async_reusable_query(Query::<a href="#type-query" docgen-rel="seetype" docgen-href="#query/0">query()</a>, QueryOpts::<a href="#type-query_opts" docgen-rel="seetype" docgen-href="#query_opts/0">query_opts()</a>) -&gt; {ok, <a href="/Users/lpgauth/Git/lpgauth/shackle/doc/shackle.html#type-request_id" docgen-rel="seetype" docgen-href="shackle:shackle#request_id/0">shackle:request_id()</a>} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a></code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="batch-2">batch/2</a></h3>
+<div class="spec">
+<p><code>batch(Queries::[<a href="#type-batch_query" docgen-rel="seetype" docgen-href="#batch_query/0">batch_query()</a>], QueryOpts::<a href="#type-query_opts" docgen-rel="seetype" docgen-href="#query_opts/0">query_opts()</a>) -&gt; {ok, term()} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a></code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="query-2">query/2</a></h3>
+<div class="spec">
+<p><code>query(Query::<a href="#type-query" docgen-rel="seetype" docgen-href="#query/0">query()</a>, QueryOpts::<a href="#type-query_opts" docgen-rel="seetype" docgen-href="#query_opts/0">query_opts()</a>) -&gt; {ok, term()} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a></code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="receive_response-1">receive_response/1</a></h3>
+<div class="spec">
+<p><code>receive_response(RequestId::term()) -&gt; {ok, term()} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a></code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="response-1">response/1</a></h3>
+<div class="spec">
+<p><code>response(X1::{ok, term()} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a>) -&gt; {ok, term()} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a></code><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="reusable_query-2">reusable_query/2</a></h3>
+<div class="spec">
+<p><code>reusable_query(Query::<a href="#type-query" docgen-rel="seetype" docgen-href="#query/0">query()</a>, QueryOpts::<a href="#type-query_opts" docgen-rel="seetype" docgen-href="#query_opts/0">query_opts()</a>) -&gt; {ok, term()} | <a href="#type-error" docgen-rel="seetype" docgen-href="#error/0">error()</a></code><br></p>
+<p> </p>
+</div>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

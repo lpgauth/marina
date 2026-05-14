@@ -20,6 +20,7 @@ marina_test_() ->
         fun reusable_query/0,
         fun reusable_query_invalid/0,
         fun schema_change_udt/0,
+        fun telemetry_sent/0,
         fun tuples/0
     ]).
 
@@ -225,6 +226,26 @@ reusable_query() ->
 reusable_query_invalid() ->
     ?assertMatch({error, {8704, _}},
         marina:reusable_query(<<"SELECT * FROM user LIMIT 1;">>, #{})).
+
+telemetry_sent() ->
+    Self = self(),
+    HandlerId = <<"marina-test-sent">>,
+    ok = telemetry:attach(HandlerId, [marina, request, sent],
+        fun (Event, Measurements, Metadata, _) ->
+            Self ! {telemetry, Event, Measurements, Metadata}
+        end, undefined),
+    try
+        ?QUERY1_RESULT = q(?QUERY1),
+        receive
+            {telemetry, [marina, request, sent],
+             #{count := 1},
+             #{operation := query, async := false}} -> ok
+        after 1000 ->
+            erlang:error(timeout_waiting_for_sent_event)
+        end
+    after
+        telemetry:detach(HandlerId)
+    end.
 
 schema_change_udt() ->
     q(<<"DROP KEYSPACE IF EXISTS test2;">>),

@@ -34,6 +34,7 @@ async_reusable_query(Query, QueryOpts) ->
         {ok, Pool} ->
             async_reusable_query(Pool, Query, QueryOpts);
         {error, Reason} ->
+            telemetry_error(reusable_query, Reason),
             {error, Reason}
     end.
 
@@ -72,6 +73,7 @@ reusable_query(Query, QueryOpts) ->
         {ok, Pool} ->
             reusable_query(Pool, Query, QueryOpts);
         {error, Reason} ->
+            telemetry_error(reusable_query, Reason),
             {error, Reason}
     end.
 
@@ -82,6 +84,7 @@ async_call(Msg, QueryOpts) ->
         {ok, Pool} ->
             async_call(Pool, Msg, QueryOpts);
         {error, Reason} ->
+            telemetry_error(element(1, Msg), Reason),
             {error, Reason}
     end.
 
@@ -89,6 +92,10 @@ async_call(Msg, QueryOpts) ->
 async_call(Pool, Msg, QueryOpts) ->
     Pid = marina_utils:query_opts(pid, QueryOpts),
     Timeout = marina_utils:query_opts(timeout, QueryOpts),
+    telemetry:execute([marina, request, sent],
+                      #{count => 1},
+                      #{operation => element(1, Msg), pool => Pool,
+                        async => true}),
     shackle:cast(Pool, {Msg, QueryOpts}, Pid, Timeout).
 
 async_reusable_query(Pool, Query, QueryOpts) ->
@@ -111,12 +118,22 @@ call(Msg, QueryOpts) ->
         {ok, Pool} ->
             call(Pool, Msg, QueryOpts);
         {error, Reason} ->
+            telemetry_error(element(1, Msg), Reason),
             {error, Reason}
     end.
 
 call(Pool, Msg, QueryOpts) ->
     Timeout = marina_utils:query_opts(timeout, QueryOpts),
+    telemetry:execute([marina, request, sent],
+                      #{count => 1},
+                      #{operation => element(1, Msg), pool => Pool,
+                        async => false}),
     response(shackle:call(Pool, {Msg, QueryOpts}, Timeout)).
+
+telemetry_error(Operation, Reason) ->
+    telemetry:execute([marina, request, error],
+                      #{count => 1},
+                      #{operation => Operation, reason => Reason}).
 
 reusable_query(Pool, Query, QueryOpts) ->
     Timeout = marina_utils:query_opts(timeout, QueryOpts),

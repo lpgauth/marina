@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.4.4
+
+### Added
+
+- Two telemetry events at the request boundary:
+
+  | Event | Measurements | Metadata |
+  |---|---|---|
+  | `[marina, request, sent]`  | `count => 1` | `operation, pool, async` |
+  | `[marina, request, error]` | `count => 1` | `operation, reason` |
+
+  `sent` fires at each shackle dispatch — once per query/batch/prepare/
+  execute. `reusable_query` with a cache miss fires twice (`prepare`
+  then `execute`), giving an accurate count of CQL ops. The `error`
+  event fires when `marina_pool:node/1` returns no pool (e.g.
+  `marina_pool_not_started`). Attach handlers via `telemetry:attach/4`.
+
+  Per-request shackle lifecycle (queue / send / receive) remains
+  observable via shackle's own telemetry — marina's events surface
+  the CQL-level intent without duplicating that work.
+
+- `telemetry` (1.4.2) is now a direct dependency (was already
+  transitively present via shackle).
+
+- `vsn` in `marina.app.src` is now an explicit string (`"0.4.4"`) —
+  was `git`, which only works when built from a checkout.
+
+No source or API changes beyond the instrumentation.
+
 ## 0.4.3
 
 ### Changed

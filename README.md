@@ -120,6 +120,19 @@ Asynchronous (return a `shackle:request_id()`, consume via `marina:receive_respo
 - **Token-aware routing.** On boot, a balanced BST over token intervals is compiled to a runtime-generated `marina_ring_utils:lookup/1`. Routing keys are hashed with Murmur3 and traverse the tree in O(log N).
 - **Topology refresh.** `marina_control` holds one long-lived CQL connection subscribed to `TOPOLOGY_CHANGE`, `STATUS_CHANGE`, and `SCHEMA_CHANGE`. Any topology event — or any reconnect — re-queries `system.peers` and posts `{topology_full_sync, Nodes}` to the pool server, which diffs the node list, adds/removes pools, evicts prepared-statement cache for removed pools, and rebuilds the ring.
 
+## Telemetry
+
+marina emits two telemetry events at the request boundary. Attach handlers via `telemetry:attach/4`:
+
+| Event | Measurements | Metadata |
+|---|---|---|
+| `[marina, request, sent]`  | `count => 1` | `operation, pool, async` |
+| `[marina, request, error]` | `count => 1` | `operation, reason` |
+
+`sent` fires at each shackle dispatch — once per `query` / `batch` / `prepare` / `execute`. A `reusable_query` with a cache miss fires twice (`prepare` then `execute`), so the sum gives an accurate count of outgoing CQL operations. The `error` event fires when `marina_pool:node/1` returns no pool (e.g. `marina_pool_not_started`).
+
+Per-request shackle lifecycle (queue / send / receive) remains observable via shackle's own telemetry — marina's events surface the CQL-level intent without duplicating that work.
+
 ## Development
 
 ```sh

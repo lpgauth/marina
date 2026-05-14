@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.6
+
+### Added
+
+- `bootstrap_retry_ms` application env option (default: `500`). When
+  `marina_pool_server` fails to reach any `bootstrap_ips` host on
+  startup, it retries on this interval. Previously hardcoded to
+  500ms; deployments behind slow-DNS or transient network outages
+  can now back the retry off without forking marina.
+
+### Plan-time notes
+
+- B2's "fuse the body-skip pipeline" recommendation was checked on
+  inspection and not acted on: `skip_tracing`, `skip_warnings`, and
+  `skip_custom_payload` in `marina_body.erl` each peel a small
+  fixed-or-counted prefix off the head of the binary -- they don't
+  re-scan the body. The recommended fusion produces no measurable
+  win and adds branching complexity, so it stays as three small
+  passes.
+- B2's "property-based ring tests" item is deferred with A4 (the
+  property-test umbrella task).
+
 ## 0.4.5
 
 ### Changed

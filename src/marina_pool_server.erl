@@ -70,8 +70,11 @@ handle_msg(?MSG_BOOTSTRAP, #state {
             }};
         {error, _Reason} ->
             logger:warning("[~p] bootstrap failed~n", [?MODULE]),
+            RetryMs = ?GET_ENV(bootstrap_retry_ms,
+                ?DEFAULT_BOOTSTRAP_RETRY_MS),
             {ok, State#state {
-                timer_ref = erlang:send_after(500, self(), ?MSG_BOOTSTRAP)
+                timer_ref = erlang:send_after(RetryMs, self(),
+                    ?MSG_BOOTSTRAP)
             }}
     end;
 handle_msg({topology_full_sync, NewNodes}, #state {

@@ -45,6 +45,7 @@ All settings are read from the `marina` application env.
 | -------------------- | ----------------------------- | -------------------------- | ------------------------------------------------------------------------- |
 | `backlog_size`       | `pos_integer()`               | `1024`                     | Per-connection [shackle](https://github.com/lpgauth/shackle) backlog.     |
 | `bootstrap_ips`      | `[string()]`                  | `["127.0.0.1"]`            | IPs tried in order until one responds with `system.peers`.                |
+| `bootstrap_retry_ms` | `pos_integer()`               | `500`                      | Delay before re-attempting bootstrap when no IP responded.                |
 | `compression`        | `boolean()`                   | `false`                    | Negotiate LZ4 compression on every connection.                            |
 | `keyspace`           | `undefined` \| `binary()`     | `undefined`                | Default keyspace; issued as `USE …` after startup.                        |
 | `password`           | `binary()`                    | `undefined`                | Password for `PasswordAuthenticator`.                                     |

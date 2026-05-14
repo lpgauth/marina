@@ -139,7 +139,11 @@ start_node(RpcAddress) ->
 
 stop_node(RpcAddress) ->
     NodeId = node_id(RpcAddress),
-    _ = catch shackle_pool:stop(NodeId),
+    try shackle_pool:stop(NodeId) of
+        _ -> ok
+    catch
+        _:_ -> ok
+    end,
     _ = marina_cache:erase_pool(NodeId),
     ok.
 

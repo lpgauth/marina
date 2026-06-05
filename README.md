@@ -152,7 +152,6 @@ make xref        # cross-reference analysis
 make dialyzer    # success typing
 make eunit       # unit + integration tests (expects ScyllaDB at 172.18.0.2:9042)
 make test        # xref + eunit + dialyzer
-make bench       # ring-lookup micro-benchmark
 ```
 
 The bundled `Dockerfile` produces the CI image (`lpgauth/erlang-scylla:28.3.1-6.2.3-amd64`) by layering OTP 28.3.1 (from the official `erlang` image) on top of `scylladb/scylla:6.2.3`. For local integration tests, run that image or a plain ScyllaDB container on `172.18.0.2:9042`.

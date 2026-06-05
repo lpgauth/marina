@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.7
+
+### Changed
+
+- Upgrade foil to 0.1.6, murmur_nif to 0.1.1 and shackle to 0.7.3
+  (pulls in knot 0.1.2 transitively).
+- Remove fprofx profile tooling.
+
 ## 0.4.6
 
 ### Added

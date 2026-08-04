@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.8
+
+### Fixed
+
+- `marina_pool:sync/3` published the `token_aware` strategy into the
+  foil table before `marina_ring:build/1` had compiled
+  `marina_ring_utils`. A query carrying a routing key in that window
+  crashed the calling process with `undef` on
+  `marina_ring_utils:lookup/1` instead of getting
+  `{error, marina_pool_not_started}`. The ring is now compiled before
+  the strategy becomes visible, on both startup and topology
+  re-syncs.
+
 ## 0.4.7
 
 ### Changed

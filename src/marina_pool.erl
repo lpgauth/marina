@@ -82,11 +82,11 @@ sync(Strategy, NewNodes, OldNodes) ->
     NewAddrs = [Addr || {Addr, _} <- NewNodes],
     lists:foreach(fun stop_node/1, OldAddrs -- NewAddrs),
     lists:foreach(fun start_node/1, NewAddrs -- OldAddrs),
-    rebuild_index(Strategy, NewNodes, length(OldNodes)),
     case Strategy of
         token_aware -> marina_ring:build(NewNodes);
         random -> ok
-    end.
+    end,
+    rebuild_index(Strategy, NewNodes, length(OldNodes)).
 
 %% private
 node({random, NodeCount}, undefined) ->

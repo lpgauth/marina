@@ -17,7 +17,7 @@
 ]).
 
 %% public
--spec authenticate(inet:socket()) ->
+-spec authenticate(shackle:socket()) ->
     ok | {error, atom()}.
 
 authenticate(Socket) ->
@@ -103,18 +103,18 @@ server_to_pool(Node) ->
     PoolBin = erlang:iolist_to_binary(lists:join(<<"_">>, PoolSplit)),
     erlang:binary_to_atom(PoolBin).
 
--spec sync_msg(inet:socket(), iodata()) ->
+-spec sync_msg(shackle:socket(), iodata()) ->
     {ok, term()} | {error, term()}.
 
 sync_msg(Socket, Msg) ->
-    case gen_tcp:send(Socket, Msg) of
+    case sock_send(Socket, Msg) of
         ok ->
             rcv_buf(Socket, <<>>);
         {error, Reason} ->
             {error, Reason}
     end.
 
--spec startup(inet:socket()) ->
+-spec startup(shackle:socket()) ->
     {ok, binary() | undefined} | {error, atom()}.
 
 startup(Socket) ->
@@ -140,7 +140,7 @@ timeout(Timeout, Timestamp) ->
     Diff = timer:now_diff(os:timestamp(), Timestamp) div 1000,
     Timeout - Diff.
 
--spec use_keyspace(inet:socket()) ->
+-spec use_keyspace(shackle:socket()) ->
     ok | {error, atom()}.
 
 use_keyspace(Socket) ->
@@ -164,7 +164,7 @@ authenticate(Username, Password, Socket) when is_binary(Username),
     end.
 
 rcv_buf(Socket, Buffer) ->
-    case gen_tcp:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT) of
+    case sock_recv(Socket) of
         {ok, Msg} ->
             Buffer2 = <<Buffer/binary, Msg/binary>>,
             case marina_frame:decode(Buffer2) of
@@ -176,6 +176,16 @@ rcv_buf(Socket, Buffer) ->
         {error, Reason} ->
             {error, Reason}
     end.
+
+sock_recv(Socket) when is_port(Socket) ->
+    gen_tcp:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT);
+sock_recv(Socket) ->
+    socket:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT).
+
+sock_send(Socket, Msg) when is_port(Socket) ->
+    gen_tcp:send(Socket, Msg);
+sock_send(Socket, Msg) ->
+    socket:send(Socket, Msg).
 
 use_keyspace(undefined, _Socket) ->
     ok;

@@ -158,44 +158,34 @@ encode_batch_values(Values) ->
      [marina_types:encode_bytes(V) || V <- Values]].
 
 flags(QueryOpts) ->
-    {Mask1, Values} = values_flag(QueryOpts),
-    Mask2 = skip_metadata(QueryOpts),
-    {Mask3, PageSize} = page_size_flag(QueryOpts),
-    {Mask4, PagingState} = paging_state(QueryOpts),
+    {Mask1, Values} = values_flag(maps:get(values, QueryOpts, undefined)),
+    Mask2 = skip_metadata(maps:get(skip_metadata, QueryOpts, false)),
+    {Mask3, PageSize} =
+        page_size_flag(maps:get(page_size, QueryOpts, undefined)),
+    {Mask4, PagingState} =
+        paging_state(maps:get(paging_state, QueryOpts, undefined)),
     Flags = Mask1 + Mask2 + Mask3 + Mask4,
     [Flags, Values, PageSize, PagingState].
 
-page_size_flag(QueryOpts) ->
-    case marina_utils:query_opts(page_size, QueryOpts) of
-        undefined ->
-            {0, []};
-        PageSize ->
-            {4, marina_types:encode_int(PageSize)}
-    end.
+page_size_flag(undefined) ->
+    {0, []};
+page_size_flag(PageSize) ->
+    {4, marina_types:encode_int(PageSize)}.
 
-paging_state(QueryOpts) ->
-    case marina_utils:query_opts(paging_state, QueryOpts) of
-        undefined ->
-            {0, []};
-        PagingState ->
-            {8, marina_types:encode_bytes(PagingState)}
-    end.
+paging_state(undefined) ->
+    {0, []};
+paging_state(PagingState) ->
+    {8, marina_types:encode_bytes(PagingState)}.
 
-skip_metadata(QueryOpts) ->
-    case marina_utils:query_opts(skip_metadata, QueryOpts) of
-        false -> 0;
-        true -> 2
-    end.
+skip_metadata(false) ->
+    0;
+skip_metadata(true) ->
+    2.
 
-values_flag(QueryOpts) ->
-    case marina_utils:query_opts(values, QueryOpts) of
-        undefined ->
-            {0, []};
-        Values ->
-            ValuesCount = length(Values),
-            EncodedValues = [marina_types:encode_bytes(Value) ||
-                Value <- Values],
-            Values2 = [marina_types:encode_short(ValuesCount),
-                EncodedValues],
-            {1, Values2}
-    end.
+values_flag(undefined) ->
+    {0, []};
+values_flag(Values) ->
+    ValuesCount = length(Values),
+    EncodedValues = [marina_types:encode_bytes(Value) || Value <- Values],
+    Values2 = [marina_types:encode_short(ValuesCount), EncodedValues],
+    {1, Values2}.

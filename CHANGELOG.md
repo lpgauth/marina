@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.10
+
+### Changed
+
+- Bump shackle to 0.8.0, the first release that ships the
+  `shackle_socket` transport used by the `protocol` option added
+  in 0.4.9.
+
 ## 0.4.9
 
 ### Added

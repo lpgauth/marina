@@ -105,6 +105,7 @@ start(<<A, B, C, D>> = RpcAddress) ->
     PoolSize = ?GET_ENV(pool_size, ?DEFAULT_POOL_SIZE),
     PoolStrategy = ?GET_ENV(pool_strategy, ?DEFAULT_POOL_STRATEGY),
     Port = ?GET_ENV(port, ?DEFAULT_PORT),
+    Protocol = ?GET_ENV(protocol, shackle_tcp),
     Reconnect = ?GET_ENV(reconnect, ?DEFAULT_RECONNECT),
     ReconnectTimeMax = ?GET_ENV(reconnect_time_max,
         ?DEFAULT_RECONNECT_MAX),
@@ -115,6 +116,7 @@ start(<<A, B, C, D>> = RpcAddress) ->
     ClientOptions = [
         {ip, Ip},
         {port, Port},
+        {protocol, Protocol},
         {reconnect, Reconnect},
         {reconnect_time_max, ReconnectTimeMax},
         {reconnect_time_min, ReconnectTimeMin},

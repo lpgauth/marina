@@ -160,10 +160,10 @@ encode_list(Values) ->
 encode_long(Value) ->
     <<Value:64/signed>>.
 
--spec encode_long_string(binary()) -> binary().
+-spec encode_long_string(binary()) -> iodata().
 
 encode_long_string(Value) ->
-    <<(encode_int(size(Value)))/binary, Value/binary>>.
+    [encode_int(size(Value)), Value].
 
 -spec encode_short(integer()) -> binary().
 encode_short(Value) ->

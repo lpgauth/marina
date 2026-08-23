@@ -30,7 +30,7 @@ init(_Opts) ->
         frame_flags = marina_utils:frame_flags()
     }}.
 
--spec setup(inet:socket(), state()) ->
+-spec setup(shackle:socket(), state()) ->
     {ok, state()} |
     {error, atom(), state()}.
 

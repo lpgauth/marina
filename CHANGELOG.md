@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.9
+
+### Added
+
+- `protocol` application env option (default: `shackle_tcp`). Setting
+  it to `shackle_socket` runs pools on the `socket`-based shackle
+  transport instead of `gen_tcp`, which cuts client-side CPU per
+  request. Requires a shackle release that ships `shackle_socket`;
+  the default behaviour is unchanged.
+
+### Changed
+
+- Trim the request encode path: long strings are no longer copied
+  into a fresh binary and query flags are computed with direct map
+  lookups.
+
 ## 0.4.8
 
 ### Fixed

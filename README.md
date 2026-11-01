@@ -41,23 +41,23 @@ Or follow master:
 
 All settings are read from the `marina` application env.
 
-| Name                 | Type                          | Default                    | Description                                                               |
-| -------------------- | ----------------------------- | -------------------------- | ------------------------------------------------------------------------- |
-| `backlog_size`       | `pos_integer()`               | `1024`                     | Per-connection [shackle](https://github.com/lpgauth/shackle) backlog.     |
-| `bootstrap_ips`      | `[string()]`                  | `["127.0.0.1"]`            | IPs tried in order until one responds with `system.peers`.                |
-| `bootstrap_retry_ms` | `pos_integer()`               | `500`                      | Delay before re-attempting bootstrap when no IP responded.                |
-| `compression`        | `boolean()`                   | `false`                    | Negotiate LZ4 compression on every connection.                            |
-| `keyspace`           | `undefined` \| `binary()`     | `undefined`                | Default keyspace; issued as `USE …` after startup.                        |
-| `password`           | `binary()`                    | `undefined`                | Password for `PasswordAuthenticator`.                                     |
-| `pool_size`          | `pos_integer()`               | `16`                       | Number of shackle connections per node.                                   |
-| `pool_strategy`      | `random` \| `round_robin`     | `random`                   | Shackle's strategy for picking a connection from a per-node pool.         |
-| `port`               | `pos_integer()`               | `9042`                     | Server port.                                                              |
-| `reconnect`          | `boolean()`                   | `true`                     | Auto-reconnect closed connections.                                        |
-| `reconnect_time_max` | `pos_integer()` \| `infinity` | `120000`                   | Upper bound on the reconnect backoff (ms).                                |
-| `reconnect_time_min` | `pos_integer()`               | `1500`                     | Lower bound on the reconnect backoff (ms).                                |
-| `socket_options`     | `[gen_tcp:option()]`          | see `marina_internal.hrl`  | `gen_tcp` options applied to every connection.                            |
-| `strategy`           | `random` \| `token_aware`     | `token_aware`              | Node selection: random, or Murmur3-hash the `routing_key` to the replica. |
-| `username`           | `binary()`                    | `undefined`                | Username for `PasswordAuthenticator`.                                     |
+| Name                 | Type                                        | Default                    | Description                                                               |
+| -------------------- | ------------------------------------------- | -------------------------- | ------------------------------------------------------------------------- |
+| `backlog_size`       | `pos_integer()`                             | `1024`                     | Per-connection [shackle](https://github.com/lpgauth/shackle) backlog.     |
+| `bootstrap_ips`      | `[string()]`                                | `["127.0.0.1"]`            | IPs tried in order until one responds with `system.peers`.                |
+| `bootstrap_retry_ms` | `pos_integer()`                             | `500`                      | Delay before re-attempting bootstrap when no IP responded.                |
+| `compression`        | `boolean()`                                 | `false`                    | Negotiate LZ4 compression on every connection.                            |
+| `keyspace`           | `undefined` \| `binary()`                   | `undefined`                | Default keyspace; issued as `USE …` after startup.                        |
+| `password`           | `binary()`                                  | `undefined`                | Password for `PasswordAuthenticator`.                                     |
+| `pool_size`          | `pos_integer()`                             | `16`                       | Number of shackle connections per node.                                   |
+| `pool_strategy`      | `power_of_two` \| `random` \| `round_robin` | `random`                   | Shackle's strategy for picking a connection from a per-node pool.         |
+| `port`               | `pos_integer()`                             | `9042`                     | Server port.                                                              |
+| `reconnect`          | `boolean()`                                 | `true`                     | Auto-reconnect closed connections.                                        |
+| `reconnect_time_max` | `pos_integer()` \| `infinity`               | `120000`                   | Upper bound on the reconnect backoff (ms).                                |
+| `reconnect_time_min` | `pos_integer()`                             | `1500`                     | Lower bound on the reconnect backoff (ms).                                |
+| `socket_options`     | `[gen_tcp:option()]`                        | see `marina_internal.hrl`  | `gen_tcp` options applied to every connection.                            |
+| `strategy`           | `random` \| `token_aware`                   | `token_aware`              | Node selection: random, or Murmur3-hash the `routing_key` to the replica. |
+| `username`           | `binary()`                                  | `undefined`                | Username for `PasswordAuthenticator`.                                     |
 
 ## Usage
 

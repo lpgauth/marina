@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.11
+
+### Added
+
+- `pool_strategy` accepts `power_of_two` (shackle 0.10.0).
+
+### Changed
+
+- Bump shackle to 0.10.0.
+
 ## 0.4.10
 
 ### Changed

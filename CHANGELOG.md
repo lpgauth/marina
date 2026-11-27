@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- `shackle_tcp_ktls` and `shackle_socket_ktls` count as TLS for the control connection.
 - TLS (`shackle_ssl`, `shackle_ssl_socket`): the control and bootstrap connections now use TLS with `socket_options`, and connection setup sends STARTUP and auth through `ssl`. Before, they spoke plain CQL to the TLS port and the pools crashed in setup.
 
 ## 0.4.11

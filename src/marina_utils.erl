@@ -218,7 +218,8 @@ sock_send(Socket, Msg) ->
     ssl:send(Socket, Msg).
 
 tls() ->
-    lists:member(?GET_ENV(protocol, shackle_tcp), [shackle_ssl, shackle_ssl_socket]).
+    lists:member(?GET_ENV(protocol, shackle_tcp), [shackle_ssl, shackle_ssl_socket, shackle_tcp_ktls,
+        shackle_socket_ktls]).
 
 use_keyspace(undefined, _Socket) ->
     ok;

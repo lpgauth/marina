@@ -52,7 +52,7 @@ All settings are read from the `marina` application env.
 | `pool_size`          | `pos_integer()`                             | `16`                       | Number of shackle connections per node.                                   |
 | `pool_strategy`      | `power_of_two` \| `random` \| `round_robin` | `random`                   | Shackle's strategy for picking a connection from a per-node pool.         |
 | `port`               | `pos_integer()`                             | `9042`                     | Server port. Scylla serves TLS on `native_transport_port_ssl` (9142).     |
-| `protocol`           | `shackle_tcp` \| `shackle_socket` \| `shackle_ssl` \| `shackle_ssl_socket` | `shackle_tcp` | Shackle transport. The ssl ones also put the control connection on TLS. |
+| `protocol`           | `shackle_tcp` \| `shackle_socket` \| `shackle_ssl` \| `shackle_ssl_socket` \| `shackle_tcp_ktls` \| `shackle_socket_ktls` | `shackle_tcp` | Shackle transport. The ssl and ktls ones also put the control connection on TLS. |
 | `reconnect`          | `boolean()`                                 | `true`                     | Auto-reconnect closed connections.                                        |
 | `reconnect_time_max` | `pos_integer()` \| `infinity`               | `120000`                   | Upper bound on the reconnect backoff (ms).                                |
 | `reconnect_time_min` | `pos_integer()`                             | `1500`                     | Lower bound on the reconnect backoff (ms).                                |
@@ -79,6 +79,10 @@ Point `port` at the TLS port, pick an ssl `protocol`, and add the TLS options to
     ]}
 ]}
 ```
+
+`shackle_tcp_ktls` does the handshake with ssl, then hands the session to
+kernel TLS, so pools send and receive plaintext on the socket. It needs Linux
+with the `tls` module and a server that offers `TLS_AES_256_GCM_SHA384`.
 
 ## Usage
 

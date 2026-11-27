@@ -51,7 +51,7 @@
     bootstrap_ips :: [string()],
     port          :: pos_integer(),
     backoff       :: pos_integer(),
-    socket        :: undefined | inet:socket(),
+    socket        :: undefined | inet:socket() | ssl:sslsocket(),
     buffer        :: binary()
 }).
 
@@ -87,7 +87,7 @@ init(undefined) ->
 terminate(_Reason, _State, #data {socket = undefined}) ->
     ok;
 terminate(_Reason, _State, #data {socket = Socket}) ->
-    _ = gen_tcp:close(Socket),
+    ok = marina_utils:close(Socket),
     ok.
 
 -spec code_change(term(), atom(), data(), term()) -> {ok, atom(), data()}.
@@ -109,14 +109,14 @@ connecting(internal, connect, #data {
             marina_pool_server ! {topology_full_sync, Nodes},
             case subscribe(Socket) of
                 ok ->
-                    ok = inet:setopts(Socket, [{active, once}]),
+                    ok = marina_utils:setopts(Socket, [{active, once}]),
                     {next_state, subscribed, Data#data {
                         socket = Socket,
                         buffer = <<>>,
                         backoff = ?BACKOFF_MIN
                     }};
                 {error, Reason} ->
-                    _ = gen_tcp:close(Socket),
+                    ok = marina_utils:close(Socket),
                     logger:warning("[~p] register failed: ~p~n", [?MODULE, Reason]),
                     backoff(Data)
             end;
@@ -133,29 +133,31 @@ connecting(_, _, Data) ->
 -spec subscribed(gen_statem:event_type(), term(), data()) ->
     gen_statem:event_handler_result(atom()).
 
-subscribed(info, {tcp, Socket, Chunk}, #data {
+subscribed(info, {Tag, Socket, Chunk}, #data {
         socket = Socket,
         buffer = Buffer
-    } = Data) ->
+    } = Data) when Tag =:= tcp; Tag =:= ssl ->
 
     {Rest, Frames} = marina_frame:decode(<<Buffer/binary, Chunk/binary>>),
     case process_frames(Frames) of
         cycle ->
-            _ = gen_tcp:close(Socket),
+            ok = marina_utils:close(Socket),
             {next_state, connecting,
                 Data#data {socket = undefined, buffer = <<>>,
                            backoff = ?BACKOFF_MIN},
                 [{next_event, internal, connect}]};
         continue ->
-            ok = inet:setopts(Socket, [{active, once}]),
+            ok = marina_utils:setopts(Socket, [{active, once}]),
             {keep_state, Data#data {buffer = Rest}}
     end;
-subscribed(info, {tcp_closed, Socket}, #data {socket = Socket} = Data) ->
+subscribed(info, {Tag, Socket}, #data {socket = Socket} = Data)
+        when Tag =:= tcp_closed; Tag =:= ssl_closed ->
     logger:warning("[~p] control socket closed~n", [?MODULE]),
     backoff(Data#data {socket = undefined, buffer = <<>>});
-subscribed(info, {tcp_error, Socket, Reason}, #data {socket = Socket} = Data) ->
+subscribed(info, {Tag, Socket, Reason}, #data {socket = Socket} = Data)
+        when Tag =:= tcp_error; Tag =:= ssl_error ->
     logger:warning("[~p] control socket error: ~p~n", [?MODULE, Reason]),
-    _ = gen_tcp:close(Socket),
+    ok = marina_utils:close(Socket),
     backoff(Data#data {socket = undefined, buffer = <<>>});
 subscribed(_, _, Data) ->
     {keep_state, Data}.
@@ -175,7 +177,7 @@ establish([Ip | Rest], Port) ->
                 {ok, Nodes} ->
                     {ok, Socket, Nodes};
                 {error, Reason} ->
-                    _ = gen_tcp:close(Socket),
+                    ok = marina_utils:close(Socket),
                     logger:warning("[~p] seed ~s handshake failed: ~p~n", [?MODULE, Ip, Reason]),
                     establish(Rest, Port)
             end;

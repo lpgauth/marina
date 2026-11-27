@@ -51,13 +51,34 @@ All settings are read from the `marina` application env.
 | `password`           | `binary()`                                  | `undefined`                | Password for `PasswordAuthenticator`.                                     |
 | `pool_size`          | `pos_integer()`                             | `16`                       | Number of shackle connections per node.                                   |
 | `pool_strategy`      | `power_of_two` \| `random` \| `round_robin` | `random`                   | Shackle's strategy for picking a connection from a per-node pool.         |
-| `port`               | `pos_integer()`                             | `9042`                     | Server port.                                                              |
+| `port`               | `pos_integer()`                             | `9042`                     | Server port. Scylla serves TLS on `native_transport_port_ssl` (9142).     |
+| `protocol`           | `shackle_tcp` \| `shackle_socket` \| `shackle_ssl` \| `shackle_ssl_socket` | `shackle_tcp` | Shackle transport. The ssl ones also put the control connection on TLS. |
 | `reconnect`          | `boolean()`                                 | `true`                     | Auto-reconnect closed connections.                                        |
 | `reconnect_time_max` | `pos_integer()` \| `infinity`               | `120000`                   | Upper bound on the reconnect backoff (ms).                                |
 | `reconnect_time_min` | `pos_integer()`                             | `1500`                     | Lower bound on the reconnect backoff (ms).                                |
-| `socket_options`     | `[gen_tcp:option()]`                        | see `marina_internal.hrl`  | `gen_tcp` options applied to every connection.                            |
+| `socket_options`     | `[gen_tcp:option() \| ssl:tls_client_option()]` | see `marina_internal.hrl` | Options applied to every connection, TLS options included.          |
 | `strategy`           | `random` \| `token_aware`                   | `token_aware`              | Node selection: random, or Murmur3-hash the `routing_key` to the replica. |
 | `username`           | `binary()`                                  | `undefined`                | Username for `PasswordAuthenticator`.                                     |
+
+### TLS
+
+Point `port` at the TLS port, pick an ssl `protocol`, and add the TLS options to
+`socket_options`. Pools and the control connection then both use TLS.
+
+```erlang
+{marina, [
+    {port, 9142},
+    {protocol, shackle_ssl_socket},  % OTP 28+; shackle_ssl runs over gen_tcp
+    {socket_options, [
+        binary, {buffer, 65535}, {nodelay, true}, {packet, raw},
+        {send_timeout, 50}, {send_timeout_close, true},
+        {verify, verify_peer},
+        {cacertfile, "/etc/marina/ca.pem"},
+        %% nodes are reached by RPC address, not by the name on their certificate
+        {server_name_indication, disable}
+    ]}
+]}
+```
 
 ## Usage
 

@@ -9,6 +9,13 @@ jobs:
     - uses: actions/checkout@v4
     - name: Start Scylla
       run: |
+        cat >> /etc/scylla/scylla.yaml <<EOF
+        native_transport_port_ssl: 9142
+        client_encryption_options:
+            enabled: true
+            certificate: $GITHUB_WORKSPACE/test/tls/node.crt
+            keyfile: $GITHUB_WORKSPACE/test/tls/node.key
+        EOF
         python3 /docker-entrypoint.py&
         sleep 60
     - name: Set Path
@@ -20,5 +27,7 @@ jobs:
       run: make xref
     - name: Run eunit
       run: make eunit
+      env:
+        MARINA_TLS_CA: ${{ github.workspace }}/test/tls/ca.pem
     - name: Run dialyzer
       run: make dialyzer

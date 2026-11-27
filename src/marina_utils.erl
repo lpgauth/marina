@@ -3,12 +3,14 @@
 
 -export([
     authenticate/1,
+    close/1,
     connect/2,
     frame_flags/0,
     pack/1,
     query/2,
     query_opts/2,
     server_to_pool/1,
+    setopts/2,
     startup/1,
     sync_msg/2,
     timeout/2,
@@ -25,16 +27,32 @@ authenticate(Socket) ->
     Password = ?GET_ENV(password, undefined),
     authenticate(Username, Password, Socket).
 
+-spec close(shackle:socket()) ->
+    ok.
+
+close(Socket) when is_port(Socket) ->
+    _ = gen_tcp:close(Socket),
+    ok;
+close({'$socket', _} = Socket) ->
+    _ = socket:close(Socket),
+    ok;
+close(Socket) ->
+    _ = ssl:close(Socket),
+    ok.
+
+%% The control and bootstrap connections use TLS when the pools do, with the
+%% same socket_options, since TLS ports do not accept plain CQL.
 -spec connect(inet:socket_address() | inet:hostname(), inet:port_number()) ->
-    {ok, inet:socket()} | {error, atom()}.
+    {ok, inet:socket() | ssl:sslsocket()} | {error, term()}.
 
 connect(Ip, Port) ->
-    SocketOpts = ?DEFAULT_SOCKET_OPTIONS ++ [{active, false}],
-    case gen_tcp:connect(Ip, Port, SocketOpts) of
-        {ok, Socket} ->
-            {ok, Socket};
-        {error, Reason} ->
-            {error, Reason}
+    case tls() of
+        true ->
+            SocketOpts = ?GET_ENV(socket_options, ?DEFAULT_SOCKET_OPTIONS),
+            ssl:connect(Ip, Port, SocketOpts ++ [{active, false}]);
+        false ->
+            SocketOpts = ?DEFAULT_SOCKET_OPTIONS ++ [{active, false}],
+            gen_tcp:connect(Ip, Port, SocketOpts)
     end.
 
 -spec frame_flags() ->
@@ -114,6 +132,14 @@ sync_msg(Socket, Msg) ->
             {error, Reason}
     end.
 
+-spec setopts(inet:socket() | ssl:sslsocket(), [gen_tcp:option()]) ->
+    ok | {error, term()}.
+
+setopts(Socket, Opts) when is_port(Socket) ->
+    inet:setopts(Socket, Opts);
+setopts(Socket, Opts) ->
+    ssl:setopts(Socket, Opts).
+
 -spec startup(shackle:socket()) ->
     {ok, binary() | undefined} | {error, atom()}.
 
@@ -179,13 +205,20 @@ rcv_buf(Socket, Buffer) ->
 
 sock_recv(Socket) when is_port(Socket) ->
     gen_tcp:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT);
+sock_recv({'$socket', _} = Socket) ->
+    socket:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT);
 sock_recv(Socket) ->
-    socket:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT).
+    ssl:recv(Socket, 0, ?DEFAULT_RECV_TIMEOUT).
 
 sock_send(Socket, Msg) when is_port(Socket) ->
     gen_tcp:send(Socket, Msg);
+sock_send({'$socket', _} = Socket, Msg) ->
+    socket:send(Socket, Msg);
 sock_send(Socket, Msg) ->
-    socket:send(Socket, Msg).
+    ssl:send(Socket, Msg).
+
+tls() ->
+    lists:member(?GET_ENV(protocol, shackle_tcp), [shackle_ssl, shackle_ssl_socket]).
 
 use_keyspace(undefined, _Socket) ->
     ok;

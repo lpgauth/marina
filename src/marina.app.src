@@ -12,6 +12,7 @@
     metal,
     syntax_tools,
     compiler,
+    ssl,
     telemetry
   ]},
   {mod, {marina_app, []}},

@@ -1,6 +1,6 @@
 {application, marina, [
   {description, "High-Performance Erlang Cassandra / Scylla CQL Client"},
-  {vsn, "0.4.11"},
+  {vsn, "0.5.0"},
   {registered, []},
   {applications, [
     kernel,

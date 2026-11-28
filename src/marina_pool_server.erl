@@ -104,11 +104,11 @@ connect(Ip, Port) ->
                         ok ->
                             {ok, Socket};
                         {error, Reason} ->
-                            gen_tcp:close(Socket),
+                            ok = marina_utils:close(Socket),
                             {error, Reason}
                     end;
                 {error, Reason} ->
-                    gen_tcp:close(Socket),
+                    ok = marina_utils:close(Socket),
                     {error, Reason}
             end;
         {error, Reason} ->

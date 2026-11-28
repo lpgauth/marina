@@ -27,12 +27,40 @@ marina_test_() ->
 marina_compression_test_() ->
     marina_suite([{compression, true}], [fun query/0]).
 
+%% Needs a node with client_encryption_options on 9142; MARINA_TLS_CA is the
+%% CA that signed its certificate. Skipped when unset.
+marina_tls_test_() ->
+    tls_suite(shackle_ssl).
+
+marina_tls_socket_test_() ->
+    tls_suite(shackle_ssl_socket).
+
+tls_suite(Protocol) ->
+    case os:getenv("MARINA_TLS_CA") of
+        false ->
+            [];
+        CaFile ->
+            SocketOptions = ?DEFAULT_SOCKET_OPTIONS ++ [
+                {verify, verify_peer},
+                {cacertfile, CaFile},
+                {server_name_indication, disable}
+            ],
+            marina_suite([
+                {port, 9142},
+                {protocol, Protocol},
+                {socket_options, SocketOptions}
+            ], [fun query/0, fun reusable_query/0, fun async_query/0])
+    end.
+
 %% --- setup ----------------------------------------------------------
 
 marina_suite(ExtraEnv, Tests) ->
     {setup,
         fun () -> start(ExtraEnv) end,
-        fun (_) -> marina_app:stop() end,
+        fun (_) ->
+            marina_app:stop(),
+            [application:unset_env(marina, K) || {K, _} <- ExtraEnv]
+        end,
         {inparallel, Tests}}.
 
 start(ExtraEnv) ->

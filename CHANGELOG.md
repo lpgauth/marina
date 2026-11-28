@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- shackle 0.11.0, which adds the kernel TLS transports `shackle_tcp_ktls` and `shackle_socket_ktls`.
+
 ### Fixed
 
 - `shackle_tcp_ktls` and `shackle_socket_ktls` count as TLS for the control connection.
